@@ -1,643 +1,634 @@
-const frameworks = [
+const catalogItems = [
   {
-    id: "a2a",
-    name: "Google A2A",
-    family: "Protocol",
-    color: "#aa3b2a",
-    category: "Interoperability-first",
-    summary:
-      "A protocol for agents running in different services, teams, or vendors to exchange tasks and results.",
-    business:
-      "Best when your company expects multiple agent products or vendors to cooperate without locking everything into one stack.",
-    technical:
-      "Uses a network protocol approach for remote agents, which helps when agents are independently deployed and owned.",
-    principalFit:
-      "A principal agent can act as broker and assign work to specialist agents exposed as remote services.",
-    strengths: [
-      "Cross-team and cross-vendor interoperability",
-      "Clean boundary between principal and specialist services",
-      "Good fit for enterprise architecture and service ownership"
+    id: "langgraph",
+    name: "LangGraph",
+    kind: "framework",
+    color: "#1f5f5b",
+    tagline: "Stateful branching and review loops",
+    summary: "Explicit graph control with strong state visibility and reviewer edges.",
+    pattern: "graph-branches",
+    pros: [
+      "Excellent for controlled branching",
+      "Strong observability and checkpoints",
+      "Good fit for review-heavy agent systems"
     ],
-    tradeoffs: [
-      "More infrastructure and protocol overhead",
-      "Needs separate orchestration and memory choices",
-      "Debugging spans multiple services"
+    cons: [
+      "Heavier workflow design upfront",
+      "Less natural for free-form debate",
+      "Interop is not the main abstraction"
     ],
-    metrics: { control: 4, businessClarity: 4, interoperability: 5 },
-    sources: [
-      {
-        label: "Google ADK A2A intro",
-        url: "https://google.github.io/adk-docs/a2a/intro/"
-      },
-      {
-        label: "Google A2A announcement",
-        url: "https://developers.googleblog.com/zh-hans/a2a-a-new-era-of-agent-interoperability/"
-      }
-    ]
+    source: "https://docs.langchain.com/oss/python/langchain/multi-agent"
   },
   {
     id: "openai-agents",
     name: "OpenAI Agents SDK",
-    family: "Runtime SDK",
+    kind: "framework",
     color: "#6b4bc2",
-    category: "Handoffs and tools",
-    summary:
-      "An app runtime for agents with handoffs, tools, guardrails, and tracing in one SDK.",
-    business:
-      "Strong when one product team wants to ship a reliable agent experience quickly with good runtime controls.",
-    technical:
-      "Provides first-class agents, handoffs, tools, streaming, run limits, and tracing close to application code.",
-    principalFit:
-      "A principal agent can hand off to specialists like product, security, or legal and collect structured outputs.",
-    strengths: [
-      "Strong tool and handoff model",
-      "Good for application-native traces and guardrails",
-      "Fast to prototype inside one product runtime"
+    tagline: "Handoffs, tools, and traces",
+    summary: "Clear specialist handoffs inside one runtime with tool calls and guardrails.",
+    pattern: "sequential-handoffs",
+    pros: [
+      "Very clear handoff model",
+      "Strong tool runtime for one app team",
+      "Good traceability"
     ],
-    tradeoffs: [
-      "Not a federation protocol by itself",
-      "Cross-system interoperability needs extra work",
-      "Long-lived workflow logic may need a separate orchestrator"
+    cons: [
+      "Not a federation protocol",
+      "Cross-system interop needs extra work",
+      "Complex long workflows may need more orchestration"
     ],
-    metrics: { control: 4, businessClarity: 4, interoperability: 3 },
-    sources: [
-      {
-        label: "OpenAI Agents SDK guide",
-        url: "https://platform.openai.com/docs/guides/agents-sdk/"
-      },
-      {
-        label: "OpenAI Agents SDK agents",
-        url: "https://openai.github.io/openai-agents-python/agents/"
-      }
-    ]
-  },
-  {
-    id: "langgraph",
-    name: "LangGraph",
-    family: "Workflow graph",
-    color: "#1f5f5b",
-    category: "Stateful orchestration",
-    summary:
-      "A graph-based orchestrator for building controlled, stateful, and branching agent workflows.",
-    business:
-      "Strong when teams care about repeatability, approvals, and seeing exactly how a complex agent process moves.",
-    technical:
-      "Represents execution as nodes and edges with shared state, making loops, retries, and checkpoints explicit.",
-    principalFit:
-      "The principal agent becomes a supervisor node coordinating specialist nodes and convergence rules.",
-    strengths: [
-      "Excellent observability of flow state",
-      "Strong for deterministic routing and retries",
-      "Useful for human review and gated approvals"
-    ],
-    tradeoffs: [
-      "Heavier setup than free-form chats",
-      "Needs deliberate workflow design",
-      "Less focused on vendor-neutral interop"
-    ],
-    metrics: { control: 5, businessClarity: 4, interoperability: 3 },
-    sources: [
-      {
-        label: "LangChain multi-agent patterns",
-        url: "https://docs.langchain.com/oss/python/langchain/multi-agent"
-      }
-    ]
+    source: "https://developers.openai.com/api/docs/guides/agents-sdk"
   },
   {
     id: "ag2",
     name: "AG2",
-    family: "Conversation framework",
+    kind: "framework",
     color: "#cf8f2e",
-    category: "Multi-agent conversation",
-    summary:
-      "The current evolution of AutoGen for multi-agent collaboration, orchestration, and conversation patterns.",
-    business:
-      "Strong when you want visible specialist dialogue, review loops, and a flexible research-style team of agents.",
-    technical:
-      "Supports multi-agent conversation patterns like two-agent chat, group chat, nested chat, and orchestration.",
-    principalFit:
-      "A principal agent can moderate specialist discussions and let experts challenge each other directly.",
-    strengths: [
-      "Natural for debate and specialist challenge loops",
-      "Flexible conversation topologies",
-      "Well suited to research-heavy multi-agent behavior"
+    tagline: "Debate-heavy specialist teams",
+    summary: "Conversation-first multi-agent coordination with direct specialist challenge.",
+    pattern: "conversation-mesh",
+    pros: [
+      "Natural for specialist challenge",
+      "Flexible team topologies",
+      "Good for exploratory comparisons"
     ],
-    tradeoffs: [
-      "Can meander without strong stopping rules",
-      "Conversation cost can climb quickly",
-      "Production controls need careful design"
+    cons: [
+      "Needs hard stopping rules",
+      "Can sprawl without governance",
+      "More tuning for production controls"
     ],
-    metrics: { control: 3, businessClarity: 3, interoperability: 3 },
-    sources: [
-      {
-        label: "AG2 quickstart",
-        url: "https://docs.ag2.ai/latest/docs/home/quickstart/"
-      },
-      {
-        label: "AG2 orchestration patterns",
-        url: "https://docs.ag2.ai/latest/docs/user-guide/advanced-concepts/orchestrations/"
-      }
-    ]
+    source: "https://docs.ag2.ai/latest/docs/home/quickstart/"
   },
   {
     id: "crewai",
     name: "CrewAI",
-    family: "Role orchestration",
+    kind: "framework",
     color: "#445fbb",
-    category: "Crew and flow model",
-    summary:
-      "A framework that combines specialist crews with flows for structured automation and agent teamwork.",
-    business:
-      "Strong for business processes where a manager-like flow coordinates role-based specialists.",
-    technical:
-      "Blends autonomous agents with flows, tasks, processes, memory, and observability for production workflows.",
-    principalFit:
-      "The principal agent is often a manager or embedded in the flow that sequences specialist work.",
-    strengths: [
-      "Good mental model for manager plus specialists",
-      "Accessible for business-process automation",
-      "Mixes autonomous crews with explicit flows"
+    tagline: "Manager and crew process",
+    summary: "Role-based orchestration that reads like a managed business workflow.",
+    pattern: "manager-review",
+    pros: [
+      "Readable manager-plus-specialists model",
+      "Good business-process framing",
+      "Structured review checkpoints"
     ],
-    tradeoffs: [
-      "Deep debate patterns may need custom design",
-      "Less focused on open agent interoperability",
-      "State can become implicit if flows are underspecified"
+    cons: [
+      "Less natural for open debate meshes",
+      "Not focused on protocol interop",
+      "Complex state still needs design"
     ],
-    metrics: { control: 4, businessClarity: 5, interoperability: 2 },
-    sources: [
-      {
-        label: "CrewAI introduction",
-        url: "https://docs.crewai.com/introduction"
-      },
-      {
-        label: "CrewAI agents concept",
-        url: "https://docs.crewai.com/en/concepts/agents"
-      }
-    ]
+    source: "https://docs.crewai.com/en/introduction"
   },
   {
     id: "semantic-kernel",
     name: "Semantic Kernel Agent Framework",
-    family: "Enterprise framework",
+    kind: "framework",
     color: "#9b4c3d",
-    category: "Microsoft enterprise ecosystem",
-    summary:
-      "An agent framework inside the Semantic Kernel ecosystem for building collaborative and goal-oriented agents.",
-    business:
-      "Strong for Microsoft-oriented enterprise teams that want agents integrated with broader platform components.",
-    technical:
-      "Provides an agent framework on top of Semantic Kernel with messaging, plugins, and enterprise components.",
-    principalFit:
-      "A principal agent can coordinate specialists while sharing kernel capabilities, plugins, and enterprise controls.",
-    strengths: [
-      "Good enterprise framing",
-      "Integrates with broader Semantic Kernel ecosystem",
-      "Strong for teams already invested in Microsoft stack"
+    tagline: "Enterprise governed flow",
+    summary: "Enterprise-oriented specialist workflow with platform-level controls.",
+    pattern: "enterprise-gated",
+    pros: [
+      "Enterprise-ready framing",
+      "Fits Microsoft-aligned stacks",
+      "Strong governed review pattern"
     ],
-    tradeoffs: [
-      "Can feel broad and ecosystem-heavy",
-      "Learning curve is higher if you only need one small app",
-      "Not primarily a cross-vendor protocol"
+    cons: [
+      "Broader ecosystem to learn",
+      "Can feel heavy for a focused app",
+      "Not primarily a neutral A2A protocol"
     ],
-    metrics: { control: 4, businessClarity: 4, interoperability: 3 },
-    sources: [
-      {
-        label: "Semantic Kernel agent framework",
-        url: "https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/"
-      }
-    ]
+    source: "https://learn.microsoft.com/en-us/semantic-kernel/frameworks/agent/"
   },
   {
     id: "llamaindex",
     name: "LlamaIndex Workflows",
-    family: "Event workflow",
+    kind: "framework",
     color: "#3f6b2a",
-    category: "Event-driven orchestration",
-    summary:
-      "An event and step-based workflow model that can assemble agents and multi-agent systems with observability.",
-    business:
-      "Strong when the team wants a structured pipeline for research, retrieval, and synthesis rather than mostly free chat.",
-    technical:
-      "Workflows are event-driven steps that emit events, making orchestration explicit and composable.",
-    principalFit:
-      "A principal agent can be a workflow step that routes work to specialist steps or agent workflows.",
-    strengths: [
-      "Clear event-driven control flow",
-      "Good fit for retrieval-heavy systems",
-      "Observability is built into workflows"
+    tagline: "Event-driven evidence pipeline",
+    summary: "Workflow and event model for structured evidence gathering and synthesis.",
+    pattern: "event-pipeline",
+    pros: [
+      "Strong evidence pipeline model",
+      "Good for retrieval-heavy systems",
+      "Clear event-driven execution"
     ],
-    tradeoffs: [
-      "Less focused on direct agent-to-agent protocol semantics",
-      "Requires workflow thinking more than chat thinking",
-      "May need custom UX for business explainability"
+    cons: [
+      "Less centered on direct agent debate",
+      "Needs workflow thinking",
+      "Requires UX work for stakeholder clarity"
     ],
-    metrics: { control: 4, businessClarity: 3, interoperability: 3 },
-    sources: [
-      {
-        label: "LlamaIndex workflows intro",
-        url: "https://docs.llamaindex.ai/en/stable/workflows/"
-      },
-      {
-        label: "LlamaIndex basic agent",
-        url: "https://docs.llamaindex.ai/en/stable/understanding/agent/"
-      }
-    ]
+    source: "https://developers.llamaindex.ai/python/llamaagents/workflows/"
   },
   {
     id: "mastra",
     name: "Mastra",
-    family: "TypeScript framework",
+    kind: "framework",
     color: "#0f6d90",
-    category: "Agents plus workflows",
-    summary:
-      "A TypeScript agent framework with agents, workflows, memory, MCP, and observability primitives.",
-    business:
-      "Strong for JavaScript and TypeScript product teams that want one framework for app-facing agent systems.",
-    technical:
-      "Offers agents, workflows, branching, suspend-resume, tracing, and MCP integration in one stack.",
-    principalFit:
-      "A principal agent can coordinate specialists through workflows or agent networks while sharing runtime context.",
-    strengths: [
+    tagline: "App-friendly workflows and agents",
+    summary: "TypeScript-first combination of workflows, agents, and traces.",
+    pattern: "app-workflow",
+    pros: [
       "Good TypeScript developer experience",
-      "Pairs agents and workflows cleanly",
-      "Includes observability and MCP primitives"
+      "Combines workflows and agents cleanly",
+      "Practical product-team fit"
     ],
-    tradeoffs: [
-      "You still need to define your governance model",
-      "Less a protocol, more an app framework",
-      "Cross-vendor A2A is not the core abstraction"
+    cons: [
+      "Framework rather than neutral protocol",
+      "Governance is on the implementer",
+      "Cross-vendor A2A is not the focus"
     ],
-    metrics: { control: 4, businessClarity: 4, interoperability: 3 },
-    sources: [
-      {
-        label: "Mastra agents",
-        url: "https://mastra.ai/agents"
-      },
-      {
-        label: "Mastra workflows",
-        url: "https://mastra.ai/workflows"
-      }
-    ]
+    source: "https://mastra.ai/workflows"
+  },
+  {
+    id: "pydanticai",
+    name: "PydanticAI",
+    kind: "framework",
+    color: "#b34747",
+    tagline: "Typed agent workflows",
+    summary: "Strong when structured outputs, validation, and typed tool-driven agents matter.",
+    pattern: "typed-review",
+    pros: [
+      "Excellent typed outputs and validation",
+      "Good for reliability-first agent systems",
+      "Strong fit when schemas matter"
+    ],
+    cons: [
+      "Less opinionated on large multi-agent topologies",
+      "Requires you to design the orchestration pattern",
+      "Interop is not the core value"
+    ],
+    source: "https://ai.pydantic.dev/"
+  },
+  {
+    id: "a2a",
+    name: "Google A2A",
+    kind: "protocol",
+    color: "#aa3b2a",
+    tagline: "Remote agent interoperability",
+    summary: "Protocol for task exchange across independently running agent services.",
+    source: "https://google.github.io/adk-docs/a2a/intro/"
   },
   {
     id: "mcp",
     name: "MCP",
-    family: "Adjacent standard",
+    kind: "adjacent",
     color: "#7a5a12",
-    category: "Tool and context protocol",
-    summary:
-      "A protocol for tools and context, useful alongside agent frameworks but not a full agent-to-agent coordination model.",
-    business:
-      "Important when the real business problem is not agent chat itself but consistent access to data, tools, and systems.",
-    technical:
-      "Standardizes how applications provide context and tools to models; it complements but does not replace agent orchestration.",
-    principalFit:
-      "A principal agent can use MCP so specialists share access to the same tool ecosystem more consistently.",
-    strengths: [
-      "Strong tool interoperability layer",
-      "Reduces custom one-off tool integrations",
-      "Pairs well with nearly every agent framework"
-    ],
-    tradeoffs: [
-      "Not a full A2A framework",
-      "Needs another runtime for delegation semantics",
-      "Should be presented as complementary, not equivalent"
-    ],
-    metrics: { control: 2, businessClarity: 4, interoperability: 5 },
-    sources: [
-      {
-        label: "Anthropic MCP overview",
-        url: "https://docs.anthropic.com/en/docs/mcp"
-      }
-    ]
+    tagline: "Shared tool and context layer",
+    summary: "Tool and context protocol that complements frameworks but does not replace orchestration.",
+    source: "https://modelcontextprotocol.io/docs/getting-started/intro"
   }
 ];
 
-const scenarios = [
-  {
-    id: "launch",
-    label: "Launch Readiness",
-    problem:
-      "Should the company launch the AI scheduling assistant this week, delay it, or relaunch with tighter safeguards?",
-    businessGoal: "Protect brand trust while still hitting a growth window.",
-    technicalGoal: "Balance metrics, security risk, policy readiness, and operational confidence.",
-    stages: [
-      {
-        name: "Brief",
-        business: "The principal agent frames the decision, the deadline, and what success looks like.",
-        technical: "Supervisor initializes scope, acceptance criteria, and convergence rules."
-      },
-      {
-        name: "Evidence Pull",
-        business: "Product and growth gather upside signals such as adoption and conversion potential.",
-        technical: "Specialist agents call metrics and research tools, then publish evidence."
-      },
-      {
-        name: "Challenge",
-        business: "Security and legal push back on risky assumptions before the business commits.",
-        technical: "Risk specialists rebut claims with scan results, policy gaps, and unresolved controls."
-      },
-      {
-        name: "Debate",
-        business: "The team argues toward a decision instead of handing over isolated opinions.",
-        technical: "Agents exchange critiques, revise confidence, and reduce contradictions."
-      },
-      {
-        name: "Decision",
-        business: "The principal agent produces one recommendation with tradeoffs and next actions.",
-        technical: "Supervisor synthesizes outputs, applies stop conditions, and emits final structured result."
-      }
-    ]
-  },
-  {
-    id: "incident",
-    label: "Incident Response",
-    problem: "Should the company shut down a feature, isolate a service, or keep operating during an anomaly?",
-    businessGoal: "Contain customer harm and preserve trust.",
-    technicalGoal: "Reduce blast radius fast while confirming root cause with evidence.",
-    stages: [
-      {
-        name: "Triage",
-        business: "A principal agent sets severity and mobilizes the right experts.",
-        technical: "Supervisor creates priority, assigns owners, and starts investigation branches."
-      },
-      {
-        name: "Parallel Investigation",
-        business: "Infra and security investigate at the same time to save time.",
-        technical: "Specialists inspect logs, alerts, and access patterns concurrently."
-      },
-      {
-        name: "Customer Pressure",
-        business: "Support and comms challenge technical decisions with real customer impact.",
-        technical: "Service and messaging constraints feed back into the execution state."
-      },
-      {
-        name: "Alignment",
-        business: "The team converges on one story of what is happening.",
-        technical: "Contradictory hypotheses are reconciled using timestamped evidence."
-      },
-      {
-        name: "Action Plan",
-        business: "The principal agent issues the resolution and communication plan.",
-        technical: "Supervisor outputs remediation steps, owners, and rollout sequence."
-      }
-    ]
-  },
-  {
-    id: "research",
-    label: "Research Consensus",
-    problem:
-      "Which architecture should the company adopt for enterprise retrieval and specialist reasoning?",
-    businessGoal: "Make a confident architecture bet without wasting engineering cycles.",
-    technicalGoal: "Compare cost, latency, security, and answer quality with defensible evidence.",
-    stages: [
-      {
-        name: "Question",
-        business: "The principal agent sets the question the experts must answer together.",
-        technical: "Supervisor defines evaluation dimensions and final output schema."
-      },
-      {
-        name: "Hypotheses",
-        business: "Specialists produce competing recommendations from different viewpoints.",
-        technical: "Domain agents generate options using benchmarks, models, and tooling."
-      },
-      {
-        name: "Review",
-        business: "A reviewer agent forces challenge so weak proposals do not slip through.",
-        technical: "Critic agent scores assumptions, conflicts, and missing evidence."
-      },
-      {
-        name: "Scoreboard",
-        business: "The team narrows choices against shared decision criteria.",
-        technical: "State records confidence, cost, risk, and implementation complexity."
-      },
-      {
-        name: "Recommendation",
-        business: "The principal agent delivers one recommendation plus fallback paths.",
-        technical: "Supervisor emits preferred option, rationale, and unresolved risks."
-      }
-    ]
-  }
-];
+const demoFrameworks = catalogItems.filter((item) => item.kind === "framework");
 
 const audiences = [
   {
     id: "business",
     label: "Business View",
-    description: "Explain who decides what, where risk sits, and why the framework matters to delivery and governance."
+    helper: "Shows who owns the decision and where the review gate lives."
   },
   {
     id: "technical",
     label: "Technical View",
-    description: "Explain runtime model, tool access, state movement, and how specialist agents coordinate under the hood."
+    helper: "Shows state movement, tool access, and orchestration style."
   }
 ];
 
-const laneDefaults = ["langgraph", "a2a"];
+const stages = [
+  {
+    id: "intake",
+    label: "Intake",
+    captionBusiness: "The principal agent opens the policy case and defines the approval bar.",
+    captionTechnical: "Supervisor initializes the case state and policy document.",
+    activeAgents: ["principal"],
+    activeTools: ["policy_doc"]
+  },
+  {
+    id: "review",
+    label: "Review",
+    captionBusiness: "Specialists review the policy in parallel with their own tools.",
+    captionTechnical: "Compliance, security, legal, and finance perform scoped tool calls.",
+    activeAgents: ["principal", "compliance", "security", "legal", "finance"],
+    activeTools: ["policy_db", "risk_scan", "contract_diff", "cost_model"]
+  },
+  {
+    id: "challenge",
+    label: "Challenge",
+    captionBusiness: "A reviewer forces rebuttals before a leadership-ready answer exists.",
+    captionTechnical: "Reviewer agent challenges contradictory findings and requests follow-ups.",
+    activeAgents: ["compliance", "security", "legal", "finance", "reviewer"],
+    activeTools: ["risk_rubric", "evidence_board"]
+  },
+  {
+    id: "synthesis",
+    label: "Synthesis",
+    captionBusiness: "The principal agent weighs the tradeoffs and narrows toward a verdict.",
+    captionTechnical: "Supervisor merges findings, reviewer flags, and tool outputs into one decision state.",
+    activeAgents: ["principal", "reviewer", "security", "legal"],
+    activeTools: ["decision_score", "evidence_board"]
+  },
+  {
+    id: "verdict",
+    label: "Verdict",
+    captionBusiness: "The principal agent returns approve, reject, or revise-with-conditions.",
+    captionTechnical: "Supervisor emits the final structured verdict and remediation items.",
+    activeAgents: ["principal", "reviewer", "decision"],
+    activeTools: ["decision_score"]
+  }
+];
+
+const agentRoster = [
+  { id: "principal", label: "Principal Agent", sublabel: "Decision owner", column: 1, row: 1 },
+  { id: "compliance", label: "Compliance", sublabel: "Regulatory fit", column: 2, row: 1 },
+  { id: "security", label: "Security", sublabel: "Risk and abuse", column: 2, row: 2 },
+  { id: "legal", label: "Legal", sublabel: "Terms and contracts", column: 3, row: 1 },
+  { id: "finance", label: "Finance", sublabel: "Cost and liability", column: 3, row: 2 },
+  { id: "reviewer", label: "Challenge Agent", sublabel: "Rebuttal gate", column: 4, row: 1 },
+  { id: "decision", label: "Decision Output", sublabel: "Approve or revise", column: 5, row: 1 }
+];
+
+const toolCatalog = {
+  policy_doc: "Policy draft",
+  policy_db: "Policy DB",
+  risk_scan: "Risk scan",
+  contract_diff: "Contract diff",
+  cost_model: "Cost model",
+  risk_rubric: "Risk rubric",
+  evidence_board: "Evidence board",
+  decision_score: "Decision score"
+};
+
+const linkIds = [
+  "principal-compliance",
+  "principal-security",
+  "principal-legal",
+  "principal-finance",
+  "compliance-reviewer",
+  "security-reviewer",
+  "legal-reviewer",
+  "finance-reviewer",
+  "reviewer-principal",
+  "reviewer-decision",
+  "principal-decision",
+  "compliance-security",
+  "security-legal",
+  "legal-finance",
+  "finance-compliance",
+  "reviewer-compliance",
+  "reviewer-security",
+  "reviewer-legal",
+  "reviewer-finance",
+  "security-principal",
+  "legal-principal",
+  "finance-principal"
+];
+
+const graphNodes = {
+  principal: { x: 50, y: 12, label: "Principal", labelX: 50, labelY: 22 },
+  compliance: { x: 18, y: 34, label: "Compliance", labelX: 18, labelY: 45 },
+  legal: { x: 50, y: 34, label: "Legal", labelX: 50, labelY: 45 },
+  finance: { x: 82, y: 34, label: "Finance", labelX: 82, labelY: 45 },
+  security: { x: 34, y: 58, label: "Security", labelX: 34, labelY: 69 },
+  reviewer: { x: 66, y: 58, label: "Reviewer", labelX: 66, labelY: 69 },
+  decision: { x: 50, y: 86, label: "Output", labelX: 50, labelY: 97 }
+};
+
+const linkEndpoints = {
+  "principal-compliance": ["principal", "compliance"],
+  "principal-security": ["principal", "security"],
+  "principal-legal": ["principal", "legal"],
+  "principal-finance": ["principal", "finance"],
+  "compliance-reviewer": ["compliance", "reviewer"],
+  "security-reviewer": ["security", "reviewer"],
+  "legal-reviewer": ["legal", "reviewer"],
+  "finance-reviewer": ["finance", "reviewer"],
+  "reviewer-principal": ["reviewer", "principal"],
+  "reviewer-decision": ["reviewer", "decision"],
+  "principal-decision": ["principal", "decision"],
+  "compliance-security": ["compliance", "security"],
+  "security-legal": ["security", "legal"],
+  "legal-finance": ["legal", "finance"],
+  "finance-compliance": ["finance", "compliance"],
+  "reviewer-compliance": ["reviewer", "compliance"],
+  "reviewer-security": ["reviewer", "security"],
+  "reviewer-legal": ["reviewer", "legal"],
+  "reviewer-finance": ["reviewer", "finance"],
+  "security-principal": ["security", "principal"],
+  "legal-principal": ["legal", "principal"],
+  "finance-principal": ["finance", "principal"]
+};
+
+const frameworkPatterns = {
+  "graph-branches": {
+    intake: {
+      links: ["principal-compliance", "principal-security"],
+      messages: ["Graph starts at the supervisor node."],
+      business: "Controlled workflow from the first step.",
+      technical: "Graph state is initialized before branching."
+    },
+    review: {
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Parallel branches collect evidence.", "Shared graph state accumulates findings."],
+      business: "All specialist checks are visible as parallel branches.",
+      technical: "Branch nodes enrich the same state object."
+    },
+    challenge: {
+      links: ["compliance-reviewer", "security-reviewer", "legal-reviewer", "finance-reviewer"],
+      messages: ["Review edge fires because contradictions were found."],
+      business: "Review is a deliberate gate, not an afterthought.",
+      technical: "Reviewer edge activates on risk or contradiction conditions."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Branches reconverge for synthesis."],
+      business: "The principal agent regains control once review clears.",
+      technical: "Reviewer output feeds back into the supervisor node."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["Finish node emits the verdict."],
+      business: "The verdict exits a controlled path.",
+      technical: "Final node emits the structured result."
+    }
+  },
+  "sequential-handoffs": {
+    intake: {
+      links: ["principal-compliance"],
+      messages: ["Principal starts the run and selects the first specialist."],
+      business: "The flow feels like a clean baton pass.",
+      technical: "The run begins with the first specialist handoff."
+    },
+    review: {
+      links: ["principal-compliance", "compliance-security", "security-legal", "legal-finance"],
+      messages: ["State is handed forward specialist by specialist."],
+      business: "Each expert owns a turn in sequence.",
+      technical: "Structured state moves through handoffs."
+    },
+    challenge: {
+      links: ["finance-reviewer", "legal-reviewer"],
+      messages: ["Reviewer handoff blocks early completion."],
+      business: "The reviewer is a clear gate before shipping.",
+      technical: "Reviewer handoff inspects intermediate output."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Reviewed state returns to the principal agent."],
+      business: "The decision owner gets one consolidated view back.",
+      technical: "Supervisor resumes with reviewed specialist output."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["Final guarded verdict is returned."],
+      business: "Guardrails stay close to the runtime.",
+      technical: "Run terminates with a bounded final response."
+    }
+  },
+  "conversation-mesh": {
+    intake: {
+      links: ["principal-compliance", "principal-security"],
+      messages: ["Policy council convened."],
+      business: "The specialists are brought into one discussion.",
+      technical: "A shared multi-agent conversation starts."
+    },
+    review: {
+      links: ["compliance-security", "security-legal", "legal-finance", "finance-compliance"],
+      messages: ["Specialists challenge each other directly."],
+      business: "You can actually see the debate.",
+      technical: "Specialists exchange conversational turns across the mesh."
+    },
+    challenge: {
+      links: ["reviewer-compliance", "reviewer-security", "reviewer-legal", "reviewer-finance"],
+      messages: ["Reviewer injects rebuttal prompts into the mesh."],
+      business: "The reviewer sharpens the debate instead of waiting at the end.",
+      technical: "Challenge prompts fan out across the conversation."
+    },
+    synthesis: {
+      links: ["security-principal", "legal-principal", "finance-principal"],
+      messages: ["Principal agent steers the group toward convergence."],
+      business: "The principal agent narrows the debate toward one answer.",
+      technical: "Supervisor aggregates turns into a synthesis step."
+    },
+    verdict: {
+      links: ["principal-decision", "reviewer-decision"],
+      messages: ["Closing turn publishes the recommendation."],
+      business: "The verdict closes a shared discussion.",
+      technical: "The final answer is emitted from the closing turn."
+    }
+  },
+  "manager-review": {
+    intake: {
+      links: ["principal-compliance", "principal-legal"],
+      messages: ["Manager assigns specialist tasks."],
+      business: "The process reads like a managed workflow from the start.",
+      technical: "Role-scoped tasks are created for specialists."
+    },
+    review: {
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Crew members execute role-specific work."],
+      business: "Each specialist has clear ownership.",
+      technical: "Specialists run their tasks with scoped tools and memory."
+    },
+    challenge: {
+      links: ["compliance-reviewer", "security-reviewer", "legal-reviewer", "finance-reviewer"],
+      messages: ["Review checkpoint stops progress for challenge."],
+      business: "A visible checkpoint prevents premature approval.",
+      technical: "A review step blocks progression until concerns are handled."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Manager resumes after review clearance."],
+      business: "The decision owner regains control after the checkpoint.",
+      technical: "Manager process resumes with accepted findings."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["Crew outputs a managed recommendation."],
+      business: "The output feels operational and accountable.",
+      technical: "Workflow completes with a structured recommendation."
+    }
+  },
+  "enterprise-gated": {
+    intake: {
+      links: ["principal-compliance", "principal-security"],
+      messages: ["Governed review opens in the enterprise runtime."],
+      business: "The case starts inside a governed platform.",
+      technical: "Supervisor creates a governed review context."
+    },
+    review: {
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Specialists evaluate with enterprise controls."],
+      business: "Specialists work in a consistent enterprise stack.",
+      technical: "Shared plugins and controls drive specialist checks."
+    },
+    challenge: {
+      links: ["reviewer-security", "reviewer-legal"],
+      messages: ["Formal review gate requests more proof."],
+      business: "The review gate is formal and explicit.",
+      technical: "Governed validation blocks completion."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Principal assembles the approved decision packet."],
+      business: "The final packet is built for governance.",
+      technical: "Supervisor merges reviewed evidence inside platform state."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["Governed verdict published."],
+      business: "The outcome fits enterprise approval flows.",
+      technical: "Platform-aligned result emitted."
+    }
+  },
+  "event-pipeline": {
+    intake: {
+      links: ["principal-compliance"],
+      messages: ["Initial policy event emitted."],
+      business: "The process starts like an evidence pipeline.",
+      technical: "Supervisor emits the intake event."
+    },
+    review: {
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Specialist steps publish evidence events."],
+      business: "Each specialist enriches the case with evidence.",
+      technical: "Intermediate events carry specialist payloads."
+    },
+    challenge: {
+      links: ["legal-reviewer", "security-reviewer"],
+      messages: ["Review event requests follow-up evidence."],
+      business: "Challenge is another pipeline step, not a side conversation.",
+      technical: "Reviewer step emits follow-up events."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Aggregator composes one decision payload."],
+      business: "The principal agent receives a single evidence-backed packet.",
+      technical: "Aggregation composes the decision payload."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["Terminal step publishes verdict."],
+      business: "The output feels disciplined and pipeline-driven.",
+      technical: "Terminal event emits the final verdict."
+    }
+  },
+  "app-workflow": {
+    intake: {
+      links: ["principal-compliance", "principal-security"],
+      messages: ["Workflow starts from application state."],
+      business: "The flow feels product-friendly from day one.",
+      technical: "Supervisor opens workflow state in one app runtime."
+    },
+    review: {
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Specialist workflow steps gather evidence."],
+      business: "Specialist work stays visible inside the product flow.",
+      technical: "Agents and steps update app-facing state."
+    },
+    challenge: {
+      links: ["reviewer-security", "reviewer-legal", "reviewer-finance"],
+      messages: ["Review branch opens as a guardrail."],
+      business: "Risk review is a branch, not a hidden extra.",
+      technical: "Guardrail branch pauses the main flow."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Principal resumes with reviewed evidence."],
+      business: "The decision owner comes back in with enough context to decide.",
+      technical: "Supervisor resumes from the branch with reviewed state."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["App publishes final verdict with traces."],
+      business: "The final answer is ready for product UX.",
+      technical: "Workflow outputs a traced final decision."
+    }
+  },
+  "typed-review": {
+    intake: {
+      links: ["principal-compliance"],
+      messages: ["Typed policy case initialized."],
+      business: "The case opens with a structured schema, not a loose prompt.",
+      technical: "Supervisor initializes validated case types and inputs."
+    },
+    review: {
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Specialists return validated findings."],
+      business: "Every specialist output is constrained and reliable.",
+      technical: "Tool calls and outputs are validated against schemas."
+    },
+    challenge: {
+      links: ["compliance-reviewer", "legal-reviewer", "security-reviewer"],
+      messages: ["Reviewer forces typed rebuttals on conflicting claims."],
+      business: "The challenge loop stays structured instead of fuzzy.",
+      technical: "Reviewer checks contradictions across validated outputs."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Principal merges typed findings into one decision model."],
+      business: "The final packet is easier to trust because it is structured.",
+      technical: "Supervisor composes a validated decision object."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["Typed verdict emitted."],
+      business: "Reliable outputs are the main strength here.",
+      technical: "Final result is emitted with strict schema guarantees."
+    }
+  }
+};
+
 let audienceId = "business";
-let scenarioId = "launch";
 let currentStage = 0;
 let autoplay = null;
-let compareIds = [...laneDefaults];
+let compareIds = ["langgraph", "openai-agents"];
 
-const frameworkGrid = document.getElementById("framework-grid-cards");
-const audienceChips = document.getElementById("audience-chip-row");
-const scenarioChips = document.getElementById("scenario-chip-row");
-const playDemoBtn = document.getElementById("play-demo-btn");
-const stepDemoBtn = document.getElementById("step-demo-btn");
-const comparisonLanes = document.getElementById("comparison-lanes");
-const frameworkSummary = document.getElementById("framework-summary");
-const architectureGuidance = document.getElementById("architecture-guidance");
-const scenarioHeadline = document.getElementById("scenario-headline");
-const scenarioSupport = document.getElementById("scenario-support");
+let frameworkCatalogCards;
+let protocolCatalogCards;
+let adjacentCatalogCards;
+let audienceChipRow;
+let stageChipRow;
+let playDemoBtn;
+let stepDemoBtn;
+let frameworkSummary;
+let appStatus;
+let skeletonCaption;
+let skeletonBoard;
+let scenarioHeadline;
+let scenarioSupport;
+let comparisonLanes;
 
 function getAudience() {
   return audiences.find((item) => item.id === audienceId);
 }
 
-function getScenario() {
-  return scenarios.find((item) => item.id === scenarioId);
+function getStage() {
+  return stages[currentStage];
 }
 
 function getFramework(id) {
-  return frameworks.find((item) => item.id === id);
+  return demoFrameworks.find((item) => item.id === id);
 }
 
-function metricLabel(value) {
-  return `${value}/5`;
+function cardMarkup(item) {
+  return `
+    <article class="catalog-card ${item.kind}">
+      <span class="catalog-badge ${item.kind}">${item.kind === "framework" ? "Framework" : item.kind === "protocol" ? "Protocol" : "Adjacent"}</span>
+      <h4>${item.name}</h4>
+      <p class="catalog-tagline">${item.tagline}</p>
+      <p>${item.summary}</p>
+      <a href="${item.source}" target="_blank" rel="noreferrer">Official docs</a>
+    </article>
+  `;
 }
 
-function laneExplanation(framework, stage, audience) {
-  const businessMap = {
-    a2a: [
-      "The principal agent decides which external specialist service should own the first pass.",
-      "Evidence arrives from separate agent services, which is good for organizational ownership.",
-      "Risk teams can challenge through follow-up requests without joining one monolithic runtime.",
-      "The debate is more formal because each exchange is a protocol task, not an ad hoc chat bubble.",
-      "The final decision is easier to defend across teams because responsibilities were clearly separated."
-    ],
-    "openai-agents": [
-      "The principal agent hands the problem to the right specialist inside one application flow.",
-      "Each specialist uses tools and returns a focused answer quickly.",
-      "A reviewer handoff can challenge the optimistic path before a final answer goes out.",
-      "The system stays understandable because handoffs show which specialist owned each part.",
-      "The principal agent returns one answer with supporting reasoning and controls."
-    ],
-    langgraph: [
-      "The principal agent follows a visible process map, which business stakeholders can audit.",
-      "Specialists work through explicit branches, so it is easier to see what evidence was collected.",
-      "Challenge rules are built into the process instead of relying on personality alone.",
-      "Debate is bounded because the graph defines where disagreement can loop and where it must stop.",
-      "The final recommendation comes from a controlled path with fewer surprises."
-    ],
-    ag2: [
-      "The principal agent invites specialists into a visible discussion that feels like a working team.",
-      "Specialists bring evidence into the conversation rather than only returning silent background work.",
-      "Pushback is natural because agents can directly challenge one another.",
-      "This can feel very intuitive, but the team needs discipline so the conversation does not sprawl.",
-      "The principal agent closes the conversation with one consolidated answer."
-    ],
-    crewai: [
-      "The flow behaves like a business manager assigning specialists defined responsibilities.",
-      "Each role completes its task and hands work to the next stage of the crew or flow.",
-      "Risk review can be inserted as a management checkpoint before approval.",
-      "The process stays easy to explain because each role has a clear charter.",
-      "The outcome reads like a managed business workflow rather than a loose discussion."
-    ],
-    "semantic-kernel": [
-      "The principal agent coordinates specialists inside an enterprise-ready framework.",
-      "Specialists use shared enterprise capabilities while still staying role-specific.",
-      "Control and governance can be aligned with broader platform policies.",
-      "This is strong when teams care about enterprise consistency as much as raw demo speed.",
-      "The final answer can fit neatly into a larger Microsoft-oriented architecture."
-    ],
-    llamaindex: [
-      "The principal agent behaves more like a process owner in an evidence pipeline.",
-      "Specialist steps contribute findings in a structured progression.",
-      "Challenge becomes part of the workflow rather than a free-form argument.",
-      "This is useful when the business wants disciplined research more than theatrical agent dialogue.",
-      "The recommendation lands as the final step of the workflow."
-    ],
-    mastra: [
-      "The principal agent can manage specialists through a product-team friendly workflow model.",
-      "Evidence collection is explicit and easy to attach to product features.",
-      "Challenge can be inserted as a review or guardrail step.",
-      "The pattern is practical for a web product team that wants speed without total chaos.",
-      "The final decision is packaged in one app-facing runtime."
-    ],
-    mcp: [
-      "MCP is not the decision workflow by itself, but it helps every specialist use the same tools and data.",
-      "The value here is consistent access to systems rather than agent delegation semantics.",
-      "Challenge quality improves because agents can inspect a shared tool ecosystem.",
-      "You still need another coordination pattern to run the debate.",
-      "Business users should see MCP as infrastructure that strengthens the other frameworks."
-    ]
-  };
-
-  const technicalMap = {
-    a2a: [
-      "Supervisor issues the initial remote task request to protocol-compatible specialist services.",
-      "Specialists execute locally with their own tools and return artifacts across the network boundary.",
-      "Risk specialists send rebuttals through additional task exchanges and clarifications.",
-      "The debate is implemented as chained task messages, not in-process shared state.",
-      "Supervisor synthesizes remote outputs and emits the final result."
-    ],
-    "openai-agents": [
-      "Supervisor starts the run and may route via handoff to a specialized agent.",
-      "Specialists invoke tools within one runtime and stream or return focused outputs.",
-      "A critic or reviewer handoff can inspect the intermediate result before completion.",
-      "Debate happens through controlled handoffs and shared run context.",
-      "Supervisor terminates the run with a bounded final response."
-    ],
-    langgraph: [
-      "Execution begins at a supervisor node with graph state initialized.",
-      "Parallel or conditional branches gather specialist evidence into shared state.",
-      "Challenge is an explicit review edge based on state or policy flags.",
-      "Looping continues only until graph conditions are satisfied.",
-      "The terminal node formats final structured output from accumulated state."
-    ],
-    ag2: [
-      "Supervisor initiates a multi-agent conversation or group chat session.",
-      "Specialists contribute findings as conversational turns, often with tool use in the loop.",
-      "Critique is native because agents can address each other directly.",
-      "Conversation selection and stop conditions must be managed carefully to avoid drift.",
-      "Supervisor or designated closer emits the final answer."
-    ],
-    crewai: [
-      "A flow or manager-like process initializes tasks and role assignments.",
-      "Agents execute role-scoped tasks with their permitted tools and memory.",
-      "Validation or manager review injects challenge before progression.",
-      "State advances through task and process boundaries rather than open chat.",
-      "The process returns a consolidated workflow output."
-    ],
-    "semantic-kernel": [
-      "Supervisor agent coordinates messaging and shared platform capabilities inside the kernel ecosystem.",
-      "Specialists may use plugins, models, and enterprise components from the same stack.",
-      "Review can be implemented via additional agents or process logic.",
-      "The framework favors governed composition over pure emergent chat.",
-      "The result can plug into broader enterprise runtime patterns."
-    ],
-    llamaindex: [
-      "A workflow starts with an event that routes through explicit steps.",
-      "Specialist steps or agent workflows emit events with evidence payloads.",
-      "A review step challenges weak claims before state advances.",
-      "The orchestration is event-driven and easier to inspect than free chat.",
-      "The terminal step publishes a final recommendation."
-    ],
-    mastra: [
-      "Supervisor runs through workflow steps or agent network calls inside a TypeScript runtime.",
-      "Specialists invoke tools, memory, or MCP-connected systems as needed.",
-      "Challenge is introduced as a control-flow branch, review step, or guardrail.",
-      "Suspend-resume and branching help contain multi-agent complexity.",
-      "The workflow ends with a product-ready output and traces."
-    ],
-    mcp: [
-      "MCP exposes tools and context in a standardized way to the participating agents.",
-      "Specialists consume common resources through MCP instead of bespoke adapters.",
-      "Challenge quality depends on which orchestration framework is above MCP.",
-      "MCP standardizes access, not delegation or debate control.",
-      "Final synthesis still belongs to the supervising runtime."
-    ]
-  };
-
-  const map = audience.id === "business" ? businessMap : technicalMap;
-  return map[framework.id][stage];
-}
-
-function renderFrameworkGrid() {
-  frameworkGrid.innerHTML = frameworks
-    .map(
-      (framework) => `
-        <article class="framework-card ${compareIds.includes(framework.id) ? "active" : ""}">
-          <span class="framework-badge" style="background:${framework.color}">${framework.family}</span>
-          <div class="framework-meta">
-            <h3>${framework.name}</h3>
-            <span>${framework.category}</span>
-          </div>
-          <p>${framework.summary}</p>
-          <p><strong>Business fit:</strong> ${framework.business}</p>
-          <div class="metric-row compact-metrics">
-            <div class="metric">
-              <span class="signal-label">Control</span>
-              <strong>${metricLabel(framework.metrics.control)}</strong>
-            </div>
-            <div class="metric">
-              <span class="signal-label">Business clarity</span>
-              <strong>${metricLabel(framework.metrics.businessClarity)}</strong>
-            </div>
-            <div class="metric">
-              <span class="signal-label">Interop</span>
-              <strong>${metricLabel(framework.metrics.interoperability)}</strong>
-            </div>
-          </div>
-        </article>
-      `
-    )
-    .join("");
+function renderCatalog() {
+  frameworkCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "framework").map(cardMarkup).join("");
+  protocolCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "protocol").map(cardMarkup).join("");
+  adjacentCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "adjacent").map(cardMarkup).join("");
 }
 
 function renderAudienceChips() {
-  audienceChips.innerHTML = audiences
+  audienceChipRow.innerHTML = audiences
     .map(
       (audience) => `
         <button class="chip ${audience.id === audienceId ? "active" : ""}" data-audience="${audience.id}">
@@ -647,7 +638,7 @@ function renderAudienceChips() {
     )
     .join("");
 
-  audienceChips.querySelectorAll("[data-audience]").forEach((button) => {
+  audienceChipRow.querySelectorAll("[data-audience]").forEach((button) => {
     button.addEventListener("click", () => {
       audienceId = button.dataset.audience;
       render();
@@ -655,21 +646,20 @@ function renderAudienceChips() {
   });
 }
 
-function renderScenarioChips() {
-  scenarioChips.innerHTML = scenarios
+function renderStageChips() {
+  stageChipRow.innerHTML = stages
     .map(
-      (scenario) => `
-        <button class="chip ${scenario.id === scenarioId ? "active" : ""}" data-scenario="${scenario.id}">
-          ${scenario.label}
+      (stage, index) => `
+        <button class="chip ${index === currentStage ? "active" : ""}" data-stage="${index}">
+          ${stage.label}
         </button>
       `
     )
     .join("");
 
-  scenarioChips.querySelectorAll("[data-scenario]").forEach((button) => {
+  stageChipRow.querySelectorAll("[data-stage]").forEach((button) => {
     button.addEventListener("click", () => {
-      scenarioId = button.dataset.scenario;
-      currentStage = 0;
+      currentStage = Number(button.dataset.stage);
       render();
     });
   });
@@ -677,29 +667,876 @@ function renderScenarioChips() {
 
 function renderSummary() {
   const audience = getAudience();
-  const scenario = getScenario();
-  scenarioHeadline.textContent = `${scenario.label} comparison`;
-  scenarioSupport.textContent =
-    audience.id === "business" ? scenario.businessGoal : scenario.technicalGoal;
+  const stage = getStage();
 
+  scenarioHeadline.textContent = "Reference skeleton plus framework-specific demos";
+  scenarioSupport.textContent = audience.helper;
   frameworkSummary.innerHTML = `
-    <div class="summary-card">
-      <p class="eyebrow">Audience Focus</p>
-      <h3>${audience.label}</h3>
-      <p>${audience.description}</p>
-    </div>
-    <div class="summary-card">
-      <p class="eyebrow">Scenario Question</p>
-      <h3>${scenario.problem}</h3>
-      <p>${audience.id === "business" ? scenario.businessGoal : scenario.technicalGoal}</p>
+    <div class="summary-pill">Structure: principal + 4 specialists + reviewer + decision output</div>
+    <div class="summary-pill">Stage: ${stage.label}</div>
+  `;
+  appStatus.textContent = `${stage.label} active. ${audience.id === "business" ? stage.captionBusiness : stage.captionTechnical}`;
+  skeletonCaption.textContent = audience.id === "business" ? stage.captionBusiness : stage.captionTechnical;
+}
+
+function getAgentRole(agentId) {
+  if (agentId === "principal") {
+    return "principal";
+  }
+
+  if (["compliance", "security", "legal", "finance"].includes(agentId)) {
+    return "specialist";
+  }
+
+  if (agentId === "reviewer") {
+    return "reviewer";
+  }
+
+  return "decision";
+}
+
+function getStageOrder(stageId) {
+  const orderByStage = {
+    intake: {
+      principal: 1
+    },
+    review: {
+      principal: 1,
+      compliance: 2,
+      security: 2,
+      legal: 2,
+      finance: 2
+    },
+    challenge: {
+      reviewer: 1,
+      compliance: 2,
+      security: 2,
+      legal: 2,
+      finance: 2
+    },
+    synthesis: {
+      reviewer: 1,
+      principal: 2,
+      security: 3,
+      legal: 3
+    },
+    verdict: {
+      principal: 1,
+      reviewer: 2,
+      decision: 3
+    }
+  };
+
+  return orderByStage[stageId];
+}
+
+function renderStepTrail() {
+  return `
+    <div class="step-trail" aria-label="Policy evaluation steps">
+      ${stages
+        .map((stage, index) => {
+          const activeClass = index === currentStage ? "active" : index < currentStage ? "complete" : "";
+          return `
+            <div class="step-item ${activeClass}">
+              <span class="step-number">${index + 1}</span>
+              <span class="step-name">${stage.label}</span>
+            </div>
+            ${index < stages.length - 1 ? '<span class="step-arrow">→</span>' : ""}
+          `;
+        })
+        .join("")}
     </div>
   `;
 }
 
-function renderLane(frameworkId, laneIndex) {
+function flowHighlights(pattern, stageId) {
+  return frameworkPatterns[pattern][stageId];
+}
+
+function frameworkTechProfile(framework) {
+  const profiles = {
+    "graph-branches": {
+      topology: "Supervisor graph with parallel branches",
+      state: "Shared graph state",
+      tools: "Node-level tool calls",
+      review: "Conditional review edge",
+      arrowA: "branch",
+      arrowB: "gate",
+      arrowC: "merge",
+      code: `graph.start("principal")
+.parallel(["compliance", "security", "legal", "finance"])
+.when("risk_flag", "reviewer")
+.then("principal")
+.finish("decision")`
+    },
+    "sequential-handoffs": {
+      topology: "Linear handoff chain",
+      state: "Run context passed forward",
+      tools: "Agent-local tools in one runtime",
+      review: "Reviewer handoff",
+      arrowA: "handoff",
+      arrowB: "review",
+      arrowC: "return",
+      code: `principal
+  -> compliance
+  -> security
+  -> legal
+  -> reviewer
+  -> principal
+  -> decision`
+    },
+    "conversation-mesh": {
+      topology: "Conversation mesh",
+      state: "Shared transcript and turns",
+      tools: "Tools inside agent turns",
+      review: "Reviewer injects rebuttals",
+      arrowA: "debate",
+      arrowB: "challenge",
+      arrowC: "converge",
+      code: `group_chat([
+  principal,
+  compliance,
+  security,
+  legal,
+  finance,
+  reviewer
+])`
+    },
+    "manager-review": {
+      topology: "Manager plus role tasks",
+      state: "Task outputs and checkpoints",
+      tools: "Role-scoped tools",
+      review: "Checkpoint gate",
+      arrowA: "assign",
+      arrowB: "checkpoint",
+      arrowC: "approve",
+      code: `manager.assign(tasks)
+crew.execute()
+review_checkpoint()
+manager.finalize()`
+    },
+    "enterprise-gated": {
+      topology: "Governed enterprise workflow",
+      state: "Platform-governed runtime state",
+      tools: "Enterprise plugins",
+      review: "Formal governance gate",
+      arrowA: "route",
+      arrowB: "govern",
+      arrowC: "publish",
+      code: `policy_case
+  |> enterprise_agents
+  |> governance_review
+  |> final_packet`
+    },
+    "event-pipeline": {
+      topology: "Event pipeline",
+      state: "Event payload aggregation",
+      tools: "Step-level evidence calls",
+      review: "Review event",
+      arrowA: "emit",
+      arrowB: "recheck",
+      arrowC: "aggregate",
+      code: `emit("policy_intake")
+on("specialist_result")
+on("review_required")
+emit("final_verdict")`
+    },
+    "app-workflow": {
+      topology: "App-native workflow",
+      state: "Workflow state in app runtime",
+      tools: "Workflow step tools",
+      review: "Guardrail branch",
+      arrowA: "step",
+      arrowB: "branch",
+      arrowC: "resume",
+      code: `workflow.step("principal")
+.parallel("specialists")
+.branch("review")
+.resume("principal")
+.complete("decision")`
+    },
+    "typed-review": {
+      topology: "Typed orchestration pipeline",
+      state: "Validated models and outputs",
+      tools: "Schema-validated tools",
+      review: "Typed contradiction checks",
+      arrowA: "validate",
+      arrowB: "rebut",
+      arrowC: "compose",
+      code: `case = PolicyCase.model_validate(input)
+findings = specialists.run(case)
+review = reviewer.check(findings)
+decision = compose(case, findings, review)`
+    }
+  };
+
+  return framework ? profiles[framework.pattern] : {
+    topology: "Reference skeleton",
+    state: "Shared decision stages",
+    tools: "Shared demo tools",
+    review: "Explicit reviewer stage",
+    arrowA: "route",
+    arrowB: "review",
+    arrowC: "decide",
+    code: `principal -> specialists -> reviewer -> decision`
+  };
+}
+
+function frameworkBaseLinks(framework) {
+  const baseLinks = {
+    "graph-branches": [
+      "principal-compliance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "compliance-reviewer",
+      "security-reviewer",
+      "legal-reviewer",
+      "finance-reviewer",
+      "reviewer-principal",
+      "principal-decision"
+    ],
+    "sequential-handoffs": [
+      "principal-compliance",
+      "compliance-security",
+      "security-legal",
+      "legal-finance",
+      "finance-reviewer",
+      "reviewer-principal",
+      "principal-decision"
+    ],
+    "conversation-mesh": [
+      "principal-compliance",
+      "principal-security",
+      "compliance-security",
+      "security-legal",
+      "legal-finance",
+      "finance-compliance",
+      "reviewer-compliance",
+      "reviewer-security",
+      "reviewer-legal",
+      "reviewer-finance",
+      "principal-decision"
+    ],
+    "manager-review": [
+      "principal-compliance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "compliance-reviewer",
+      "security-reviewer",
+      "legal-reviewer",
+      "finance-reviewer",
+      "reviewer-principal",
+      "principal-decision"
+    ],
+    "enterprise-gated": [
+      "principal-compliance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "reviewer-security",
+      "reviewer-legal",
+      "reviewer-principal",
+      "principal-decision"
+    ],
+    "event-pipeline": [
+      "principal-compliance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "security-reviewer",
+      "legal-reviewer",
+      "reviewer-principal",
+      "principal-decision"
+    ],
+    "app-workflow": [
+      "principal-compliance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "reviewer-security",
+      "reviewer-legal",
+      "reviewer-finance",
+      "reviewer-principal",
+      "principal-decision"
+    ],
+    "typed-review": [
+      "principal-compliance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "compliance-reviewer",
+      "security-reviewer",
+      "legal-reviewer",
+      "reviewer-principal",
+      "principal-decision"
+    ]
+  };
+
+  return framework ? baseLinks[framework.pattern] : [
+    "principal-compliance",
+    "principal-security",
+    "principal-legal",
+    "principal-finance",
+    "compliance-reviewer",
+    "security-reviewer",
+    "legal-reviewer",
+    "finance-reviewer",
+    "reviewer-principal",
+    "principal-decision"
+  ];
+}
+
+function stageImplementationCode(framework, stageId) {
+  const codeMap = {
+    "graph-branches": {
+      intake: `state = init_case(policy_doc)\nroute("principal")`,
+      review: `parallel(["compliance", "security", "legal", "finance"])\nupdate(state.findings)`,
+      challenge: `if contradictions(state):\n  goto("reviewer")`,
+      synthesis: `merge(state.findings, state.review)\nroute("principal")`,
+      verdict: `emit_verdict(state)`
+    },
+    "sequential-handoffs": {
+      intake: `ctx = start_run(policy_doc)\nhandoff(principal, compliance)`,
+      review: `handoff(compliance, security)\nhandoff(security, legal)\nhandoff(legal, finance)`,
+      challenge: `handoff(finance, reviewer)`,
+      synthesis: `handoff(reviewer, principal)\nprincipal.compose(ctx)`,
+      verdict: `return principal.final(ctx)`
+    },
+    "conversation-mesh": {
+      intake: `chat.start(principal, topic="policy_case")`,
+      review: `chat.broadcast([compliance, security, legal, finance])`,
+      challenge: `reviewer.challenge(chat.transcript)`,
+      synthesis: `principal.summarize(chat.transcript)`,
+      verdict: `chat.close(with_result=True)`
+    },
+    "manager-review": {
+      intake: `manager.create_tasks(policy_case)`,
+      review: `crew.run(role_tasks)`,
+      challenge: `review_checkpoint(crew_outputs)`,
+      synthesis: `manager.combine(approved_outputs)`,
+      verdict: `manager.publish_verdict()`
+    },
+    "enterprise-gated": {
+      intake: `case = governed_case(policy_doc)`,
+      review: `run_enterprise_agents(case)`,
+      challenge: `governance_gate(case.findings)`,
+      synthesis: `principal.build_decision_packet(case)`,
+      verdict: `publish(case.packet)`
+    },
+    "event-pipeline": {
+      intake: `emit("policy_intake", policy_doc)`,
+      review: `emit("specialist_review")`,
+      challenge: `emit("review_required")`,
+      synthesis: `aggregate("reviewed_findings")`,
+      verdict: `emit("final_verdict")`
+    },
+    "app-workflow": {
+      intake: `workflow.step("principal_intake")`,
+      review: `workflow.parallel("specialists")`,
+      challenge: `workflow.branch("review_guardrail")`,
+      synthesis: `workflow.resume("principal_synthesis")`,
+      verdict: `workflow.complete("decision")`
+    },
+    "typed-review": {
+      intake: `case = PolicyCase.model_validate(input)`,
+      review: `findings = specialists.run(case)`,
+      challenge: `review = reviewer.check(findings)`,
+      synthesis: `decision = compose(case, findings, review)`,
+      verdict: `return Decision.model_validate(decision)`
+    },
+    reference: {
+      intake: `principal opens policy case`,
+      review: `specialists evaluate with tools`,
+      challenge: `reviewer requests rebuttals`,
+      synthesis: `principal merges findings`,
+      verdict: `decision output published`
+    }
+  };
+
+  return framework ? codeMap[framework.pattern][stageId] : codeMap.reference[stageId];
+}
+
+function graphMessageMap(framework, stageId) {
+  const byPattern = {
+    "graph-branches": {
+      intake: {
+        "principal-compliance": "open case",
+        "principal-security": "risk scope"
+      },
+      review: {
+        "principal-compliance": "policy task",
+        "principal-security": "scan task",
+        "principal-legal": "legal task",
+        "principal-finance": "cost task"
+      },
+      challenge: {
+        "compliance-reviewer": "control gap",
+        "security-reviewer": "risk finding",
+        "legal-reviewer": "contract issue",
+        "finance-reviewer": "cost concern"
+      },
+      synthesis: {
+        "reviewer-principal": "review packet"
+      },
+      verdict: {
+        "principal-decision": "final verdict"
+      }
+    },
+    "sequential-handoffs": {
+      intake: {
+        "principal-compliance": "handoff case"
+      },
+      review: {
+        "principal-compliance": "policy task",
+        "compliance-security": "controls",
+        "security-legal": "risk notes",
+        "legal-finance": "cost flags"
+      },
+      challenge: {
+        "finance-reviewer": "concerns",
+        "legal-reviewer": "exceptions"
+      },
+      synthesis: {
+        "reviewer-principal": "reviewed run"
+      },
+      verdict: {
+        "principal-decision": "final output"
+      }
+    },
+    "conversation-mesh": {
+      intake: {
+        "principal-compliance": "open thread",
+        "principal-security": "invite"
+      },
+      review: {
+        "compliance-security": "challenge",
+        "security-legal": "rebuttal",
+        "legal-finance": "tradeoff",
+        "finance-compliance": "counterpoint"
+      },
+      challenge: {
+        "reviewer-compliance": "prove it",
+        "reviewer-security": "show evidence",
+        "reviewer-legal": "justify risk",
+        "reviewer-finance": "quantify cost"
+      },
+      synthesis: {
+        "security-principal": "risk stance",
+        "legal-principal": "legal stance",
+        "finance-principal": "cost stance"
+      },
+      verdict: {
+        "principal-decision": "recommendation",
+        "reviewer-decision": "challenge notes"
+      }
+    },
+    "manager-review": {
+      intake: {
+        "principal-compliance": "assign",
+        "principal-legal": "assign"
+      },
+      review: {
+        "principal-compliance": "policy task",
+        "principal-security": "risk task",
+        "principal-legal": "legal task",
+        "principal-finance": "cost task"
+      },
+      challenge: {
+        "compliance-reviewer": "output",
+        "security-reviewer": "output",
+        "legal-reviewer": "output",
+        "finance-reviewer": "output"
+      },
+      synthesis: {
+        "reviewer-principal": "approved set"
+      },
+      verdict: {
+        "principal-decision": "managed verdict"
+      }
+    },
+    "enterprise-gated": {
+      intake: {
+        "principal-compliance": "case start",
+        "principal-security": "case start"
+      },
+      review: {
+        "principal-compliance": "policy task",
+        "principal-security": "security task",
+        "principal-legal": "legal task",
+        "principal-finance": "finance task"
+      },
+      challenge: {
+        "reviewer-security": "gate fail",
+        "reviewer-legal": "gate fail"
+      },
+      synthesis: {
+        "reviewer-principal": "governed packet"
+      },
+      verdict: {
+        "principal-decision": "approved packet"
+      }
+    },
+    "event-pipeline": {
+      intake: {
+        "principal-compliance": "emit intake"
+      },
+      review: {
+        "principal-compliance": "event",
+        "principal-security": "event",
+        "principal-legal": "event",
+        "principal-finance": "event"
+      },
+      challenge: {
+        "legal-reviewer": "review event",
+        "security-reviewer": "review event"
+      },
+      synthesis: {
+        "reviewer-principal": "aggregate"
+      },
+      verdict: {
+        "principal-decision": "emit verdict"
+      }
+    },
+    "app-workflow": {
+      intake: {
+        "principal-compliance": "start step",
+        "principal-security": "start step"
+      },
+      review: {
+        "principal-compliance": "step",
+        "principal-security": "step",
+        "principal-legal": "step",
+        "principal-finance": "step"
+      },
+      challenge: {
+        "reviewer-security": "guardrail",
+        "reviewer-legal": "guardrail",
+        "reviewer-finance": "guardrail"
+      },
+      synthesis: {
+        "reviewer-principal": "resume state"
+      },
+      verdict: {
+        "principal-decision": "complete flow"
+      }
+    },
+    "typed-review": {
+      intake: {
+        "principal-compliance": "validated case"
+      },
+      review: {
+        "principal-compliance": "typed task",
+        "principal-security": "typed task",
+        "principal-legal": "typed task",
+        "principal-finance": "typed task"
+      },
+      challenge: {
+        "compliance-reviewer": "schema gap",
+        "security-reviewer": "risk proof",
+        "legal-reviewer": "typed issue"
+      },
+      synthesis: {
+        "reviewer-principal": "validated review"
+      },
+      verdict: {
+        "principal-decision": "typed output"
+      }
+    },
+    reference: {
+      intake: {
+        "principal-compliance": "open case",
+        "principal-security": "scope"
+      },
+      review: {
+        "principal-compliance": "task",
+        "principal-security": "task",
+        "principal-legal": "task",
+        "principal-finance": "task"
+      },
+      challenge: {
+        "compliance-reviewer": "finding",
+        "security-reviewer": "finding",
+        "legal-reviewer": "finding",
+        "finance-reviewer": "finding"
+      },
+      synthesis: {
+        "reviewer-principal": "review notes"
+      },
+      verdict: {
+        "principal-decision": "decision"
+      }
+    }
+  };
+
+  const key = framework ? framework.pattern : "reference";
+  return byPattern[key][stageId] || {};
+}
+
+function renderFrameworkTechStrip(framework) {
+  const profile = frameworkTechProfile(framework);
+  return `
+    <div class="tech-strip">
+      <article>
+        <span>Topology</span>
+        <strong>${profile.topology}</strong>
+      </article>
+      <article>
+        <span>State</span>
+        <strong>${profile.state}</strong>
+      </article>
+      <article>
+        <span>Tools</span>
+        <strong>${profile.tools}</strong>
+      </article>
+      <article>
+        <span>Review</span>
+        <strong>${profile.review}</strong>
+      </article>
+    </div>
+  `;
+}
+
+function renderCodeHint(framework, stageId) {
+  const profile = frameworkTechProfile(framework);
+  const stageCode = stageImplementationCode(framework, stageId);
+  return `
+    <section class="code-hint">
+      <div class="code-hint-grid">
+        <div class="code-panel">
+          <div class="code-hint-head">
+            <strong>Current step code</strong>
+            <span>${stageId}</span>
+          </div>
+          <pre><code>${stageCode}</code></pre>
+        </div>
+        <div class="code-panel">
+          <div class="code-hint-head">
+            <strong>Flow pattern</strong>
+            <span>${profile.topology}</span>
+          </div>
+          <pre><code>${profile.code}</code></pre>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderGraphMap({ framework, activeAgents, stageId, color, neutral = false }) {
+  const stageHighlights = framework ? flowHighlights(framework.pattern, stageId) : {
+    links: frameworkBaseLinks(null),
+    messages: []
+  };
+  const baseLinks = frameworkBaseLinks(framework);
+  const activeLinkSet = new Set(stageHighlights.links);
+  const activeAgentSet = new Set(activeAgents);
+  const messageMap = graphMessageMap(framework, stageId);
+
+  const lineMarkup = baseLinks
+    .map((linkId) => {
+      const [fromId, toId] = linkEndpoints[linkId];
+      const from = graphNodes[fromId];
+      const to = graphNodes[toId];
+      return `
+        <line
+          class="graph-edge ${activeLinkSet.has(linkId) ? "active" : ""}"
+          x1="${from.x}"
+          y1="${from.y}"
+          x2="${to.x}"
+          y2="${to.y}"
+          marker-end="url(#arrowhead-${neutral ? "neutral" : "live"})"
+        />
+      `;
+    })
+    .join("");
+
+  const edgeLabelMarkup = Object.entries(messageMap)
+    .map(([linkId, label]) => {
+      const [fromId, toId] = linkEndpoints[linkId];
+      const from = graphNodes[fromId];
+      const to = graphNodes[toId];
+      const midX = (from.x + to.x) / 2;
+      const midY = (from.y + to.y) / 2 - 2;
+      return `
+        <g class="graph-edge-label">
+          <rect x="${midX - 8}" y="${midY - 3.7}" width="16" height="6.5" rx="3.2" ry="3.2"></rect>
+          <text x="${midX}" y="${midY + 0.7}" text-anchor="middle">${label}</text>
+        </g>
+      `;
+    })
+    .join("");
+
+  const nodeMarkup = Object.entries(graphNodes)
+    .map(([nodeId, node]) => `
+      <g class="graph-node ${activeAgentSet.has(nodeId) ? "active" : ""} role-${getAgentRole(nodeId)}">
+        <circle cx="${node.x}" cy="${node.y}" r="7" />
+        <text x="${node.labelX}" y="${node.labelY}" text-anchor="middle">${node.label}</text>
+      </g>
+    `)
+    .join("");
+
+  return `
+    <div class="graph-map ${neutral ? "neutral" : ""}" style="--framework-color:${color}">
+      <svg viewBox="0 0 100 100" role="img" aria-label="Framework topology graph">
+        <defs>
+          <marker id="arrowhead-live" markerWidth="3" markerHeight="3" refX="2.6" refY="1.5" orient="auto">
+            <path d="M0,0 L3,1.5 L0,3 z" fill="currentColor"></path>
+          </marker>
+          <marker id="arrowhead-neutral" markerWidth="3" markerHeight="3" refX="2.6" refY="1.5" orient="auto">
+            <path d="M0,0 L3,1.5 L0,3 z" fill="currentColor"></path>
+          </marker>
+        </defs>
+        ${lineMarkup}
+        ${edgeLabelMarkup}
+        ${nodeMarkup}
+      </svg>
+    </div>
+  `;
+}
+
+function renderBoard({ framework, color, activeAgents, activeTools, messages, stageId, neutral = false }) {
+  const stageOrder = getStageOrder(stageId);
+  const profile = frameworkTechProfile(framework);
+  return `
+    <div class="flow-board ${neutral ? "neutral" : ""}" style="--framework-color:${color}">
+      <div class="tool-ribbon tool-ribbon-top">
+        ${Object.entries(toolCatalog)
+          .map(
+            ([toolId, label]) => `
+              <span class="tool-chip ${activeTools.has(toolId) ? "active" : ""}">${label}</span>
+            `
+          )
+          .join("")}
+      </div>
+
+      <section class="flow-section ${activeAgents.has("principal") ? "active" : ""}">
+        <div class="flow-section-head">
+          <span class="flow-section-label">Principal</span>
+          ${stageOrder.principal ? `<span class="flow-stage-chip">${stageOrder.principal}</span>` : ""}
+        </div>
+        ${agentRoster
+          .filter((agent) => agent.id === "principal")
+          .map(
+            (agent) => `
+              <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
+                ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
+                <span>${agent.sublabel}</span>
+                <strong>${agent.label}</strong>
+              </article>
+            `
+          )
+          .join("")}
+      </section>
+
+      <div class="flow-arrow-wrap">
+        <div class="flow-arrow">↓</div>
+        <span class="flow-arrow-label">${profile.arrowA}</span>
+      </div>
+
+      <section class="flow-section ${["compliance", "security", "legal", "finance"].some((id) => activeAgents.has(id)) ? "active" : ""}">
+        <div class="flow-section-head">
+          <span class="flow-section-label">Specialists</span>
+          ${["compliance", "security", "legal", "finance"].some((id) => stageOrder[id]) ? `<span class="flow-stage-chip">${stageOrder.compliance || stageOrder.security || stageOrder.legal || stageOrder.finance}</span>` : ""}
+        </div>
+        <div class="specialist-grid">
+          ${agentRoster
+            .filter((agent) => ["compliance", "security", "legal", "finance"].includes(agent.id))
+            .map(
+              (agent) => `
+                <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
+                  ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
+                  <span>${agent.sublabel}</span>
+                  <strong>${agent.label}</strong>
+                </article>
+              `
+          )
+          .join("")}
+        </div>
+      </section>
+
+      <div class="flow-arrow-wrap">
+        <div class="flow-arrow">↓</div>
+        <span class="flow-arrow-label">${profile.arrowB}</span>
+      </div>
+
+      <section class="flow-section ${activeAgents.has("reviewer") ? "active" : ""}">
+        <div class="flow-section-head">
+          <span class="flow-section-label">Review</span>
+          ${stageOrder.reviewer ? `<span class="flow-stage-chip">${stageOrder.reviewer}</span>` : ""}
+        </div>
+        ${agentRoster
+          .filter((agent) => agent.id === "reviewer")
+          .map(
+            (agent) => `
+              <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
+                ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
+                <span>${agent.sublabel}</span>
+                <strong>${agent.label}</strong>
+              </article>
+            `
+          )
+          .join("")}
+      </section>
+
+      <div class="flow-arrow-wrap">
+        <div class="flow-arrow">↓</div>
+        <span class="flow-arrow-label">${profile.arrowC}</span>
+      </div>
+
+      <section class="flow-section ${activeAgents.has("decision") ? "active" : ""}">
+        <div class="flow-section-head">
+          <span class="flow-section-label">Output</span>
+          ${stageOrder.decision ? `<span class="flow-stage-chip">${stageOrder.decision}</span>` : ""}
+        </div>
+        ${agentRoster
+          .filter((agent) => agent.id === "decision")
+          .map(
+            (agent) => `
+              <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
+                ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
+                <span>${agent.sublabel}</span>
+                <strong>${agent.label}</strong>
+              </article>
+            `
+          )
+          .join("")}
+      </section>
+
+      <div class="message-stack">
+        ${messages
+          .map((message, index) => `<div class="message-bubble" style="animation-delay:${index * 120}ms">${message}</div>`)
+          .join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderSkeleton() {
+  const stage = getStage();
+  skeletonBoard.innerHTML = `
+    ${renderStepTrail()}
+    ${renderFrameworkTechStrip(null)}
+    <div class="lane-role-box lane-role-box-top">
+      <strong>${stage.label}</strong>
+      <p>${stage.captionTechnical}</p>
+    </div>
+    ${renderGraphMap({
+      framework: null,
+      activeAgents: stage.activeAgents,
+      stageId: stage.id,
+      color: "#7d6f62",
+      neutral: true
+    })}
+    ${renderCodeHint(null, stage.id)}
+  `;
+}
+
+function laneMarkup(frameworkId, laneIndex) {
   const framework = getFramework(frameworkId);
-  const scenario = getScenario();
   const audience = getAudience();
+  const stage = getStage();
+  const highlights = flowHighlights(framework.pattern, stage.id);
 
   return `
     <article class="compare-lane">
@@ -709,125 +1546,63 @@ function renderLane(frameworkId, laneIndex) {
           <h3>${framework.name}</h3>
         </div>
         <select class="lane-select" data-lane="${laneIndex}">
-          ${frameworks
+          ${demoFrameworks
             .map(
               (option) => `
-                <option value="${option.id}" ${option.id === framework.id ? "selected" : ""}>
-                  ${option.name}
-                </option>
+                <option value="${option.id}" ${option.id === framework.id ? "selected" : ""}>${option.name}</option>
               `
             )
             .join("")}
         </select>
       </div>
 
-      <div class="lane-pill-row">
-        <span class="lane-pill" style="background:${framework.color}">${framework.family}</span>
-        <span class="lane-pill neutral">${framework.category}</span>
+      <p class="lane-summary">${framework.summary}</p>
+      ${renderFrameworkTechStrip(framework)}
+
+      ${renderStepTrail()}
+
+      <div class="lane-role-box lane-role-box-top">
+        <strong>${stage.label}</strong>
+        <p>${audience.id === "business" ? highlights.business : highlights.technical}</p>
       </div>
 
-      <p class="lane-summary">${audience.id === "business" ? framework.business : framework.technical}</p>
+      ${renderGraphMap({
+        framework,
+        activeAgents: stage.activeAgents,
+        stageId: stage.id,
+        color: framework.color
+      })}
 
-      <div class="lane-role-box">
-        <strong>Principal + specialists fit</strong>
-        <p>${framework.principalFit}</p>
-      </div>
-
-      <div class="sequence-list">
-        ${scenario.stages
-          .map((stage, index) => {
-            const active = index === currentStage ? "active" : "";
-            const text = laneExplanation(framework, index, audience);
-            return `
-              <div class="sequence-step ${active}">
-                <div class="sequence-index">${index + 1}</div>
-                <div class="sequence-body">
-                  <h4>${stage.name}</h4>
-                  <p>${text}</p>
-                </div>
-              </div>
-            `;
-          })
-          .join("")}
-      </div>
+      ${renderCodeHint(framework, stage.id)}
 
       <div class="lane-bottom">
         <article>
-          <h4>Strengths</h4>
-          <ul>${framework.strengths.map((item) => `<li>${item}</li>`).join("")}</ul>
+          <h4>Pros</h4>
+          <ul>${framework.pros.map((item) => `<li>${item}</li>`).join("")}</ul>
         </article>
         <article>
-          <h4>Tradeoffs</h4>
-          <ul>${framework.tradeoffs.map((item) => `<li>${item}</li>`).join("")}</ul>
+          <h4>Cons</h4>
+          <ul>${framework.cons.map((item) => `<li>${item}</li>`).join("")}</ul>
         </article>
-      </div>
-
-      <div class="lane-sources">
-        <h4>Primary sources</h4>
-        ${framework.sources
-          .map((source) => `<a href="${source.url}" target="_blank" rel="noreferrer">${source.label}</a>`)
-          .join("")}
       </div>
     </article>
   `;
 }
 
 function renderComparison() {
-  comparisonLanes.innerHTML = compareIds.map((id, index) => renderLane(id, index)).join("");
+  comparisonLanes.innerHTML = compareIds.map((id, index) => laneMarkup(id, index)).join("");
   comparisonLanes.querySelectorAll(".lane-select").forEach((select) => {
     select.addEventListener("change", (event) => {
       const laneIndex = Number(event.target.dataset.lane);
       compareIds[laneIndex] = event.target.value;
-      render();
+      renderComparison();
     });
   });
 }
 
-function renderArchitectureGuidance() {
-  const audience = getAudience();
-  architectureGuidance.innerHTML = `
-    <article>
-      <h3>${audience.id === "business" ? "How to talk about it" : "How to design it"}</h3>
-      <ul>
-        <li>${
-          audience.id === "business"
-            ? "Frame the principal agent as the decision owner and specialists as controlled advisors."
-            : "Make the principal agent own routing, stop conditions, and final synthesis."
-        }</li>
-        <li>${
-          audience.id === "business"
-            ? "Separate tool infrastructure, workflow control, and cross-agent communication so buyers do not confuse them."
-            : "Treat tools, orchestration, and inter-agent protocol as separate layers."
-        }</li>
-        <li>${
-          audience.id === "business"
-            ? "Use side-by-side tradeoffs: faster to ship, easier to govern, easier to integrate, easier to audit."
-            : "Evaluate by state model, concurrency, observability, and interoperability boundaries."
-        }</li>
-      </ul>
-    </article>
-    <article>
-      <h3>Not exhaustive, but broader</h3>
-      <ul>
-        <li>This app now covers protocol-first, runtime SDK, workflow, conversation, enterprise, and adjacent standard categories.</li>
-        <li>It is still a curated landscape, not a definitive list of every agent framework on the market.</li>
-        <li>For a buying or architecture decision, these categories are usually more useful than a giant undifferentiated catalog.</li>
-      </ul>
-    </article>
-    <article>
-      <h3>Best fit for your scenario</h3>
-      <ul>
-        <li>If specialists are internal and you want high control, start with workflow or runtime frameworks.</li>
-        <li>If specialists are owned by different teams or vendors, put A2A on the shortlist.</li>
-        <li>If tools and shared context are the real bottleneck, compare orchestration options alongside MCP.</li>
-      </ul>
-    </article>
-  `;
-}
-
 function nextStage() {
-  currentStage = (currentStage + 1) % getScenario().stages.length;
-  renderComparison();
+  currentStage = (currentStage + 1) % stages.length;
+  render();
 }
 
 function toggleAutoplay() {
@@ -839,19 +1614,59 @@ function toggleAutoplay() {
   }
 
   playDemoBtn.textContent = "Pause Demos";
-  autoplay = window.setInterval(nextStage, 2200);
+  autoplay = window.setInterval(nextStage, 4200);
 }
 
 function render() {
-  renderFrameworkGrid();
+  renderCatalog();
   renderAudienceChips();
-  renderScenarioChips();
+  renderStageChips();
   renderSummary();
+  renderSkeleton();
   renderComparison();
-  renderArchitectureGuidance();
 }
 
-playDemoBtn.addEventListener("click", toggleAutoplay);
-stepDemoBtn.addEventListener("click", nextStage);
+function initApp() {
+  frameworkCatalogCards = document.getElementById("framework-catalog-cards");
+  protocolCatalogCards = document.getElementById("protocol-catalog-cards");
+  adjacentCatalogCards = document.getElementById("adjacent-catalog-cards");
+  audienceChipRow = document.getElementById("audience-chip-row");
+  stageChipRow = document.getElementById("stage-chip-row");
+  playDemoBtn = document.getElementById("play-demo-btn");
+  stepDemoBtn = document.getElementById("step-demo-btn");
+  frameworkSummary = document.getElementById("framework-summary");
+  appStatus = document.getElementById("app-status");
+  skeletonCaption = document.getElementById("skeleton-caption");
+  skeletonBoard = document.getElementById("skeleton-board");
+  scenarioHeadline = document.getElementById("scenario-headline");
+  scenarioSupport = document.getElementById("scenario-support");
+  comparisonLanes = document.getElementById("comparison-lanes");
 
-render();
+  const requiredElements = [
+    ["framework-catalog-cards", frameworkCatalogCards],
+    ["protocol-catalog-cards", protocolCatalogCards],
+    ["adjacent-catalog-cards", adjacentCatalogCards],
+    ["audience-chip-row", audienceChipRow],
+    ["stage-chip-row", stageChipRow],
+    ["play-demo-btn", playDemoBtn],
+    ["step-demo-btn", stepDemoBtn],
+    ["framework-summary", frameworkSummary],
+    ["app-status", appStatus],
+    ["skeleton-caption", skeletonCaption],
+    ["skeleton-board", skeletonBoard],
+    ["scenario-headline", scenarioHeadline],
+    ["scenario-support", scenarioSupport],
+    ["comparison-lanes", comparisonLanes]
+  ];
+
+  const missingIds = requiredElements.filter(([, element]) => !element).map(([id]) => id);
+  if (missingIds.length > 0) {
+    throw new Error(`Missing DOM nodes: ${missingIds.join(", ")}`);
+  }
+
+  playDemoBtn.addEventListener("click", toggleAutoplay);
+  stepDemoBtn.addEventListener("click", nextStage);
+  render();
+}
+
+initApp();

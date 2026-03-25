@@ -1,0 +1,13 @@
+{
+  "name": "agentic-framework-comparison",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Vercel-ready static app for comparing multi-agent communication frameworks.",
+  "scripts": {
+    "check": "node --check app.js && node scripts/verify-static.js",
+    "dev": "python3 -m http.server 8000"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

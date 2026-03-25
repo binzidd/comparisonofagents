@@ -1,30 +1,49 @@
 # Agent-to-Agent Framework Comparison Lab
 
-This is a lightweight prototype app for comparing agent-to-agent communication approaches using a shared multi-agent scenario.
+This is a Vercel-ready static app that compares how agent frameworks handle one shared policy-evaluation flow.
 
 ## What it shows
 
-- A curated comparison of direct A2A frameworks/protocols and adjacent standards
-- A shared scenario with a principal agent coordinating specialist agents
-- Visual control-flow playback for debate, challenge, and convergence
-- Pros, cons, and architecture guidance for supervisor-plus-specialist designs
+- A principal agent evaluating a customer data retention policy
+- Specialist agents for compliance, security, legal, and finance
+- A challenge agent that forces rebuttals before final approval
+- Side-by-side animated framework comparisons
+- Business and technical explanation modes
 
-## Open locally
+## Local development
 
-Because this prototype is dependency-free, you can open [`index.html`](./index.html) directly in a browser.
-
-If you prefer serving it locally:
+Run:
 
 ```bash
-python3 -m http.server 8000
+npm run check
+npm run dev
 ```
 
 Then open `http://localhost:8000`.
 
-## Suggested next upgrades
+## Deploy to Vercel from GitHub
 
-- Add richer framework metadata sourced from official docs
-- Replace the static simulation with a real event log player
-- Add sequence diagrams and side-by-side architecture views
-- Introduce filtering by topology: supervisor, mesh, debate, marketplace
-- Export comparison summaries for architecture reviews
+1. Push this repository to GitHub.
+2. In Vercel, choose `Add New Project`.
+3. Import the GitHub repository.
+4. Keep the framework preset as `Other`.
+5. Leave the build command empty.
+6. Leave the output directory empty.
+7. Deploy.
+
+Vercel will serve the static files from the repository root using [`vercel.json`](./vercel.json).
+
+## Verification
+
+Run:
+
+```bash
+npm run check
+```
+
+This validates:
+
+- `app.js` syntax
+- required HTML mount points
+- deferred script loading
+- stylesheet wiring
