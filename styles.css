@@ -36,7 +36,7 @@ a {
 }
 
 .page-shell {
-  width: min(1720px, calc(100% - 24px));
+  width: min(1880px, calc(100% - 20px));
   margin: 0 auto;
   padding: 28px 0 56px;
 }
@@ -408,7 +408,7 @@ select {
 }
 
 .comparison-lanes {
-  grid-template-columns: repeat(2, minmax(760px, 1fr));
+  grid-template-columns: repeat(2, minmax(860px, 1fr));
   overflow-x: auto;
   align-items: start;
   padding-bottom: 8px;
@@ -417,7 +417,7 @@ select {
 .compare-lane {
   display: grid;
   gap: 18px;
-  min-width: 760px;
+  min-width: 860px;
 }
 
 .lane-top {
@@ -479,15 +479,15 @@ select {
   border: 1px solid var(--line);
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.45);
-  padding: 22px;
-  min-height: 420px;
+  padding: 28px;
+  min-height: 560px;
 }
 
 .graph-map svg {
   width: 100%;
   height: auto;
   color: color-mix(in srgb, var(--framework-color) 72%, #5d5145);
-  max-height: 520px;
+  max-height: 700px;
 }
 
 .graph-edge {
@@ -510,7 +510,7 @@ select {
 
 .graph-edge-label text {
   fill: var(--text);
-  font-size: 2.3px;
+  font-size: 2.8px;
   font-family: "IBM Plex Sans", sans-serif;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -524,7 +524,7 @@ select {
 
 .graph-node text {
   fill: var(--text);
-  font-size: 4.4px;
+  font-size: 5px;
   font-family: "IBM Plex Sans", sans-serif;
   font-weight: 600;
 }

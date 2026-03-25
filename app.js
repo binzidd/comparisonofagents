@@ -284,13 +284,38 @@ const linkIds = [
 ];
 
 const graphNodes = {
-  principal: { x: 50, y: 12, label: "Principal", labelX: 50, labelY: 22 },
-  compliance: { x: 18, y: 34, label: "Compliance", labelX: 18, labelY: 45 },
-  legal: { x: 50, y: 34, label: "Legal", labelX: 50, labelY: 45 },
-  finance: { x: 82, y: 34, label: "Finance", labelX: 82, labelY: 45 },
-  security: { x: 34, y: 58, label: "Security", labelX: 34, labelY: 69 },
-  reviewer: { x: 66, y: 58, label: "Reviewer", labelX: 66, labelY: 69 },
-  decision: { x: 50, y: 86, label: "Output", labelX: 50, labelY: 97 }
+  principal: { x: 50, y: 10, label: "Principal", labelX: 50, labelY: 20 },
+  compliance: { x: 18, y: 32, label: "Compliance", labelX: 18, labelY: 43 },
+  legal: { x: 50, y: 32, label: "Legal", labelX: 50, labelY: 43 },
+  finance: { x: 82, y: 32, label: "Finance", labelX: 82, labelY: 43 },
+  security: { x: 30, y: 60, label: "Security", labelX: 30, labelY: 71 },
+  reviewer: { x: 70, y: 60, label: "Reviewer", labelX: 70, labelY: 71 },
+  decision: { x: 50, y: 92, label: "Output", labelX: 50, labelY: 99 }
+};
+
+const graphLabelOffsets = {
+  "principal-compliance": { dx: -8, dy: -4 },
+  "principal-security": { dx: 7, dy: -1 },
+  "principal-legal": { dx: 0, dy: -5 },
+  "principal-finance": { dx: 8, dy: -4 },
+  "compliance-reviewer": { dx: -4, dy: 3 },
+  "security-reviewer": { dx: 0, dy: 5 },
+  "legal-reviewer": { dx: 0, dy: -4 },
+  "finance-reviewer": { dx: 4, dy: 4 },
+  "reviewer-principal": { dx: 8, dy: -2 },
+  "reviewer-decision": { dx: 7, dy: 4 },
+  "principal-decision": { dx: 9, dy: 0 },
+  "compliance-security": { dx: -8, dy: 0 },
+  "security-legal": { dx: -4, dy: 3 },
+  "legal-finance": { dx: 0, dy: -4 },
+  "finance-compliance": { dx: 0, dy: -3 },
+  "reviewer-compliance": { dx: -10, dy: -2 },
+  "reviewer-security": { dx: -6, dy: 4 },
+  "reviewer-legal": { dx: -1, dy: -4 },
+  "reviewer-finance": { dx: 6, dy: 2 },
+  "security-principal": { dx: -8, dy: 0 },
+  "legal-principal": { dx: -2, dy: -5 },
+  "finance-principal": { dx: 10, dy: -2 }
 };
 
 const linkEndpoints = {
@@ -1356,11 +1381,13 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
       const [fromId, toId] = linkEndpoints[linkId];
       const from = graphNodes[fromId];
       const to = graphNodes[toId];
-      const midX = (from.x + to.x) / 2;
-      const midY = (from.y + to.y) / 2 - 2;
+      const offset = graphLabelOffsets[linkId] || { dx: 0, dy: 0 };
+      const midX = (from.x + to.x) / 2 + offset.dx;
+      const midY = (from.y + to.y) / 2 - 2 + offset.dy;
+      const boxWidth = Math.max(14, Math.min(24, label.length * 1.55));
       return `
         <g class="graph-edge-label">
-          <rect x="${midX - 8}" y="${midY - 3.7}" width="16" height="6.5" rx="3.2" ry="3.2"></rect>
+          <rect x="${midX - boxWidth / 2}" y="${midY - 3.7}" width="${boxWidth}" height="6.5" rx="3.2" ry="3.2"></rect>
           <text x="${midX}" y="${midY + 0.7}" text-anchor="middle">${label}</text>
         </g>
       `;
