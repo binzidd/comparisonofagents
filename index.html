@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agent-to-Agent Framework Comparison Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Agent-to-Agent Comparison Studio</p>
+          <h1>Compare how multi-agent frameworks coordinate, challenge, and converge.</h1>
+          <p class="hero-text">
+            Explore a shared scenario where a principal agent orchestrates domain specialists,
+            tool calls, and disagreement loops. Switch frameworks to inspect communication
+            style, control flow, operational tradeoffs, and visual behavior.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-btn" id="play-demo-btn">Play Both Demos</button>
+            <a class="secondary-btn" href="#comparison-lab">Jump to Comparison</a>
+          </div>
+        </div>
+        <section class="hero-panel">
+          <div class="panel-header">
+            <span>Scenario</span>
+            <span>Principal agent + specialist swarm</span>
+          </div>
+          <h2>Launch decision for an AI scheduling assistant</h2>
+          <p>
+            A planner agent coordinates product, security, legal, and growth specialists. Each
+            specialist can use tools, challenge assumptions, and push the group toward a shared
+            release recommendation.
+          </p>
+          <div class="signal-grid">
+            <article>
+              <span class="signal-label">Shared Goal</span>
+              <strong>Approve, delay, or relaunch</strong>
+            </article>
+            <article>
+              <span class="signal-label">Conflict Mode</span>
+              <strong>Structured challenge</strong>
+            </article>
+            <article>
+              <span class="signal-label">Tool Layer</span>
+              <strong>Metrics, policy, vuln scan</strong>
+            </article>
+          </div>
+        </section>
+      </header>
+
+      <main>
+        <section class="section" id="framework-grid">
+          <div class="section-heading">
+            <p class="eyebrow">Curated Comparison</p>
+            <h2>Frameworks and protocols mapped to the same orchestration problem</h2>
+            <p>
+              This prototype compares direct agent communication protocols, orchestration-first
+              frameworks, and adjacent standards that matter when specialists need to share tools
+              and state.
+            </p>
+          </div>
+          <div class="framework-grid" id="framework-grid-cards"></div>
+        </section>
+
+        <section class="section lab-section">
+          <div class="section-heading">
+            <p class="eyebrow">Interactive Lab</p>
+            <h2 id="scenario-headline">Watch one scenario play out across different coordination styles</h2>
+            <p>
+              Two frameworks run side by side so technical and non-technical users can compare how
+              the same principal-agent scenario is coordinated.
+            </p>
+            <p id="scenario-support"></p>
+          </div>
+
+          <div class="lab-layout" id="comparison-lab">
+            <aside class="control-panel">
+              <div class="control-group">
+                <span class="control-label">Audience lens</span>
+                <div class="chip-row" id="audience-chip-row"></div>
+              </div>
+
+              <div class="control-group">
+                <span class="control-label">Scenario</span>
+                <div class="chip-row" id="scenario-chip-row"></div>
+              </div>
+
+              <div class="control-group" id="framework-summary"></div>
+              <button class="secondary-btn compact lab-step-btn" id="step-demo-btn">Advance Both</button>
+            </aside>
+
+            <div class="visual-panel">
+              <div class="comparison-lanes" id="comparison-lanes"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="section architecture-section">
+          <div class="section-heading">
+            <p class="eyebrow">Design Guidance</p>
+            <h2>When a principal agent supervises specialists with tools</h2>
+          </div>
+          <div id="architecture-guidance" class="guidance-grid"></div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
