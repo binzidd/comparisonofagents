@@ -710,6 +710,41 @@ select {
   color: #dfe8f8;
 }
 
+.code-block-highlight {
+  display: grid;
+  gap: 2px;
+}
+
+.code-line {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: start;
+  gap: 12px;
+  margin: 0 -8px;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.code-line-no {
+  color: rgba(181, 198, 223, 0.54);
+  text-align: right;
+  user-select: none;
+}
+
+.code-line-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.code-line.active {
+  background: rgba(75, 141, 255, 0.14);
+  box-shadow: inset 3px 0 0 rgba(75, 141, 255, 0.88);
+}
+
+.code-line.active .code-line-no {
+  color: #9ec4ff;
+}
+
 .flow-board {
   display: grid;
   gap: 12px;

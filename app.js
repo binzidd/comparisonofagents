@@ -1731,6 +1731,102 @@ print(decision)`;
   return examples[framework.pattern];
 }
 
+function implementationHighlightLines(framework, stageId) {
+  const rangesByPattern = {
+    reference: {
+      intake: [[29, 32]],
+      review: [[34, 37]],
+      challenge: [[38, 39]],
+      synthesis: [[40, 40]],
+      verdict: [[41, 41]]
+    },
+    "graph-branches": {
+      intake: [[31, 35], [44, 48]],
+      review: [[14, 24]],
+      challenge: [[26, 28]],
+      synthesis: [[30, 35]],
+      verdict: [[44, 50]]
+    },
+    "sequential-handoffs": {
+      intake: [[27, 30]],
+      review: [[7, 19]],
+      challenge: [[21, 24]],
+      synthesis: [[26, 30]],
+      verdict: [[32, 33]]
+    },
+    "conversation-mesh": {
+      intake: [[11, 18]],
+      review: [[20, 28]],
+      challenge: [[17, 18], [29, 30]],
+      synthesis: [[29, 30]],
+      verdict: [[30, 30]]
+    },
+    "manager-review": {
+      intake: [[7, 13]],
+      review: [[15, 20]],
+      challenge: [[20, 20]],
+      synthesis: [[22, 27]],
+      verdict: [[29, 30]]
+    },
+    "enterprise-gated": {
+      intake: [[7, 13]],
+      review: [[15, 19]],
+      challenge: [[21, 25]],
+      synthesis: [[27, 31]],
+      verdict: [[31, 31]]
+    },
+    "event-pipeline": {
+      intake: [[4, 7]],
+      review: [[9, 15]],
+      challenge: [[17, 19]],
+      synthesis: [[21, 22]],
+      verdict: [[21, 25]]
+    },
+    "app-workflow": {
+      intake: [[23, 30]],
+      review: [[23, 30]],
+      challenge: [[32, 32]],
+      synthesis: [[33, 33]],
+      verdict: [[34, 34]]
+    },
+    "typed-review": {
+      intake: [[17, 21]],
+      review: [[23, 27]],
+      challenge: [[29, 29]],
+      synthesis: [[30, 32]],
+      verdict: [[32, 33]]
+    }
+  };
+
+  const key = framework ? framework.pattern : "reference";
+  return rangesByPattern[key][stageId] || [];
+}
+
+function escapeHtml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function renderHighlightedCode(code, activeRanges) {
+  const activeLines = new Set();
+  activeRanges.forEach(([start, end]) => {
+    for (let line = start; line <= end; line += 1) {
+      activeLines.add(line);
+    }
+  });
+
+  return code
+    .split("\n")
+    .map((line, index) => {
+      const lineNumber = index + 1;
+      const activeClass = activeLines.has(lineNumber) ? " active" : "";
+      return `<span class="code-line${activeClass}"><span class="code-line-no">${lineNumber}</span><span class="code-line-text">${escapeHtml(line) || "&nbsp;"}</span></span>`;
+    })
+    .join("");
+}
+
 function graphMessageMap(framework, stageId) {
   const byPattern = {
     "graph-branches": {
@@ -2008,6 +2104,7 @@ function renderCodeHint(framework, stageId) {
   const codeSourceLabel = framework ? framework.name : "Reference skeleton";
   const codeSourceHref = framework ? framework.source : policyPack.source;
   const implementationCode = frameworkExampleCode(framework, question);
+  const highlightedImplementation = renderHighlightedCode(implementationCode, implementationHighlightLines(framework, stageId));
   return `
     <section class="code-hint">
       <div class="code-hint-grid">
@@ -2034,7 +2131,7 @@ ${stageCode}</code></pre>
           <strong>Framework implementation for this policy checker</strong>
           <a href="${codeSourceHref}" target="_blank" rel="noreferrer">${codeSourceLabel} docs</a>
         </div>
-        <pre><code>${implementationCode}</code></pre>
+        <pre><code class="code-block-highlight">${highlightedImplementation}</code></pre>
       </div>
     </section>
   `;
