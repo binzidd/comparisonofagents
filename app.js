@@ -775,8 +775,27 @@ let traceStore = null;
 let footerLikeBtn;
 let footerLikeCount;
 
-const likeStorageKey = "comparison_lab_like_count";
-const likeActiveKey = "comparison_lab_like_active";
+const likeStore = {
+  storageKey: "comparison_lab_like_state",
+  read() {
+    try {
+      const raw = window.localStorage.getItem(this.storageKey);
+      if (!raw) {
+        return { count: 0, liked: false };
+      }
+      const parsed = JSON.parse(raw);
+      return {
+        count: Number.isFinite(Number(parsed.count)) ? Number(parsed.count) : 0,
+        liked: parsed.liked === true
+      };
+    } catch (error) {
+      return { count: 0, liked: false };
+    }
+  },
+  write(nextState) {
+    window.localStorage.setItem(this.storageKey, JSON.stringify(nextState));
+  }
+};
 
 function getStage() {
   return stages[currentStage];
@@ -2631,36 +2650,27 @@ function render() {
   renderScoreRationale();
 }
 
-function getStoredLikeCount() {
-  const value = window.localStorage.getItem(likeStorageKey);
-  return Number.isFinite(Number(value)) ? Number(value) : 0;
-}
-
-function hasLiked() {
-  return window.localStorage.getItem(likeActiveKey) === "true";
-}
-
 function renderFooterLike() {
   if (!footerLikeBtn || !footerLikeCount) {
     return;
   }
 
-  const count = getStoredLikeCount();
-  const liked = hasLiked();
-  footerLikeCount.textContent = String(count);
-  footerLikeBtn.classList.toggle("liked", liked);
-  footerLikeBtn.setAttribute("aria-pressed", liked ? "true" : "false");
+  const state = likeStore.read();
+  footerLikeCount.textContent = String(state.count);
+  footerLikeBtn.classList.toggle("liked", state.liked);
+  footerLikeBtn.setAttribute("aria-pressed", state.liked ? "true" : "false");
   const icon = footerLikeBtn.querySelector(".like-icon");
   if (icon) {
-    icon.textContent = liked ? "♥" : "♡";
+    icon.textContent = state.liked ? "♥" : "♡";
   }
 }
 
 function toggleFooterLike() {
-  const liked = hasLiked();
-  const nextCount = Math.max(0, getStoredLikeCount() + (liked ? -1 : 1));
-  window.localStorage.setItem(likeStorageKey, String(nextCount));
-  window.localStorage.setItem(likeActiveKey, liked ? "false" : "true");
+  const state = likeStore.read();
+  likeStore.write({
+    count: Math.max(0, state.count + (state.liked ? -1 : 1)),
+    liked: !state.liked
+  });
   renderFooterLike();
 }
 
