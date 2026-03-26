@@ -969,10 +969,7 @@ function renderSummary() {
 
   scenarioHeadline.textContent = "Public policy checker across frameworks";
   scenarioSupport.textContent = `Click through one stage at a time to compare orchestration, eval, and risk handling for the same question: ${question.label}`;
-  frameworkSummary.innerHTML = `
-    <div class="summary-pill">Policy: ${policyPack.title}</div>
-    <div class="summary-pill">Question: ${question.label}</div>
-  `;
+  frameworkSummary.innerHTML = "";
   appStatus.textContent = "";
   skeletonCaption.textContent = "Click through one stage at a time to see how each framework handles this shared structure.";
 }

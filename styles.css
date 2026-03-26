@@ -481,8 +481,7 @@ select {
 }
 
 .lab-status-row {
-  grid-template-columns: 1fr;
-  margin-bottom: 18px;
+  display: none;
 }
 
 .summary-strip {
