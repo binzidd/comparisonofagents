@@ -381,13 +381,13 @@ const graphLayouts = {
     decision: { x: 50, y: 92, labelX: 50, labelY: 99 }
   },
   "sequential-handoffs": {
-    principal: { x: 16, y: 14, labelX: 16, labelY: 25 },
-    compliance: { x: 32, y: 32, labelX: 24, labelY: 43 },
-    security: { x: 50, y: 48, labelX: 50, labelY: 59 },
-    legal: { x: 68, y: 64, labelX: 68, labelY: 75 },
-    finance: { x: 84, y: 80, labelX: 84, labelY: 91 },
-    reviewer: { x: 50, y: 80, labelX: 50, labelY: 91 },
-    decision: { x: 50, y: 96, labelX: 50, labelY: 99 }
+    principal: { x: 10, y: 16, labelX: 16, labelY: 26 },
+    compliance: { x: 34, y: 16, labelX: 34, labelY: 26 },
+    security: { x: 58, y: 16, labelX: 58, labelY: 26 },
+    legal: { x: 82, y: 16, labelX: 78, labelY: 26 },
+    finance: { x: 82, y: 52, labelX: 78, labelY: 62 },
+    reviewer: { x: 52, y: 74, labelX: 52, labelY: 84 },
+    decision: { x: 16, y: 90, labelX: 22, labelY: 98 }
   },
   "conversation-mesh": {
     principal: { x: 50, y: 12, labelX: 50, labelY: 22 },
