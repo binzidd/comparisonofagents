@@ -1154,6 +1154,32 @@ final output includes confidence`
   };
 }
 
+const riskMetricLabels = new Set(["Context Loss", "Unsupported Answer Risk"]);
+
+function scoreState(label, value) {
+  if (riskMetricLabels.has(label)) {
+    if (value >= 4) {
+      return { tone: "danger", label: "High risk" };
+    }
+
+    if (value === 3) {
+      return { tone: "caution", label: "Watch" };
+    }
+
+    return { tone: "safe", label: "Contained" };
+  }
+
+  if (value <= 2) {
+    return { tone: "danger", label: "Weak" };
+  }
+
+  if (value === 3) {
+    return { tone: "caution", label: "Moderate" };
+  }
+
+  return { tone: "safe", label: "Strong" };
+}
+
 function frameworkBaseLinks(framework) {
   const baseLinks = {
     "graph-branches": [
@@ -1328,6 +1354,289 @@ function stageImplementationCode(framework, stageId) {
   };
 
   return framework ? codeMap[framework.pattern][stageId] : codeMap.reference[stageId];
+}
+
+function frameworkExampleCode(framework, question) {
+  const clauseNames = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId].title);
+  const clauseString = clauseNames.map((item) => `"${item}"`).join(", ");
+
+  const examples = {
+    "graph-branches": `from langgraph.graph import StateGraph, END
+
+class PolicyState(dict):
+    question: str
+    clauses: list[str]
+    findings: dict
+    reviewer_notes: list[str]
+    answer: str
+
+def compliance_node(state):
+    state["findings"]["compliance"] = retrieve_clause(state["question"], "retention")
+    return state
+
+def security_node(state):
+    state["findings"]["security"] = retrieve_clause(state["question"], "private_repos")
+    return state
+
+def legal_node(state):
+    state["findings"]["legal"] = retrieve_clause(state["question"], "rights")
+    return state
+
+def reviewer_node(state):
+    state["reviewer_notes"] = check_for_unsupported_claims(state["findings"])
+    return state
+
+def principal_node(state):
+    state["answer"] = compose_answer(
+        question=state["question"],
+        findings=state["findings"],
+        reviewer_notes=state["reviewer_notes"],
+    )
+    return state
+
+graph = StateGraph(PolicyState)
+graph.add_node("principal", principal_node)
+graph.add_node("compliance", compliance_node)
+graph.add_node("security", security_node)
+graph.add_node("legal", legal_node)
+graph.add_node("reviewer", reviewer_node)
+graph.add_edge("principal", "compliance")
+graph.add_edge("principal", "security")
+graph.add_edge("principal", "legal")
+graph.add_edge("compliance", "reviewer")
+graph.add_edge("security", "reviewer")
+graph.add_edge("legal", "reviewer")
+graph.add_edge("reviewer", "principal")
+graph.add_edge("principal", END)
+
+result = graph.compile().invoke({
+    "question": "${question.prompt}",
+    "clauses": [${clauseString}],
+    "findings": {},
+    "reviewer_notes": [],
+})`,
+    "sequential-handoffs": `from agents import Agent, Runner
+
+policy_case = {
+    "question": "${question.prompt}",
+    "clauses": [${clauseString}],
+}
+
+compliance = Agent(
+    name="Compliance",
+    instructions="Extract retention and rights language. Return citations.",
+    tools=[retrieve_clause],
+)
+
+security = Agent(
+    name="Security",
+    instructions="Check repository-access and security exceptions that affect the answer.",
+    tools=[retrieve_clause],
+)
+
+legal = Agent(
+    name="Legal",
+    instructions="Rewrite the answer with conditions and legal caveats preserved.",
+    tools=[retrieve_clause],
+)
+
+reviewer = Agent(
+    name="Reviewer",
+    instructions="Reject answers that lack clause support or overclaim policy rights.",
+)
+
+principal = Agent(
+    name="Principal",
+    instructions="Own the final policy answer and include confidence plus citations.",
+    handoffs=[compliance, security, legal, reviewer],
+)
+
+result = Runner.run_sync(principal, input=policy_case)`,
+    "conversation-mesh": `from autogen import GroupChat, GroupChatManager
+
+shared_case = {
+    "question": "${question.prompt}",
+    "required_clauses": [${clauseString}],
+}
+
+principal = build_agent("Principal", "Drive toward a final cited answer.")
+compliance = build_agent("Compliance", "Argue from retention and privacy-rights clauses.")
+security = build_agent("Security", "Challenge risky security assumptions.")
+legal = build_agent("Legal", "Preserve conditions, exceptions, and precise wording.")
+data_ops = build_agent("DataOps", "Reason about retention operations and lifecycle edge cases.")
+reviewer = build_agent("Reviewer", "Interrupt when claims are unsupported or vague.")
+
+chat = GroupChat(
+    agents=[principal, compliance, security, legal, data_ops, reviewer],
+    messages=[{"role": "user", "content": str(shared_case)}],
+    max_round=8,
+)
+
+manager = GroupChatManager(groupchat=chat)
+principal.initiate_chat(manager, message="Produce a final cited answer with caveats.")`,
+    "manager-review": `from crewai import Agent, Task, Crew, Process
+
+question = "${question.prompt}"
+
+principal = Agent(role="Principal", goal="Ship the final policy answer with confidence and citations.")
+compliance = Agent(role="Compliance", goal="Check privacy and retention obligations.")
+security = Agent(role="Security", goal="Check security and access exceptions.")
+legal = Agent(role="Legal", goal="Preserve exact policy conditions.")
+data_ops = Agent(role="Data Ops", goal="Review retention lifecycle implications.")
+reviewer = Agent(role="Reviewer", goal="Block unsupported answers.")
+
+tasks = [
+    Task(description=f"Answer {question} from retention and rights clauses.", agent=compliance),
+    Task(description="Find repository-access or security exceptions.", agent=security),
+    Task(description="Rewrite findings into policy-accurate legal language.", agent=legal),
+    Task(description="Assess operational retention implications.", agent=data_ops),
+    Task(description="Reject unsupported or overconfident claims.", agent=reviewer),
+]
+
+crew = Crew(
+    agents=[principal, compliance, security, legal, data_ops, reviewer],
+    tasks=tasks,
+    process=Process.sequential,
+)
+
+result = crew.kickoff()`,
+    "enterprise-gated": `from semantic_kernel.agents import ChatCompletionAgent
+
+policy_case = {
+    "question": "${question.prompt}",
+    "clauses": [${clauseString}],
+}
+
+principal = ChatCompletionAgent(service=kernel, name="Principal")
+compliance = ChatCompletionAgent(service=kernel, name="Compliance")
+security = ChatCompletionAgent(service=kernel, name="Security")
+legal = ChatCompletionAgent(service=kernel, name="Legal")
+reviewer = ChatCompletionAgent(service=kernel, name="Reviewer")
+
+findings = {
+    "compliance": compliance.get_response(policy_case),
+    "security": security.get_response(policy_case),
+    "legal": legal.get_response(policy_case),
+}
+
+review_gate = reviewer.get_response({
+    "question": policy_case["question"],
+    "findings": findings,
+    "rule": "Reject unsupported claims and missing caveats.",
+})
+
+final_answer = principal.get_response({
+    "question": policy_case["question"],
+    "findings": findings,
+    "review_gate": review_gate,
+})`,
+    "event-pipeline": `from llama_index.core.workflow import StartEvent, StopEvent, Workflow, step
+
+class PolicyWorkflow(Workflow):
+    @step
+    async def intake(self, event: StartEvent):
+        return {"question": "${question.prompt}", "clauses": [${clauseString}]}
+
+    @step
+    async def specialist_review(self, event):
+        return {
+            "compliance": retrieve_clause(event["question"], "retention"),
+            "security": retrieve_clause(event["question"], "private_repos"),
+            "legal": retrieve_clause(event["question"], "rights"),
+        }
+
+    @step
+    async def challenge(self, event):
+        event["reviewer_notes"] = check_for_unsupported_claims(event)
+        return event
+
+    @step
+    async def verdict(self, event):
+        return StopEvent(result=compose_answer(event))
+
+workflow = PolicyWorkflow(timeout=120)
+result = workflow.run()`,
+    "app-workflow": `import { Agent, createWorkflow } from "@mastra/core";
+
+const question = "${question.prompt}";
+
+const principal = new Agent({ name: "principal" });
+const compliance = new Agent({ name: "compliance" });
+const security = new Agent({ name: "security" });
+const legal = new Agent({ name: "legal" });
+const reviewer = new Agent({ name: "reviewer" });
+
+export const policyChecker = createWorkflow({
+  id: "policy-checker",
+  inputSchema: policyCaseSchema,
+})
+  .step("principal-intake", async ({ input }) => ({
+    question,
+    clauses: [${clauseString}],
+    ...input,
+  }))
+  .parallel([
+    compliance.asStep("compliance-review"),
+    security.asStep("security-review"),
+    legal.asStep("legal-review"),
+  ])
+  .branch("review-guardrail", async ({ context }) =>
+    hasUnsupportedClaim(context) ? "reviewer" : "principal-synthesis"
+  )
+  .step("principal-synthesis", async ({ context }) => composeAnswer(context))
+  .commit();`,
+    "typed-review": `from pydantic import BaseModel
+from pydantic_ai import Agent
+
+class PolicyCase(BaseModel):
+    question: str
+    clauses: list[str]
+
+class Finding(BaseModel):
+    agent: str
+    citation: str
+    conclusion: str
+
+class Decision(BaseModel):
+    answer: str
+    citations: list[str]
+    confidence: float
+    reviewer_notes: list[str]
+
+principal = Agent("openai:gpt-4.1", result_type=Decision)
+specialist = Agent("openai:gpt-4.1", result_type=Finding)
+reviewer = Agent("openai:gpt-4.1", result_type=list[str])
+
+case = PolicyCase(
+    question="${question.prompt}",
+    clauses=[${clauseString}],
+)
+
+findings = [
+    specialist.run_sync(f"Compliance review: {case.model_dump_json()}").output,
+    specialist.run_sync(f"Security review: {case.model_dump_json()}").output,
+    specialist.run_sync(f"Legal review: {case.model_dump_json()}").output,
+]
+
+reviewer_notes = reviewer.run_sync(f"Challenge these findings: {findings}").output
+decision = principal.run_sync(
+    f"Return a final answer with citations and confidence. Case={case} Findings={findings} Notes={reviewer_notes}"
+).output`
+  };
+
+  if (!framework) {
+    return `policy_case = {
+  "question": "${question.prompt}",
+  "clauses": [${clauseString}]
+}
+
+principal.assign(policy_case)
+specialists.review(policy_case)
+reviewer.challenge(findings)
+decision = principal.compose(findings, reviewer_notes)`;
+  }
+
+  return examples[framework.pattern];
 }
 
 function graphMessageMap(framework, stageId) {
@@ -1581,16 +1890,18 @@ function renderFrameworkScorecard(framework) {
       </div>
       <div class="framework-score-grid">
         ${profile.scorecard
-          .map(
-            (item) => `
-              <article class="framework-score-row">
+          .map((item) => {
+            const state = scoreState(item.label, item.value);
+            return `
+              <article class="framework-score-row ${state.tone}">
                 <strong>${item.label}</strong>
                 <div class="score-dot-row" aria-label="${item.label} score ${item.value} out of 5">
                   ${scorePillMarkup(item.value)}
                 </div>
+                <span class="score-status">${state.label}</span>
               </article>
-            `
-          )
+            `;
+          })
           .join("")}
       </div>
     </section>
@@ -1604,13 +1915,14 @@ function renderCodeHint(framework, stageId) {
   const clauseList = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId].title).join(", ");
   const codeSourceLabel = framework ? framework.name : "Reference skeleton";
   const codeSourceHref = framework ? framework.source : policyPack.source;
+  const implementationCode = frameworkExampleCode(framework, question);
   return `
     <section class="code-hint">
       <div class="code-hint-grid">
         <div class="code-panel">
           <div class="code-hint-head">
             <strong>Current step code</strong>
-            <a href="${codeSourceHref}" target="_blank" rel="noreferrer">${codeSourceLabel} docs</a>
+            <span>${stageId}</span>
           </div>
           <pre><code>question = "${question.prompt}"
 relevant_clauses = [${question.relevantClauses.map((clauseId) => `"${clauseId}"`).join(", ")}]
@@ -1624,6 +1936,13 @@ ${stageCode}</code></pre>
           </div>
           <pre><code>${profile.evalCode}</code></pre>
         </div>
+      </div>
+      <div class="code-panel code-panel-wide">
+        <div class="code-hint-head">
+          <strong>Framework implementation for this policy checker</strong>
+          <a href="${codeSourceHref}" target="_blank" rel="noreferrer">${codeSourceLabel} docs</a>
+        </div>
+        <pre><code>${implementationCode}</code></pre>
       </div>
     </section>
   `;
