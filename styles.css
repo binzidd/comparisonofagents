@@ -357,6 +357,7 @@ p {
 .chip {
   background: rgba(17, 26, 39, 0.7);
   border-color: var(--line);
+  color: var(--text);
   cursor: pointer;
   transition: transform 160ms ease, background 160ms ease, color 160ms ease;
   font-size: 0.92rem;
@@ -871,7 +872,7 @@ select {
 .specialist-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
 
 .flow-agent {

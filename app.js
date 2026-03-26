@@ -362,11 +362,11 @@ const linkIds = [
 
 const graphNodes = {
   principal: { x: 50, y: 10, label: "Principal", labelX: 50, labelY: 20 },
-  compliance: { x: 18, y: 32, label: "Compliance", labelX: 18, labelY: 43 },
-  legal: { x: 50, y: 32, label: "Legal", labelX: 50, labelY: 43 },
-  finance: { x: 82, y: 32, label: "Finance", labelX: 82, labelY: 43 },
-  security: { x: 30, y: 60, label: "Security", labelX: 30, labelY: 71 },
-  reviewer: { x: 70, y: 60, label: "Reviewer", labelX: 70, labelY: 71 },
+  compliance: { x: 14, y: 34, label: "Compliance", labelX: 14, labelY: 45 },
+  security: { x: 38, y: 34, label: "Security", labelX: 38, labelY: 45 },
+  legal: { x: 62, y: 34, label: "Legal", labelX: 62, labelY: 45 },
+  finance: { x: 86, y: 34, label: "Finance", labelX: 86, labelY: 45 },
+  reviewer: { x: 50, y: 62, label: "Reviewer", labelX: 50, labelY: 73 },
   decision: { x: 50, y: 92, label: "Output", labelX: 50, labelY: 99 }
 };
 
@@ -2050,23 +2050,13 @@ function renderFrameworkScorecard(framework) {
 }
 
 function renderCodeHint(framework, stageId) {
-  const profile = frameworkTechProfile(framework);
-  const question = getQuestion();
-  const clauseList = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId].title).join(", ");
   const codeSourceLabel = framework ? framework.name : "Reference skeleton";
   const codeSourceHref = framework ? framework.source : policyPack.source;
-  const implementationCode = frameworkExampleCode(framework, question);
+  const implementationCode = frameworkExampleCode(framework, getQuestion());
   const highlightedImplementation = renderHighlightedCode(implementationCode, stageId);
   const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
   return `
     <section class="code-hint">
-      <div class="code-panel">
-        <div class="code-hint-head">
-          <strong>Eval + controls</strong>
-          <span>${clauseList}</span>
-        </div>
-        <pre><code>${profile.evalCode}</code></pre>
-      </div>
       <div class="code-panel code-panel-wide">
         <div class="code-hint-head">
           <strong>Framework implementation for this policy checker</strong>
