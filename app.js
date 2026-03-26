@@ -975,7 +975,7 @@ function renderSummary() {
     <div class="summary-pill">Stage: ${stage.label}</div>
   `;
   appStatus.textContent = `${stage.label} active. ${stage.caption}`;
-  skeletonCaption.textContent = "Reference only: principal routes work to specialists, reviewer challenges weak claims, and output returns one policy answer.";
+  skeletonCaption.textContent = "Click through one stage at a time to see how each framework handles this shared structure.";
 }
 
 function renderSkeletonMini() {
@@ -2561,11 +2561,40 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 
 function renderSkeleton() {
   skeletonBoard.innerHTML = `
-    <div class="lane-role-box lane-role-box-top" style="--stage-rgb:${stageTheme.review}">
-      <strong>Static reference structure</strong>
-      <p>Principal routes work to specialists, reviewer challenges weak claims, and output returns one policy answer.</p>
+    <div class="skel-rationale">
+      <p class="skel-rationale-why">Why this architecture?</p>
+      <p class="skel-rationale-body">Policy questions span legal, compliance, security, and data domains simultaneously. A single generalist agent risks domain blind-spots and ungrounded answers. This four-stage pattern enforces separation of concerns while converging on one auditable verdict — regardless of whether agents run sequentially, in parallel, or as a mesh.</p>
+      <p class="skel-conformance">All 6 frameworks implement the same four roles. Their topology (fan-out, chain, mesh) is their design differentiator — the architecture is the constant.</p>
     </div>
-    ${renderSkeletonMini()}
+    <div class="skel-flow">
+      <div class="skel-node" style="--skel-rgb:${stageTheme.intake}">
+        <div class="skel-node-bar"></div>
+        <span class="skel-node-role">Principal</span>
+        <strong class="skel-node-action">Routes &amp; delegates</strong>
+        <p class="skel-node-desc">Reads the policy corpus and question, then dispatches to the right domain specialists.</p>
+      </div>
+      <div class="skel-arrow" aria-hidden="true">→</div>
+      <div class="skel-node" style="--skel-rgb:${stageTheme.review}">
+        <div class="skel-node-bar"></div>
+        <span class="skel-node-role">Specialists</span>
+        <strong class="skel-node-action">Domain experts</strong>
+        <p class="skel-node-desc">Compliance, legal, security, and data ops each check their domain independently.</p>
+      </div>
+      <div class="skel-arrow" aria-hidden="true">→</div>
+      <div class="skel-node" style="--skel-rgb:${stageTheme.challenge}">
+        <div class="skel-node-bar"></div>
+        <span class="skel-node-role">Reviewer</span>
+        <strong class="skel-node-action">Challenges claims</strong>
+        <p class="skel-node-desc">Adversarially tests every finding for unsupported claims, missing caveats, or contradictions.</p>
+      </div>
+      <div class="skel-arrow" aria-hidden="true">→</div>
+      <div class="skel-node" style="--skel-rgb:${stageTheme.verdict}">
+        <div class="skel-node-bar"></div>
+        <span class="skel-node-role">Output</span>
+        <strong class="skel-node-action">One verdict</strong>
+        <p class="skel-node-desc">Synthesises a single policy answer from all reviewed findings — every framework must converge here.</p>
+      </div>
+    </div>
   `;
 }
 
