@@ -1082,6 +1082,7 @@ function flowHighlights(pattern, stageId) {
 function frameworkTechProfile(framework) {
   const profiles = {
     "graph-branches": {
+      intro: "LangGraph's graph-first design delivers best-in-class checkpointing, observability, and true parallel fan-out — the go-to when auditability and reviewer gates are non-negotiable.",
       cards: [
         { label: "Execution", value: "Supervisor graph with explicit branch and merge nodes" },
         { label: "Performance", value: "Higher setup cost, but review can run in parallel branches" },
@@ -1111,6 +1112,7 @@ checkpoint("before_reviewer")
 replay_if_clause_coverage_fails()`
     },
     "sequential-handoffs": {
+      intro: "OpenAI Agents SDK offers the clearest specialist handoff model with strong built-in tracing, but its serial execution means stage latency stacks with each agent in the chain.",
       cards: [
         { label: "Execution", value: "Linear baton-pass handoffs inside one run context" },
         { label: "Performance", value: "Simple to reason about, but latency stacks if specialists are sequential" },
@@ -1139,6 +1141,7 @@ assert no_required_clause_dropped(ctx)
 reviewer.must_reject_if_support_missing()`
     },
     "conversation-mesh": {
+      intro: "AG2 enables dynamic multi-agent debates where specialists challenge each other directly — highly flexible for exploratory analysis, but requires firm stopping rules to prevent conversation sprawl.",
       cards: [
         { label: "Execution", value: "Conversation mesh with direct specialist challenge" },
         { label: "Performance", value: "Great for exploration, but turn-taking can be token and latency heavy" },
@@ -1167,6 +1170,7 @@ limit_turns(max=8)
 force_reviewer_to_request_clause_ids()`
     },
     "manager-review": {
+      intro: "CrewAI frames multi-agent coordination as a managed crew with defined roles, making workflows readable and business-friendly at the cost of dynamic mesh coordination.",
       cards: [
         { label: "Execution", value: "Manager assigns specialist tasks, then resumes after checkpoint review" },
         { label: "Performance", value: "Operationally clear and easy to split, with moderate orchestration overhead" },
@@ -1197,6 +1201,7 @@ force_reviewer_to_request_clause_ids()`
 ])`
     },
     "enterprise-gated": {
+      intro: "Semantic Kernel brings enterprise governance and Microsoft-stack integration to agent pipelines, with deliberate approval gates that prioritise auditability over raw throughput.",
       cards: [
         { label: "Execution", value: "Governed workflow with platform-level checkpoints and controls" },
         { label: "Performance", value: "Heavier platform cost, but strong fit when auditability matters" },
@@ -1224,6 +1229,7 @@ force_reviewer_to_request_clause_ids()`
 require_exception_path_for_ambiguous_answers()`
     },
     "event-pipeline": {
+      intro: "LlamaIndex Workflows models specialist coordination as an event-driven pipeline — strong for retrieval-heavy evidence gathering, though sequential event handlers stack latency per stage.",
       cards: [
         { label: "Execution", value: "Event-driven evidence pipeline with aggregation steps" },
         { label: "Performance", value: "Scales well when evidence extraction is eventful and decoupled" },
@@ -1252,6 +1258,7 @@ requeue_if_clause_score < threshold
 aggregate_only_supported_findings()`
     },
     "app-workflow": {
+      intro: "Mastra combines agents, workflows, and tracing in a TypeScript-first runtime built for product teams who want strong developer ergonomics without deep agent-negotiation complexity.",
       cards: [
         { label: "Execution", value: "App-native workflow that keeps orchestration close to product code" },
         { label: "Performance", value: "Strong product-team ergonomics with moderate workflow overhead" },
@@ -1279,6 +1286,7 @@ aggregate_only_supported_findings()`
 if (confidence < 0.7) branch("human_check")`
     },
     "typed-review": {
+      intro: "PydanticAI enforces schema-validated typed outputs at every specialist handoff — the strongest choice when data integrity and structured interfaces matter more than dynamic topology.",
       cards: [
         { label: "Execution", value: "Typed orchestration pipeline with validated inputs and outputs" },
         { label: "Performance", value: "Moderate runtime cost, offset by lower downstream cleanup and retries" },
@@ -2702,7 +2710,7 @@ function renderExecutiveSummary(framework) {
 
   return `
     <div class="exec-summary">
-      <span class="exec-summary-label">Executive Summary</span>
+      <span class="exec-summary-label">Our Findings</span>
       <div class="exec-summary-groups">
         ${strengths.length ? `
         <div class="exec-group">
@@ -2723,6 +2731,7 @@ function laneMarkup(frameworkId, laneIndex) {
   const framework = getFramework(frameworkId);
   const stage = getStage();
   const highlights = flowHighlights(framework.pattern, stage.id);
+  const profile = frameworkTechProfile(framework);
 
   return `
     <article class="compare-lane" style="--stage-rgb:${stageTheme[stage.id]}">
@@ -2742,7 +2751,7 @@ function laneMarkup(frameworkId, laneIndex) {
         </select>
       </div>
 
-      <p class="lane-summary">${framework.summary}</p>
+      <p class="lane-intro">${profile.intro}</p>
       ${renderExecutiveSummary(framework)}
       ${renderFrameworkTechStrip(framework)}
 
