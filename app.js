@@ -1356,12 +1356,62 @@ function stageImplementationCode(framework, stageId) {
   return framework ? codeMap[framework.pattern][stageId] : codeMap.reference[stageId];
 }
 
+function sharedPolicyHelpers(question) {
+  const clauseEntries = question.relevantClauses
+    .map((clauseId) => `    "${clauseId}": "${policyPack.clauses[clauseId].summary}"`)
+    .join(",\n");
+
+  return `from dataclasses import dataclass, field
+from typing import Any
+
+POLICY_TEXT = {
+${clauseEntries}
+}
+
+@dataclass
+class PolicyAnswer:
+    answer: str
+    citations: list[str]
+    confidence: float
+    reviewer_notes: list[str] = field(default_factory=list)
+
+def retrieve_clause(question: str, clause_id: str) -> dict[str, str]:
+    return {
+        "clause_id": clause_id,
+        "question": question,
+        "summary": POLICY_TEXT[clause_id],
+    }
+
+def check_for_unsupported_claims(findings: Any) -> list[str]:
+    notes = []
+    serialized = str(findings).lower()
+    if "immediate deletion" in serialized:
+        notes.append("Policy does not promise immediate deletion.")
+    if "always" in serialized:
+        notes.append("Answer overclaims certainty; preserve conditions and exceptions.")
+    return notes
+
+def compose_answer(question: str, findings: Any, reviewer_notes: list[str]) -> PolicyAnswer:
+    citations = [item["clause_id"] for item in findings if isinstance(item, dict) and "clause_id" in item]
+    if not citations:
+        citations = ["retention", "rights"]
+    return PolicyAnswer(
+        answer="Answer the policy question with conditions, cited clauses, and reviewer caveats.",
+        citations=sorted(set(citations)),
+        confidence=0.78 if reviewer_notes else 0.9,
+        reviewer_notes=reviewer_notes,
+    )`;
+}
+
 function frameworkExampleCode(framework, question) {
   const clauseNames = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId].title);
   const clauseString = clauseNames.map((item) => `"${item}"`).join(", ");
+  const helpers = sharedPolicyHelpers(question);
 
   const examples = {
-    "graph-branches": `from langgraph.graph import StateGraph, END
+    "graph-branches": `${helpers}
+
+from langgraph.graph import StateGraph, END
 
 class PolicyState(dict):
     question: str
@@ -1414,8 +1464,11 @@ result = graph.compile().invoke({
     "clauses": [${clauseString}],
     "findings": {},
     "reviewer_notes": [],
-})`,
-    "sequential-handoffs": `from agents import Agent, Runner
+})
+print(result["answer"])`,
+    "sequential-handoffs": `${helpers}
+
+from agents import Agent, Runner
 
 policy_case = {
     "question": "${question.prompt}",
@@ -1447,17 +1500,23 @@ reviewer = Agent(
 
 principal = Agent(
     name="Principal",
-    instructions="Own the final policy answer and include confidence plus citations.",
+    instructions="Own the final policy answer and include confidence plus citations. Use compose_answer once findings are returned.",
     handoffs=[compliance, security, legal, reviewer],
 )
 
-result = Runner.run_sync(principal, input=policy_case)`,
-    "conversation-mesh": `from autogen import GroupChat, GroupChatManager
+result = Runner.run_sync(principal, input=policy_case)
+print(result.final_output)`,
+    "conversation-mesh": `${helpers}
+
+from autogen import AssistantAgent, GroupChat, GroupChatManager
 
 shared_case = {
     "question": "${question.prompt}",
     "required_clauses": [${clauseString}],
 }
+
+def build_agent(name: str, system_message: str) -> AssistantAgent:
+    return AssistantAgent(name=name, system_message=system_message, llm_config={"temperature": 0})
 
 principal = build_agent("Principal", "Drive toward a final cited answer.")
 compliance = build_agent("Compliance", "Argue from retention and privacy-rights clauses.")
@@ -1473,8 +1532,11 @@ chat = GroupChat(
 )
 
 manager = GroupChatManager(groupchat=chat)
-principal.initiate_chat(manager, message="Produce a final cited answer with caveats.")`,
-    "manager-review": `from crewai import Agent, Task, Crew, Process
+principal.initiate_chat(manager, message="Produce a final cited answer with caveats.")
+print(chat.messages[-1]["content"])`,
+    "manager-review": `${helpers}
+
+from crewai import Agent, Task, Crew, Process
 
 question = "${question.prompt}"
 
@@ -1499,8 +1561,11 @@ crew = Crew(
     process=Process.sequential,
 )
 
-result = crew.kickoff()`,
-    "enterprise-gated": `from semantic_kernel.agents import ChatCompletionAgent
+result = crew.kickoff()
+print(result)`,
+    "enterprise-gated": `${helpers}
+
+from semantic_kernel.agents import ChatCompletionAgent
 
 policy_case = {
     "question": "${question.prompt}",
@@ -1529,8 +1594,11 @@ final_answer = principal.get_response({
     "question": policy_case["question"],
     "findings": findings,
     "review_gate": review_gate,
-})`,
-    "event-pipeline": `from llama_index.core.workflow import StartEvent, StopEvent, Workflow, step
+})
+print(final_answer)`,
+    "event-pipeline": `${helpers}
+
+from llama_index.core.workflow import StartEvent, StopEvent, Workflow, step
 
 class PolicyWorkflow(Workflow):
     @step
@@ -1539,24 +1607,28 @@ class PolicyWorkflow(Workflow):
 
     @step
     async def specialist_review(self, event):
-        return {
-            "compliance": retrieve_clause(event["question"], "retention"),
-            "security": retrieve_clause(event["question"], "private_repos"),
-            "legal": retrieve_clause(event["question"], "rights"),
-        }
+        findings = [
+            retrieve_clause(event["question"], "retention"),
+            retrieve_clause(event["question"], "private_repos"),
+            retrieve_clause(event["question"], "rights"),
+        ]
+        return {"question": event["question"], "findings": findings}
 
     @step
     async def challenge(self, event):
-        event["reviewer_notes"] = check_for_unsupported_claims(event)
+        event["reviewer_notes"] = check_for_unsupported_claims(event["findings"])
         return event
 
     @step
     async def verdict(self, event):
-        return StopEvent(result=compose_answer(event))
+        return StopEvent(result=compose_answer(event["question"], event["findings"], event["reviewer_notes"]))
 
 workflow = PolicyWorkflow(timeout=120)
-result = workflow.run()`,
-    "app-workflow": `import requests
+result = workflow.run()
+print(result)`,
+    "app-workflow": `${helpers}
+
+import requests
 from dataclasses import dataclass
 
 @dataclass
@@ -1595,8 +1667,11 @@ case = PolicyCase(
 )
 
 run = start_mastra_policy_checker(case)
-result = get_mastra_run(run["runId"])`,
-    "typed-review": `from pydantic import BaseModel
+result = get_mastra_run(run["runId"])
+print(result)`,
+    "typed-review": `${helpers}
+
+from pydantic import BaseModel
 from pydantic_ai import Agent
 
 class PolicyCase(BaseModel):
@@ -1632,19 +1707,25 @@ findings = [
 reviewer_notes = reviewer.run_sync(f"Challenge these findings: {findings}").output
 decision = principal.run_sync(
     f"Return a final answer with citations and confidence. Case={case} Findings={findings} Notes={reviewer_notes}"
-).output`
+).output
+print(decision)`
   };
 
   if (!framework) {
-    return `policy_case = {
+    return `${helpers}
+
+policy_case = {
   "question": "${question.prompt}",
   "clauses": [${clauseString}]
 }
 
-principal.assign(policy_case)
-specialists.review(policy_case)
-reviewer.challenge(findings)
-decision = principal.compose(findings, reviewer_notes)`;
+findings = [
+    retrieve_clause(policy_case["question"], "retention"),
+    retrieve_clause(policy_case["question"], "rights"),
+]
+reviewer_notes = check_for_unsupported_claims(findings)
+decision = compose_answer(policy_case["question"], findings, reviewer_notes)
+print(decision)`;
   }
 
   return examples[framework.pattern];
