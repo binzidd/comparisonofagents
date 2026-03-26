@@ -2067,15 +2067,6 @@ function renderCodeHint(framework, stageId) {
         </div>
         <pre><code>${profile.evalCode}</code></pre>
       </div>
-      ${traceStage ? `
-        <div class="code-panel">
-          <div class="code-hint-head">
-            <strong>Python trace state</strong>
-            <span>${traceStage.runtime}</span>
-          </div>
-          <pre><code>${escapeHtml(JSON.stringify(traceStage.state, null, 2))}</code></pre>
-        </div>
-      ` : ""}
       <div class="code-panel code-panel-wide">
         <div class="code-hint-head">
           <strong>Framework implementation for this policy checker</strong>
