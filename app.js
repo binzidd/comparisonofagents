@@ -726,7 +726,6 @@ function renderCatalog() {
 
 function renderPolicyCase() {
   const question = getQuestion();
-  const relevantClauses = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId]);
 
   policyCasePanel.innerHTML = `
     <div class="policy-case-head">
@@ -756,29 +755,12 @@ function renderPolicyCase() {
     <div class="policy-answer-strip compact">
       <article>
         <span>Question</span>
-        <strong>${question.prompt}</strong>
+        <strong>${question.label}</strong>
       </article>
       <article>
         <span>Expected answer</span>
         <strong>${question.expectedAnswer}</strong>
       </article>
-      <article>
-        <span>Key clauses</span>
-        <strong>${relevantClauses.map((clause) => clause.title).join(" · ")}</strong>
-      </article>
-    </div>
-
-    <div class="policy-clause-grid compact">
-      ${relevantClauses
-        .map(
-          (clause) => `
-            <article class="policy-clause-card">
-              <span>${clause.title}</span>
-              <strong>${clause.summary}</strong>
-            </article>
-          `
-        )
-        .join("")}
     </div>
   `;
 
@@ -1778,65 +1760,6 @@ function renderHighlightedCode(code, stageId) {
     .join("");
 }
 
-function currentStatePayload(framework, stageId) {
-  const question = getQuestion();
-  const base = {
-    question: question.prompt,
-    clauses: question.relevantClauses,
-    stage: stageId
-  };
-
-  const byStage = {
-    intake: {
-      ...base,
-      requested_by: "principal",
-      loaded_tools: ["policy_text", "question_bank"]
-    },
-    review: {
-      ...base,
-      findings: {
-        compliance: "retention clause pulled",
-        security: "repository-access exception checked",
-        legal: "rights wording extracted",
-        data_ops: "retention lifecycle reviewed"
-      }
-    },
-    challenge: {
-      ...base,
-      reviewer_input: ["unsupported-claim-check", "missing-caveat-check"],
-      contested_points: ["overclaim risk", "missing condition risk"]
-    },
-    synthesis: {
-      ...base,
-      merged_findings: ["retention", "rights", "exceptions"],
-      reviewer_notes: ["preserve conditions", "cite clauses directly"]
-    },
-    verdict: {
-      ...base,
-      answer: question.expectedAnswer,
-      citations: question.relevantClauses,
-      confidence: 0.82
-    }
-  };
-
-  if (!framework) {
-    return byStage[stageId];
-  }
-
-  const wrappers = {
-    "graph-branches": { state_container: "shared_graph_state" },
-    "sequential-handoffs": { state_container: "run_context" },
-    "conversation-mesh": { state_container: "chat_transcript" },
-    "manager-review": { state_container: "task_outputs" },
-    "enterprise-gated": { state_container: "governed_case" },
-    "event-pipeline": { state_container: "event_payload" },
-    "app-workflow": { state_container: "workflow_context" },
-    "typed-review": { state_container: "typed_models" }
-  };
-
-  return { ...wrappers[framework.pattern], ...byStage[stageId] };
-}
-
 function graphMessageMap(framework, stageId) {
   const byPattern = {
     "graph-branches": {
@@ -2106,19 +2029,6 @@ function renderFrameworkScorecard(framework) {
   `;
 }
 
-function renderStatePayload(framework, stageId) {
-  const payload = currentStatePayload(framework, stageId);
-  return `
-    <section class="state-payload">
-      <div class="code-hint-head">
-        <strong>State passed at this step</strong>
-        <span>${stageId}</span>
-      </div>
-      <pre><code>${JSON.stringify(payload, null, 2)}</code></pre>
-    </section>
-  `;
-}
-
 function renderCodeHint(framework, stageId) {
   const profile = frameworkTechProfile(framework);
   const question = getQuestion();
@@ -2136,7 +2046,6 @@ function renderCodeHint(framework, stageId) {
         </div>
         <pre><code>${profile.evalCode}</code></pre>
       </div>
-      ${renderStatePayload(framework, stageId)}
       <div class="code-panel code-panel-wide">
         <div class="code-hint-head">
           <strong>Framework implementation for this policy checker</strong>
