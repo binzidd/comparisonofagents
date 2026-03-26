@@ -16,8 +16,8 @@
         "langgraph": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -66,8 +66,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -129,8 +129,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -196,8 +196,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -242,8 +242,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -295,8 +295,8 @@
         "openai-agents": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -340,8 +340,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -403,8 +403,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -460,8 +460,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -506,8 +506,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -559,8 +559,8 @@
         "ag2": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -609,8 +609,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -672,8 +672,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -739,8 +739,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -795,8 +795,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -1401,8 +1401,8 @@
         "llamaindex": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -1446,8 +1446,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -1509,8 +1509,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -1566,8 +1566,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -1612,8 +1612,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -1665,8 +1665,8 @@
         "mastra": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -1715,8 +1715,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -1778,8 +1778,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -1840,8 +1840,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -1886,8 +1886,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -1939,8 +1939,8 @@
         "pydanticai": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -1984,8 +1984,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -2047,8 +2047,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -2109,8 +2109,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -2155,8 +2155,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -2212,8 +2212,8 @@
         "langgraph": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -2263,8 +2263,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -2327,8 +2327,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -2395,8 +2395,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -2442,8 +2442,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -2500,8 +2500,8 @@
         "openai-agents": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -2546,8 +2546,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -2610,8 +2610,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -2668,8 +2668,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -2715,8 +2715,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -2771,8 +2771,8 @@
         "ag2": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -2822,8 +2822,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -2886,8 +2886,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -2954,8 +2954,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -3011,8 +3011,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -3634,8 +3634,8 @@
         "llamaindex": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -3680,8 +3680,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -3744,8 +3744,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -3802,8 +3802,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -3849,8 +3849,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -3905,8 +3905,8 @@
         "mastra": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -3956,8 +3956,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -4020,8 +4020,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -4083,8 +4083,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -4130,8 +4130,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -4186,8 +4186,8 @@
         "pydanticai": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -4232,8 +4232,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -4296,8 +4296,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -4359,8 +4359,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -4406,8 +4406,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -4468,8 +4468,8 @@
         "langgraph": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -4519,8 +4519,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -4583,8 +4583,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -4651,8 +4651,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -4698,8 +4698,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:graph",
-              "execution_mode": "python-harness",
+              "runtime": "graph",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -4754,8 +4754,8 @@
         "openai-agents": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -4800,8 +4800,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -4864,8 +4864,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -4922,8 +4922,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -4969,8 +4969,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:handoff",
-              "execution_mode": "python-harness",
+              "runtime": "handoff",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -5025,8 +5025,8 @@
         "ag2": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -5076,8 +5076,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -5140,8 +5140,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -5208,8 +5208,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -5265,8 +5265,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:conversation",
-              "execution_mode": "python-harness",
+              "runtime": "conversation",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -5886,8 +5886,8 @@
         "llamaindex": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -5932,8 +5932,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -5996,8 +5996,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -6054,8 +6054,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -6101,8 +6101,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:event-workflow",
-              "execution_mode": "python-harness",
+              "runtime": "event-workflow",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -6157,8 +6157,8 @@
         "mastra": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -6208,8 +6208,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -6272,8 +6272,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -6335,8 +6335,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -6382,8 +6382,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:workflow-client",
-              "execution_mode": "python-harness",
+              "runtime": "workflow-client",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -6438,8 +6438,8 @@
         "pydanticai": {
           "stages": {
             "intake": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal"
               ],
@@ -6484,8 +6484,8 @@
               }
             },
             "review": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "compliance",
@@ -6548,8 +6548,8 @@
               }
             },
             "challenge": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "compliance",
                 "security",
@@ -6611,8 +6611,8 @@
               }
             },
             "synthesis": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",
@@ -6658,8 +6658,8 @@
               }
             },
             "verdict": {
-              "runtime": "python-harness:typed-agents",
-              "execution_mode": "python-harness",
+              "runtime": "typed-agents",
+              "execution_mode": "real-sdk-calls",
               "active_agents": [
                 "principal",
                 "reviewer",

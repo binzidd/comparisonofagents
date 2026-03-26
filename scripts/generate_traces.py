@@ -476,7 +476,8 @@ def build_trace_store() -> dict:
         for framework_id, meta in FRAMEWORKS.items():
             stages = {}
             for stage_id, links in meta["links"].items():
-                stages[stage_id] = {
+                real = _real_stage(framework_id, question_id, stage_id)
+                stage_entry: dict = {
                     "runtime": meta["runtime"],
                     "execution_mode": "python-harness",
                     "active_agents": STAGE_AGENTS[stage_id],
@@ -486,6 +487,10 @@ def build_trace_store() -> dict:
                     "metrics": framework_metrics(framework_id, stage_id, question_id),
                     "output": stage_output(question, framework_id, stage_id),
                 }
+                if real:
+                    stage_entry["execution_mode"] = "real-sdk-calls"
+                    stage_entry["runtime"] = meta["runtime"].replace("python-harness:", "")
+                stages[stage_id] = stage_entry
             payload["questions"][question_id]["frameworks"][framework_id] = {"stages": stages}
     return payload
 
