@@ -1509,50 +1509,16 @@ function stageImplementationCode(framework, stageId) {
 }
 
 function sharedPolicyHelpers(question) {
-  const clauseEntries = question.relevantClauses
-    .map((clauseId) => `    "${clauseId}": "${policyPack.clauses[clauseId].summary}"`)
-    .join(",\n");
+  const clauseList = question.relevantClauses
+    .map((clauseId) => policyPack.clauses[clauseId].title)
+    .join(", ");
 
-  return `from dataclasses import dataclass, field
-from typing import Any
-
-POLICY_TEXT = {
-${clauseEntries}
-}
-
-@dataclass
-class PolicyAnswer:
-    answer: str
-    citations: list[str]
-    confidence: float
-    reviewer_notes: list[str] = field(default_factory=list)
-
-def retrieve_clause(question: str, clause_id: str) -> dict[str, str]:
-    return {
-        "clause_id": clause_id,
-        "question": question,
-        "summary": POLICY_TEXT[clause_id],
-    }
-
-def check_for_unsupported_claims(findings: Any) -> list[str]:
-    notes = []
-    serialized = str(findings).lower()
-    if "immediate deletion" in serialized:
-        notes.append("Policy does not promise immediate deletion.")
-    if "always" in serialized:
-        notes.append("Answer overclaims certainty; preserve conditions and exceptions.")
-    return notes
-
-def compose_answer(question: str, findings: Any, reviewer_notes: list[str]) -> PolicyAnswer:
-    citations = [item["clause_id"] for item in findings if isinstance(item, dict) and "clause_id" in item]
-    if not citations:
-        citations = ["retention", "rights"]
-    return PolicyAnswer(
-        answer="Answer the policy question with conditions, cited clauses, and reviewer caveats.",
-        citations=sorted(set(citations)),
-        confidence=0.78 if reviewer_notes else 0.9,
-        reviewer_notes=reviewer_notes,
-    )`;
+  return `# Shared definitions and helper functions
+# - PolicyAnswer model
+# - retrieve_clause(question, clause_id)
+# - check_for_unsupported_claims(findings)
+# - compose_answer(question, findings, reviewer_notes)
+# Shared corpus for this example: ${clauseList}`;
 }
 
 function frameworkExampleCode(framework, question) {
