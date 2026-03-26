@@ -972,9 +972,8 @@ function renderSummary() {
   frameworkSummary.innerHTML = `
     <div class="summary-pill">Policy: ${policyPack.title}</div>
     <div class="summary-pill">Question: ${question.label}</div>
-    <div class="summary-pill">Stage: ${stage.label}</div>
   `;
-  appStatus.textContent = `${stage.label} active. ${stage.caption}`;
+  appStatus.textContent = "";
   skeletonCaption.textContent = "Click through one stage at a time to see how each framework handles this shared structure.";
 }
 

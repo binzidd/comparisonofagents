@@ -486,19 +486,24 @@ select {
 }
 
 .summary-strip {
-  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .summary-pill {
   display: flex;
   align-items: center;
-  min-height: 58px;
+  min-height: 52px;
   color: var(--text);
+  font-size: 0.88rem;
+}
+
+.summary-pill + .summary-pill {
+  border-left: 1px solid var(--line);
+  padding-left: 20px;
 }
 
 .app-status {
-  display: flex;
-  align-items: center;
+  display: none;
 }
 
 .skeleton-card,
@@ -518,7 +523,17 @@ select {
 
 .skeleton-copy {
   display: grid;
-  gap: 6px;
+  gap: 8px;
+}
+
+.skeleton-copy h3 {
+  font-size: clamp(1.7rem, 3vw, 2.2rem);
+  line-height: 1.1;
+}
+
+.skeleton-copy p {
+  font-size: 0.92rem;
+  color: var(--muted);
 }
 
 /* Rationale callout */
