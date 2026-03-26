@@ -2682,6 +2682,43 @@ function renderScoreRationale() {
   `;
 }
 
+function renderExecutiveSummary(framework) {
+  const profile = frameworkTechProfile(framework);
+  const rows = [...traceScoreRows(framework), ...profile.scorecard];
+
+  const annotated = rows.map((item) => {
+    const isRisk = riskMetricLabels.has(item.label);
+    const state = scoreState(item.label, item.value);
+    const effectiveScore = isRisk ? 5 - item.value : item.value;
+    return { ...item, isRisk, state, effectiveScore };
+  });
+
+  const sorted = [...annotated].sort((a, b) => b.effectiveScore - a.effectiveScore);
+  const strengths = sorted.filter((m) => m.state.tone === "safe").slice(0, 3);
+  const concerns = sorted.filter((m) => m.state.tone !== "safe");
+
+  const pillHtml = (items, tone) =>
+    items.map((m) => `<span class="exec-pill exec-pill-${tone}">${m.label}${m.detail ? ` · ${m.detail}` : ""}</span>`).join("");
+
+  return `
+    <div class="exec-summary">
+      <span class="exec-summary-label">Executive Summary</span>
+      <div class="exec-summary-groups">
+        ${strengths.length ? `
+        <div class="exec-group">
+          <span class="exec-group-title">Strengths</span>
+          <div class="exec-pills">${pillHtml(strengths, "safe")}</div>
+        </div>` : ""}
+        ${concerns.length ? `
+        <div class="exec-group">
+          <span class="exec-group-title">Watch</span>
+          <div class="exec-pills">${pillHtml(concerns, concerns[0].state.tone)}</div>
+        </div>` : ""}
+      </div>
+    </div>
+  `;
+}
+
 function laneMarkup(frameworkId, laneIndex) {
   const framework = getFramework(frameworkId);
   const stage = getStage();
@@ -2706,6 +2743,7 @@ function laneMarkup(frameworkId, laneIndex) {
       </div>
 
       <p class="lane-summary">${framework.summary}</p>
+      ${renderExecutiveSummary(framework)}
       ${renderFrameworkTechStrip(framework)}
 
       ${renderStepTrail()}
