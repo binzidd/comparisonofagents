@@ -1348,6 +1348,25 @@ function renderCodeHint(framework, stageId) {
   `;
 }
 
+function renderMessageList(framework, stageId) {
+  const messages = Object.entries(graphMessageMap(framework, stageId));
+  return `
+    <div class="message-list">
+      ${messages
+        .map(([linkId, message]) => {
+          const [fromId, toId] = linkEndpoints[linkId];
+          return `
+            <article class="message-row">
+              <strong>${graphNodes[fromId].label} → ${graphNodes[toId].label}</strong>
+              <span>${message}</span>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
 function renderGraphMap({ framework, activeAgents, stageId, color, neutral = false }) {
   const stageHighlights = framework ? flowHighlights(framework.pattern, stageId) : {
     links: frameworkBaseLinks(null),
@@ -1356,7 +1375,6 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
   const baseLinks = frameworkBaseLinks(framework);
   const activeLinkSet = new Set(stageHighlights.links);
   const activeAgentSet = new Set(activeAgents);
-  const messageMap = graphMessageMap(framework, stageId);
 
   const lineMarkup = baseLinks
     .map((linkId) => {
@@ -1372,24 +1390,6 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
           y2="${to.y}"
           marker-end="url(#arrowhead-${neutral ? "neutral" : "live"})"
         />
-      `;
-    })
-    .join("");
-
-  const edgeLabelMarkup = Object.entries(messageMap)
-    .map(([linkId, label]) => {
-      const [fromId, toId] = linkEndpoints[linkId];
-      const from = graphNodes[fromId];
-      const to = graphNodes[toId];
-      const offset = graphLabelOffsets[linkId] || { dx: 0, dy: 0 };
-      const midX = (from.x + to.x) / 2 + offset.dx;
-      const midY = (from.y + to.y) / 2 - 2 + offset.dy;
-      const boxWidth = Math.max(14, Math.min(24, label.length * 1.55));
-      return `
-        <g class="graph-edge-label">
-          <rect x="${midX - boxWidth / 2}" y="${midY - 3.7}" width="${boxWidth}" height="6.5" rx="3.2" ry="3.2"></rect>
-          <text x="${midX}" y="${midY + 0.7}" text-anchor="middle">${label}</text>
-        </g>
       `;
     })
     .join("");
@@ -1415,7 +1415,6 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
           </marker>
         </defs>
         ${lineMarkup}
-        ${edgeLabelMarkup}
         ${nodeMarkup}
       </svg>
     </div>
@@ -1548,11 +1547,13 @@ function renderSkeleton() {
       <strong>${stage.label}</strong>
       <p>${stage.captionTechnical}</p>
     </div>
-    ${renderGraphMap({
+    ${renderBoard({
       framework: null,
-      activeAgents: stage.activeAgents,
-      stageId: stage.id,
       color: "#7d6f62",
+      activeAgents: new Set(stage.activeAgents),
+      activeTools: new Set(stage.activeTools),
+      messages: ["Reference structure only: principal delegates, specialists evaluate, reviewer challenges, output concludes."],
+      stageId: stage.id,
       neutral: true
     })}
     ${renderCodeHint(null, stage.id)}
@@ -1599,6 +1600,8 @@ function laneMarkup(frameworkId, laneIndex) {
         stageId: stage.id,
         color: framework.color
       })}
+
+      ${renderMessageList(framework, stage.id)}
 
       ${renderCodeHint(framework, stage.id)}
 

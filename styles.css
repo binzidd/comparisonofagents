@@ -553,6 +553,32 @@ select {
   stroke: rgba(170, 59, 42, 0.48);
 }
 
+.message-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.message-row {
+  display: grid;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.message-row strong {
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.message-row span {
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .code-hint {
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -852,6 +878,10 @@ select {
   .code-panel + .code-panel {
     border-left: 0;
     border-top: 1px solid rgba(31, 26, 22, 0.08);
+  }
+
+  .message-list {
+    grid-template-columns: 1fr;
   }
 }
 
