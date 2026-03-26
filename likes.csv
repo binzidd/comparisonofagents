@@ -1,0 +1,7 @@
+timestamp,event,note
+# This file tracks like events for comparisonofagents.
+# Auto-updating from the browser requires a backend (e.g. a GitHub Action triggered via a proxy API).
+# Current like counts are stored in each visitor's localStorage under "comparison_lab_like_state".
+# To populate this file automatically, deploy a small serverless function (Vercel/Netlify/Cloudflare Worker)
+# that receives a POST when someone clicks Like, appends a row here via the GitHub Contents API,
+# and returns the current total. The function holds the GitHub token server-side — never in the browser.

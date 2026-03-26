@@ -50,17 +50,27 @@
             <p id="scenario-support"></p>
           </div>
 
-          <section class="policy-case-panel" id="policy-case-panel"></section>
-
-          <div class="lab-toolbar">
-            <div class="toolbar-group">
-              <span class="control-label">Stage</span>
-              <div class="chip-row" id="stage-chip-row"></div>
+          <div class="lab-block">
+            <div class="lab-block-head">
+              <span class="lab-block-num">01</span>
+              <span class="lab-block-label">Question</span>
             </div>
+            <section class="policy-case-panel" id="policy-case-panel"></section>
+          </div>
 
-            <div class="toolbar-actions">
-              <button class="secondary-btn compact" id="prev-stage-btn">Previous Stage</button>
-              <button class="secondary-btn compact" id="step-demo-btn">Next Stage</button>
+          <div class="lab-block">
+            <div class="lab-block-head">
+              <span class="lab-block-num">02</span>
+              <span class="lab-block-label">Stage</span>
+            </div>
+            <div class="lab-toolbar">
+              <div class="toolbar-group">
+                <div class="chip-row" id="stage-chip-row"></div>
+              </div>
+              <div class="toolbar-actions">
+                <button class="secondary-btn compact" id="prev-stage-btn">Previous Stage</button>
+                <button class="secondary-btn compact" id="step-demo-btn">Next Stage</button>
+              </div>
             </div>
           </div>
 
@@ -69,17 +79,29 @@
             <div class="app-status" id="app-status" aria-live="polite"></div>
           </div>
 
-          <section class="skeleton-card">
-            <div class="skeleton-copy">
-              <p class="eyebrow">Reference Skeleton</p>
-              <h3>One shared agent structure</h3>
-              <p id="skeleton-caption"></p>
+          <div class="lab-block">
+            <div class="lab-block-head">
+              <span class="lab-block-num">03</span>
+              <span class="lab-block-label">Reference Architecture</span>
             </div>
-            <div id="skeleton-board"></div>
-          </section>
+            <section class="skeleton-card">
+              <div class="skeleton-copy">
+                <p class="eyebrow">Reference Skeleton</p>
+                <h3>One shared agent structure</h3>
+                <p id="skeleton-caption"></p>
+              </div>
+              <div id="skeleton-board"></div>
+            </section>
+          </div>
 
-          <div class="comparison-lanes" id="comparison-lanes"></div>
-          <section class="section-tail" id="score-rationale"></section>
+          <div class="lab-block">
+            <div class="lab-block-head">
+              <span class="lab-block-num">04</span>
+              <span class="lab-block-label">Demo</span>
+            </div>
+            <div class="comparison-lanes" id="comparison-lanes"></div>
+            <section class="section-tail" id="score-rationale"></section>
+          </div>
         </section>
       </main>
 
