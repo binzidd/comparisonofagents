@@ -1556,35 +1556,46 @@ class PolicyWorkflow(Workflow):
 
 workflow = PolicyWorkflow(timeout=120)
 result = workflow.run()`,
-    "app-workflow": `import { Agent, createWorkflow } from "@mastra/core";
+    "app-workflow": `import requests
+from dataclasses import dataclass
 
-const question = "${question.prompt}";
+@dataclass
+class PolicyCase:
+    question: str
+    clauses: list[str]
+    user_id: str
 
-const principal = new Agent({ name: "principal" });
-const compliance = new Agent({ name: "compliance" });
-const security = new Agent({ name: "security" });
-const legal = new Agent({ name: "legal" });
-const reviewer = new Agent({ name: "reviewer" });
+def start_mastra_policy_checker(case: PolicyCase) -> dict:
+    response = requests.post(
+        "http://localhost:4111/api/workflows/policy-checker/start",
+        json={
+            "input": {
+                "question": case.question,
+                "clauses": case.clauses,
+                "userId": case.user_id,
+            }
+        },
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()
 
-export const policyChecker = createWorkflow({
-  id: "policy-checker",
-  inputSchema: policyCaseSchema,
-})
-  .step("principal-intake", async ({ input }) => ({
-    question,
-    clauses: [${clauseString}],
-    ...input,
-  }))
-  .parallel([
-    compliance.asStep("compliance-review"),
-    security.asStep("security-review"),
-    legal.asStep("legal-review"),
-  ])
-  .branch("review-guardrail", async ({ context }) =>
-    hasUnsupportedClaim(context) ? "reviewer" : "principal-synthesis"
-  )
-  .step("principal-synthesis", async ({ context }) => composeAnswer(context))
-  .commit();`,
+def get_mastra_run(run_id: str) -> dict:
+    response = requests.get(
+        f"http://localhost:4111/api/workflows/runs/{run_id}",
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()
+
+case = PolicyCase(
+    question="${question.prompt}",
+    clauses=[${clauseString}],
+    user_id="policy-reviewer-42",
+)
+
+run = start_mastra_policy_checker(case)
+result = get_mastra_run(run["runId"])`,
     "typed-review": `from pydantic import BaseModel
 from pydantic_ai import Agent
 
