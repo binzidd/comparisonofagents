@@ -61,8 +61,8 @@ a {
 .hero {
   grid-template-columns: 1fr;
   align-items: stretch;
-  gap: 24px;
-  padding: 12px 0 8px;
+  gap: 18px;
+  padding: 6px 0 4px;
 }
 
 .hero-copy,
@@ -80,7 +80,7 @@ a {
 .hero-copy,
 .hero-panel {
   border-radius: 36px;
-  padding: 30px 34px;
+  padding: 26px 34px 24px;
 }
 
 .eyebrow {
@@ -102,8 +102,10 @@ h4 {
 }
 
 h1 {
-  font-size: clamp(3rem, 7vw, 5.6rem);
-  max-width: 11ch;
+  font-size: clamp(3rem, 5.8vw, 5.1rem);
+  max-width: 18ch;
+  line-height: 0.94;
+  text-wrap: balance;
 }
 
 h2 {
@@ -714,6 +716,26 @@ select {
   overflow-x: auto;
 }
 
+.verdict-metric-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 16px 0;
+}
+
+.verdict-metric-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(126, 155, 196, 0.16);
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: rgba(17, 26, 39, 0.78);
+  color: #eef4ff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 .code-hint code {
   display: block;
   font-family: "IBM Plex Sans", sans-serif;
@@ -1219,5 +1241,10 @@ select {
 
   .specialist-grid {
     grid-template-columns: 1fr;
+  }
+
+  h1 {
+    max-width: none;
+    text-wrap: unset;
   }
 }

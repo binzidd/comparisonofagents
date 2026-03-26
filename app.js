@@ -2210,6 +2210,14 @@ function renderCodeHint(framework, stageId) {
   const implementationCode = frameworkExampleCode(framework, getQuestion());
   const highlightedImplementation = renderHighlightedCode(implementationCode, stageId);
   const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
+  const verdictMetricChips = stageId === "verdict" && traceStage?.metrics
+    ? `
+      <div class="verdict-metric-row" aria-label="Verdict metrics">
+        <span class="verdict-metric-chip">Total tokens: ${traceStage.metrics.token_total_estimate}</span>
+        <span class="verdict-metric-chip">Total cost: $${traceStage.metrics.usd_cost_estimate}</span>
+      </div>
+    `
+    : "";
   const frameworkNote = framework
     ? `${framework.name} example and ${traceStage?.runtime || framework.pattern} harness view. Provider strings in code examples are not the same thing as the orchestration framework.`
     : "Reference-only implementation view.";
@@ -2228,6 +2236,7 @@ function renderCodeHint(framework, stageId) {
             <strong>Python harness output</strong>
             <span>${traceStage.metrics.time_ms} ms · ${traceStage.metrics.token_total_estimate} tok · $${traceStage.metrics.usd_cost_estimate}</span>
           </div>
+          ${verdictMetricChips}
           <pre><code>${escapeHtml(JSON.stringify(traceStage.output, null, 2))}</code></pre>
           <p class="trace-footnote">${frameworkNote} Executed by the repo’s Python comparison harness for this framework shape, not the official SDK runtime.</p>
         </div>
