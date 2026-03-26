@@ -470,6 +470,16 @@ const graphLabelOffsets = {
   "finance-principal": { dx: 10, dy: -2 }
 };
 
+const NODE_DESCRIPTIONS = {
+  principal: "Routes the question to specialist agents",
+  compliance: "Validates regulatory compliance requirements",
+  legal: "Reviews legal precedents and obligations",
+  finance: "Evaluates financial risk and impact",
+  security: "Checks access controls and security policy",
+  reviewer: "Challenges weak or conflicting claims",
+  output: "Synthesizes a single policy verdict"
+};
+
 const linkEndpoints = {
   "principal-compliance": ["principal", "compliance"],
   "principal-security": ["principal", "security"],
@@ -761,6 +771,7 @@ let selectedQuestionId = "retention";
 let frameworkCatalogCards;
 let policyCasePanel;
 let stageChipRow;
+let graphTooltip;
 let prevStageBtn;
 let stepDemoBtn;
 let frameworkSummary;
@@ -1017,10 +1028,10 @@ function renderStepTrail() {
         .map((stage, index) => {
           const activeClass = index === currentStage ? "active" : index < currentStage ? "complete" : "";
           return `
-            <div class="step-item ${activeClass}" style="--item-rgb:${stageTheme[stage.id]}">
+            <button class="step-item ${activeClass}" style="--item-rgb:${stageTheme[stage.id]}" data-goto-stage="${index}">
               <span class="step-number">${index + 1}</span>
               <span class="step-name">${stage.label}</span>
-            </div>
+            </button>
             ${index < stages.length - 1 ? '<span class="step-arrow">→</span>' : ""}
           `;
         })
@@ -2332,7 +2343,9 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
 
   const nodeMarkup = Object.entries(graphNodes)
     .map(([nodeId, node]) => `
-      <g class="graph-node ${activeAgentSet.has(nodeId) ? "active" : ""} role-${getAgentRole(nodeId)}">
+      <g class="graph-node ${activeAgentSet.has(nodeId) ? "active" : ""} role-${getAgentRole(nodeId)}"
+         data-node-id="${nodeId}"
+         data-node-desc="${NODE_DESCRIPTIONS[nodeId] || nodeId}">
         <circle cx="${node.x}" cy="${node.y}" r="7" />
         <text x="${node.labelX}" y="${node.labelY}" text-anchor="middle">${node.label}</text>
       </g>
@@ -2601,6 +2614,35 @@ function renderComparison() {
       renderScoreRationale();
     });
   });
+  comparisonLanes.querySelectorAll("[data-goto-stage]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currentStage = Number(btn.dataset.gotoStage);
+      render();
+    });
+  });
+}
+
+function handleNodeHover(e) {
+  const nodeG = e.target.closest("[data-node-id]");
+  if (!nodeG) return;
+  const stage = getStage();
+  const isActive = nodeG.classList.contains("active");
+  const desc = nodeG.dataset.nodeDesc || nodeG.dataset.nodeId;
+  graphTooltip.textContent = isActive
+    ? `${nodeG.dataset.nodeId} — active in ${stage.label}`
+    : desc;
+  graphTooltip.removeAttribute("hidden");
+}
+
+function handleNodeOut(e) {
+  if (!e.relatedTarget?.closest("[data-node-id]")) {
+    graphTooltip.setAttribute("hidden", "");
+  }
+}
+
+function handleNodeMove(e) {
+  graphTooltip.style.left = `${e.clientX + 14}px`;
+  graphTooltip.style.top = `${e.clientY - 36}px`;
 }
 
 function nextStage() {
@@ -2676,6 +2718,7 @@ async function initApp() {
   scoreRationale = document.getElementById("score-rationale");
   footerLikeBtn = document.getElementById("footer-like-btn");
   footerLikeCount = document.getElementById("footer-like-count");
+  graphTooltip = document.getElementById("graph-tooltip");
 
   const requiredElements = [
     ["framework-catalog-cards", frameworkCatalogCards],
@@ -2692,7 +2735,8 @@ async function initApp() {
     ["comparison-lanes", comparisonLanes],
     ["score-rationale", scoreRationale],
     ["footer-like-btn", footerLikeBtn],
-    ["footer-like-count", footerLikeCount]
+    ["footer-like-count", footerLikeCount],
+    ["graph-tooltip", graphTooltip]
   ];
 
   const missingIds = requiredElements.filter(([, element]) => !element).map(([id]) => id);
@@ -2704,6 +2748,9 @@ async function initApp() {
   prevStageBtn.addEventListener("click", previousStage);
   stepDemoBtn.addEventListener("click", nextStage);
   footerLikeBtn.addEventListener("click", toggleFooterLike);
+  comparisonLanes.addEventListener("mouseover", handleNodeHover);
+  comparisonLanes.addEventListener("mouseout", handleNodeOut);
+  comparisonLanes.addEventListener("mousemove", handleNodeMove);
   renderFooterLike();
   render();
 }

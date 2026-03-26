@@ -17,7 +17,6 @@
 }
 
 html {
-  scroll-behavior: smooth;
 }
 
 body {
@@ -317,6 +316,14 @@ p {
   grid-template-columns: 1fr auto;
   align-items: end;
   margin-bottom: 18px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(7, 17, 29, 0.94);
+  backdrop-filter: blur(18px);
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  padding: 12px 18px;
 }
 
 .policy-case-panel {
@@ -430,7 +437,6 @@ p {
   border-color: var(--line);
   color: var(--text);
   cursor: pointer;
-  transition: transform 160ms ease, background 160ms ease, color 160ms ease;
   font-size: 0.92rem;
   font-weight: 600;
   padding: 10px 14px;
@@ -443,11 +449,6 @@ p {
   box-shadow: 0 0 0 2px rgba(75, 141, 255, 0.12);
 }
 
-.chip:hover,
-.primary-btn:hover,
-.secondary-btn:hover {
-  transform: translateY(-1px);
-}
 
 .primary-btn,
 .secondary-btn,
@@ -460,7 +461,6 @@ select {
 .primary-btn,
 .secondary-btn {
   cursor: pointer;
-  transition: transform 160ms ease, background 160ms ease, color 160ms ease;
 }
 
 .primary-btn {
@@ -701,6 +701,38 @@ select {
   fill: rgba(var(--stage-rgb), 0.14);
   stroke: rgba(var(--stage-rgb), 0.84);
   stroke-width: 1.6;
+}
+
+.graph-node:hover circle {
+  stroke: rgba(var(--stage-rgb), 1);
+  fill: rgba(var(--stage-rgb), 0.22);
+  cursor: default;
+}
+
+.graph-tooltip {
+  position: fixed;
+  z-index: 999;
+  background: rgba(17, 26, 39, 0.96);
+  border: 1px solid rgba(75, 141, 255, 0.28);
+  border-radius: 10px;
+  padding: 7px 13px;
+  font-size: 0.84rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  color: var(--text);
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 8px 28px rgba(2, 8, 18, 0.5);
+}
+.graph-tooltip[hidden] { display: none; }
+
+button.step-item {
+  background: rgba(17, 26, 39, 0.65);
+  font: inherit;
+  cursor: pointer;
+}
+button.step-item:hover {
+  border-color: rgba(var(--item-rgb), 0.5);
+  background: rgba(var(--item-rgb), 0.1);
 }
 
 .message-list {
@@ -1044,7 +1076,6 @@ select {
   background: rgba(var(--stage-rgb), 0.12);
   border-color: rgba(var(--stage-rgb), 0.34);
   color: var(--text);
-  animation: pop-in 260ms ease;
 }
 
 .message-stack {
@@ -1053,7 +1084,6 @@ select {
 
 .message-bubble {
   font-size: 0.96rem;
-  animation: fade-up 340ms ease both;
 }
 
 .lane-bottom {
@@ -1187,27 +1217,6 @@ select {
   box-shadow: 0 0 0 3px rgba(255, 191, 87, 0.12);
 }
 
-@keyframes fade-up {
-  0% {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pop-in {
-  0% {
-    transform: scale(0.96);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
 
 @media (max-width: 1180px) {
   .hero,
