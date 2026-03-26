@@ -772,6 +772,11 @@ let scenarioSupport;
 let comparisonLanes;
 let scoreRationale;
 let traceStore = null;
+let footerLikeBtn;
+let footerLikeCount;
+
+const likeStorageKey = "comparison_lab_like_count";
+const likeActiveKey = "comparison_lab_like_active";
 
 function getStage() {
   return stages[currentStage];
@@ -2626,6 +2631,39 @@ function render() {
   renderScoreRationale();
 }
 
+function getStoredLikeCount() {
+  const value = window.localStorage.getItem(likeStorageKey);
+  return Number.isFinite(Number(value)) ? Number(value) : 0;
+}
+
+function hasLiked() {
+  return window.localStorage.getItem(likeActiveKey) === "true";
+}
+
+function renderFooterLike() {
+  if (!footerLikeBtn || !footerLikeCount) {
+    return;
+  }
+
+  const count = getStoredLikeCount();
+  const liked = hasLiked();
+  footerLikeCount.textContent = String(count);
+  footerLikeBtn.classList.toggle("liked", liked);
+  footerLikeBtn.setAttribute("aria-pressed", liked ? "true" : "false");
+  const icon = footerLikeBtn.querySelector(".like-icon");
+  if (icon) {
+    icon.textContent = liked ? "♥" : "♡";
+  }
+}
+
+function toggleFooterLike() {
+  const liked = hasLiked();
+  const nextCount = Math.max(0, getStoredLikeCount() + (liked ? -1 : 1));
+  window.localStorage.setItem(likeStorageKey, String(nextCount));
+  window.localStorage.setItem(likeActiveKey, liked ? "false" : "true");
+  renderFooterLike();
+}
+
 async function loadTraces() {
   try {
     const response = await fetch("./traces/framework_traces.json", { cache: "no-store" });
@@ -2653,6 +2691,8 @@ async function initApp() {
   scenarioSupport = document.getElementById("scenario-support");
   comparisonLanes = document.getElementById("comparison-lanes");
   scoreRationale = document.getElementById("score-rationale");
+  footerLikeBtn = document.getElementById("footer-like-btn");
+  footerLikeCount = document.getElementById("footer-like-count");
 
   const requiredElements = [
     ["framework-catalog-cards", frameworkCatalogCards],
@@ -2667,7 +2707,9 @@ async function initApp() {
     ["scenario-headline", scenarioHeadline],
     ["scenario-support", scenarioSupport],
     ["comparison-lanes", comparisonLanes],
-    ["score-rationale", scoreRationale]
+    ["score-rationale", scoreRationale],
+    ["footer-like-btn", footerLikeBtn],
+    ["footer-like-count", footerLikeCount]
   ];
 
   const missingIds = requiredElements.filter(([, element]) => !element).map(([id]) => id);
@@ -2678,6 +2720,8 @@ async function initApp() {
   await loadTraces();
   prevStageBtn.addEventListener("click", previousStage);
   stepDemoBtn.addEventListener("click", nextStage);
+  footerLikeBtn.addEventListener("click", toggleFooterLike);
+  renderFooterLike();
   render();
 }
 
