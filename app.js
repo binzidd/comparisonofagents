@@ -17,7 +17,7 @@ const catalogItems = [
       "Less natural for free-form debate",
       "Interop is not the main abstraction"
     ],
-    source: "https://docs.langchain.com/oss/python/langchain/multi-agent"
+    source: "https://langchain-ai.github.io/langgraph/"
   },
   {
     id: "openai-agents",
@@ -37,7 +37,7 @@ const catalogItems = [
       "Cross-system interop needs extra work",
       "Complex long workflows may need more orchestration"
     ],
-    source: "https://developers.openai.com/api/docs/guides/agents-sdk"
+    source: "https://platform.openai.com/docs/guides/agents"
   },
   {
     id: "ag2",
@@ -117,7 +117,7 @@ const catalogItems = [
       "Needs workflow thinking",
       "Requires UX work for stakeholder clarity"
     ],
-    source: "https://developers.llamaindex.ai/python/llamaagents/workflows/"
+    source: "https://docs.llamaindex.ai/en/stable/module_guides/workflow/"
   },
   {
     id: "mastra",
@@ -2592,6 +2592,7 @@ function renderComparison() {
       const laneIndex = Number(event.target.dataset.lane);
       compareIds[laneIndex] = event.target.value;
       renderComparison();
+      renderScoreRationale();
     });
   });
 }
