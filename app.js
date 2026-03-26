@@ -901,7 +901,6 @@ function getTraceTotals(frameworkId) {
 function cardMarkup(item) {
   return `
     <article class="catalog-card ${item.kind}">
-      <span class="catalog-badge ${item.kind}">${item.kind === "framework" ? "Framework" : item.kind === "protocol" ? "Protocol" : "Adjacent"}</span>
       <h4>${item.name}</h4>
       <p class="catalog-tagline">${item.tagline}</p>
       <p>${item.summary}</p>
