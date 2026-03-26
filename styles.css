@@ -36,7 +36,7 @@ a {
 }
 
 .page-shell {
-  width: min(1880px, calc(100% - 20px));
+  width: min(2160px, calc(100% - 20px));
   margin: 0 auto;
   padding: 28px 0 56px;
 }
@@ -500,7 +500,7 @@ select {
 }
 
 .comparison-lanes {
-  grid-template-columns: repeat(2, minmax(860px, 1fr));
+  grid-template-columns: repeat(2, minmax(980px, 1fr));
   overflow-x: auto;
   align-items: start;
   padding-bottom: 8px;
@@ -509,7 +509,7 @@ select {
 .compare-lane {
   display: grid;
   gap: 18px;
-  min-width: 860px;
+  min-width: 980px;
 }
 
 .lane-top {
@@ -717,7 +717,7 @@ select {
   font-family: "IBM Plex Sans", sans-serif;
   font-size: 0.92rem;
   line-height: 1.55;
-  color: #dfe8f8;
+  color: #ffffff;
 }
 
 .code-block-highlight {
@@ -736,7 +736,7 @@ select {
 }
 
 .code-line-no {
-  color: rgba(181, 198, 223, 0.54);
+  color: rgba(255, 255, 255, 0.52);
   text-align: right;
   user-select: none;
 }
@@ -869,7 +869,7 @@ select {
 
 .specialist-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -1167,7 +1167,7 @@ select {
   }
 
   .specialist-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .step-arrow {
@@ -1197,6 +1197,10 @@ select {
   }
 
   .lane-bottom {
+    grid-template-columns: 1fr;
+  }
+
+  .specialist-grid {
     grid-template-columns: 1fr;
   }
 }

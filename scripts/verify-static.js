@@ -19,6 +19,7 @@ const html = fs.readFileSync(htmlPath, "utf8");
 const requiredIds = [
   "framework-catalog-cards",
   "stage-chip-row",
+  "prev-stage-btn",
   "step-demo-btn",
   "framework-summary",
   "skeleton-caption",

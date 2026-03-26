@@ -686,6 +686,7 @@ let selectedQuestionId = "retention";
 let frameworkCatalogCards;
 let policyCasePanel;
 let stageChipRow;
+let prevStageBtn;
 let stepDemoBtn;
 let frameworkSummary;
 let appStatus;
@@ -2432,6 +2433,11 @@ function nextStage() {
   render();
 }
 
+function previousStage() {
+  currentStage = (currentStage - 1 + stages.length) % stages.length;
+  render();
+}
+
 function render() {
   renderCatalog();
   renderPolicyCase();
@@ -2459,6 +2465,7 @@ async function initApp() {
   frameworkCatalogCards = document.getElementById("framework-catalog-cards");
   policyCasePanel = document.getElementById("policy-case-panel");
   stageChipRow = document.getElementById("stage-chip-row");
+  prevStageBtn = document.getElementById("prev-stage-btn");
   stepDemoBtn = document.getElementById("step-demo-btn");
   frameworkSummary = document.getElementById("framework-summary");
   appStatus = document.getElementById("app-status");
@@ -2473,6 +2480,7 @@ async function initApp() {
     ["framework-catalog-cards", frameworkCatalogCards],
     ["policy-case-panel", policyCasePanel],
     ["stage-chip-row", stageChipRow],
+    ["prev-stage-btn", prevStageBtn],
     ["step-demo-btn", stepDemoBtn],
     ["framework-summary", frameworkSummary],
     ["app-status", appStatus],
@@ -2490,6 +2498,7 @@ async function initApp() {
   }
 
   await loadTraces();
+  prevStageBtn.addEventListener("click", previousStage);
   stepDemoBtn.addEventListener("click", nextStage);
   render();
 }
