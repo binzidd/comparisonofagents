@@ -5,8 +5,9 @@ const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
 const cssPath = path.join(root, "styles.css");
 const jsPath = path.join(root, "app.js");
+const tracePath = path.join(root, "traces", "framework_traces.json");
 
-const requiredFiles = [htmlPath, cssPath, jsPath];
+const requiredFiles = [htmlPath, cssPath, jsPath, tracePath];
 requiredFiles.forEach((filePath) => {
   if (!fs.existsSync(filePath)) {
     throw new Error(`Missing required file: ${path.basename(filePath)}`);

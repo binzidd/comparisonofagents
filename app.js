@@ -695,6 +695,7 @@ let scenarioHeadline;
 let scenarioSupport;
 let comparisonLanes;
 let scoreRationale;
+let traceStore = null;
 
 function getStage() {
   return stages[currentStage];
@@ -706,6 +707,10 @@ function getFramework(id) {
 
 function getQuestion() {
   return policyQuestions.find((item) => item.id === selectedQuestionId);
+}
+
+function getTraceStage(frameworkId, stageId) {
+  return traceStore?.questions?.[selectedQuestionId]?.frameworks?.[frameworkId]?.stages?.[stageId] || null;
 }
 
 function cardMarkup(item) {
@@ -802,6 +807,20 @@ function renderSummary() {
   `;
   appStatus.textContent = `${stage.label} active. ${stage.caption}`;
   skeletonCaption.textContent = "Reference only: principal routes work to specialists, reviewer challenges weak claims, and output returns one policy answer.";
+}
+
+function renderSkeletonMini() {
+  return `
+    <div class="skeleton-mini">
+      <article><span>Principal</span><strong>Route question</strong></article>
+      <div class="skeleton-mini-arrow">↓</div>
+      <article><span>Specialists</span><strong>Check policy clauses</strong></article>
+      <div class="skeleton-mini-arrow">↓</div>
+      <article><span>Review</span><strong>Challenge weak claims</strong></article>
+      <div class="skeleton-mini-arrow">↓</div>
+      <article><span>Output</span><strong>Return one answer</strong></article>
+    </div>
+  `;
 }
 
 function getAgentRole(agentId) {
@@ -2037,6 +2056,7 @@ function renderCodeHint(framework, stageId) {
   const codeSourceHref = framework ? framework.source : policyPack.source;
   const implementationCode = frameworkExampleCode(framework, question);
   const highlightedImplementation = renderHighlightedCode(implementationCode, stageId);
+  const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
   return `
     <section class="code-hint">
       <div class="code-panel">
@@ -2046,6 +2066,15 @@ function renderCodeHint(framework, stageId) {
         </div>
         <pre><code>${profile.evalCode}</code></pre>
       </div>
+      ${traceStage ? `
+        <div class="code-panel">
+          <div class="code-hint-head">
+            <strong>Python trace state</strong>
+            <span>${traceStage.runtime}</span>
+          </div>
+          <pre><code>${escapeHtml(JSON.stringify(traceStage.state, null, 2))}</code></pre>
+        </div>
+      ` : ""}
       <div class="code-panel code-panel-wide">
         <div class="code-hint-head">
           <strong>Framework implementation for this policy checker</strong>
@@ -2053,6 +2082,15 @@ function renderCodeHint(framework, stageId) {
         </div>
         <pre><code class="code-block-highlight">${highlightedImplementation}</code></pre>
       </div>
+      ${traceStage ? `
+        <div class="code-panel code-panel-wide">
+          <div class="code-hint-head">
+            <strong>Python trace output</strong>
+            <span>${stageId}</span>
+          </div>
+          <pre><code>${escapeHtml(JSON.stringify(traceStage.output, null, 2))}</code></pre>
+        </div>
+      ` : ""}
     </section>
   `;
 }
@@ -2065,7 +2103,10 @@ function evidenceClauseForLink(linkId) {
 }
 
 function renderMessageList(framework, stageId) {
-  const messages = Object.entries(graphMessageMap(framework, stageId));
+  const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
+  const messages = traceStage
+    ? traceStage.messages.map((message) => [message.link_id, message.message])
+    : Object.entries(graphMessageMap(framework, stageId));
   return `
     <div class="message-list">
       ${messages
@@ -2086,7 +2127,11 @@ function renderMessageList(framework, stageId) {
 }
 
 function renderGraphMap({ framework, activeAgents, stageId, color, neutral = false }) {
-  const stageHighlights = framework ? flowHighlights(framework.pattern, stageId) : {
+  const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
+  const stageHighlights = traceStage ? {
+    links: traceStage.active_links,
+    messages: traceStage.messages.map((item) => item.message)
+  } : framework ? flowHighlights(framework.pattern, stageId) : {
     links: frameworkBaseLinks(null),
     messages: []
   };
@@ -2253,15 +2298,7 @@ function renderSkeleton() {
       <strong>Static reference structure</strong>
       <p>Principal routes work to specialists, reviewer challenges weak claims, and output returns one policy answer.</p>
     </div>
-    ${renderBoard({
-      framework: null,
-      color: "#7d6f62",
-      activeAgents: new Set(agentRoster.map((agent) => agent.id)),
-      activeTools: new Set(["policy_text", "question_bank", "clause_index", "evidence_matrix", "answer_builder"]),
-      messages: ["Reference only: use the framework panes below to step through how orchestration changes at each stage."],
-      stageId: "review",
-      neutral: true
-    })}
+    ${renderSkeletonMini()}
   `;
 }
 
@@ -2316,7 +2353,7 @@ function renderScoreRationale() {
                         : item.label === "Observability" || item.label === "Replayability" || item.label === "Human Review"
                           ? profile.cards[2].value
                           : profile.cards[3].value;
-                    return `<li><strong>${item.label}:</strong> ${reason}</li>`;
+                    return `<li><strong>${item.label}:</strong> ${reason} Score: ${item.value}/5.</li>`;
                   })
                   .join("")}
               </ul>
@@ -2405,7 +2442,20 @@ function render() {
   renderScoreRationale();
 }
 
-function initApp() {
+async function loadTraces() {
+  try {
+    const response = await fetch("./traces/framework_traces.json", { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Trace file returned ${response.status}`);
+    }
+    traceStore = await response.json();
+  } catch (error) {
+    traceStore = null;
+    console.error("Trace load failed", error);
+  }
+}
+
+async function initApp() {
   frameworkCatalogCards = document.getElementById("framework-catalog-cards");
   policyCasePanel = document.getElementById("policy-case-panel");
   stageChipRow = document.getElementById("stage-chip-row");
@@ -2439,6 +2489,7 @@ function initApp() {
     throw new Error(`Missing DOM nodes: ${missingIds.join(", ")}`);
   }
 
+  await loadTraces();
   stepDemoBtn.addEventListener("click", nextStage);
   render();
 }
