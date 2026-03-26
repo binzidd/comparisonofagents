@@ -375,14 +375,14 @@ select {
 }
 
 .step-item.active {
-  background: rgba(31, 95, 91, 0.12);
-  border-color: rgba(31, 95, 91, 0.26);
+  background: rgba(40, 112, 255, 0.12);
+  border-color: rgba(40, 112, 255, 0.28);
   color: var(--text);
 }
 
 .step-item.complete {
-  background: rgba(170, 59, 42, 0.1);
-  border-color: rgba(170, 59, 42, 0.22);
+  background: rgba(120, 128, 140, 0.12);
+  border-color: rgba(120, 128, 140, 0.22);
   color: var(--text);
 }
 
@@ -486,20 +486,20 @@ select {
 .graph-map svg {
   width: 100%;
   height: auto;
-  color: color-mix(in srgb, var(--framework-color) 72%, #5d5145);
+  color: rgba(40, 112, 255, 0.72);
   max-height: 700px;
 }
 
 .graph-edge {
-  stroke: rgba(93, 81, 69, 0.2);
+  stroke: rgba(128, 134, 144, 0.32);
   stroke-width: 0.62;
-  color: rgba(93, 81, 69, 0.2);
+  color: rgba(128, 134, 144, 0.32);
 }
 
 .graph-edge.active {
-  stroke: color-mix(in srgb, var(--framework-color) 78%, #5d5145);
+  stroke: rgba(40, 112, 255, 0.72);
   stroke-width: 1.12;
-  color: color-mix(in srgb, var(--framework-color) 78%, #5d5145);
+  color: rgba(40, 112, 255, 0.72);
 }
 
 .graph-edge-label rect {
@@ -517,8 +517,8 @@ select {
 }
 
 .graph-node circle {
-  fill: rgba(255, 255, 255, 0.95);
-  stroke: rgba(31, 26, 22, 0.18);
+  fill: rgba(248, 249, 251, 0.95);
+  stroke: rgba(158, 164, 174, 0.55);
   stroke-width: 1.1;
 }
 
@@ -530,27 +530,9 @@ select {
 }
 
 .graph-node.active circle {
+  fill: rgba(40, 112, 255, 0.12);
+  stroke: rgba(40, 112, 255, 0.72);
   stroke-width: 1.6;
-}
-
-.graph-node.role-principal.active circle {
-  fill: color-mix(in srgb, var(--framework-color) 18%, white);
-  stroke: color-mix(in srgb, var(--framework-color) 68%, rgba(31, 26, 22, 0.18));
-}
-
-.graph-node.role-specialist.active circle {
-  fill: rgba(31, 95, 91, 0.15);
-  stroke: rgba(31, 95, 91, 0.48);
-}
-
-.graph-node.role-reviewer.active circle {
-  fill: rgba(207, 143, 46, 0.18);
-  stroke: rgba(207, 143, 46, 0.52);
-}
-
-.graph-node.role-decision.active circle {
-  fill: rgba(170, 59, 42, 0.16);
-  stroke: rgba(170, 59, 42, 0.48);
 }
 
 .message-list {
@@ -650,8 +632,8 @@ select {
 }
 
 .flow-section.active {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: color-mix(in srgb, var(--framework-color) 18%, rgba(31, 26, 22, 0.08));
+  background: rgba(40, 112, 255, 0.06);
+  border-color: rgba(40, 112, 255, 0.22);
 }
 
 .flow-section-head {
@@ -754,28 +736,9 @@ select {
 
 .flow-agent.active {
   transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--framework-color) 45%, rgba(31, 26, 22, 0.12));
+  background: rgba(40, 112, 255, 0.08);
+  border-color: rgba(40, 112, 255, 0.34);
   box-shadow: 0 16px 30px rgba(53, 34, 18, 0.14);
-}
-
-.flow-agent.role-principal.active {
-  background: color-mix(in srgb, var(--framework-color) 18%, white);
-  border-color: color-mix(in srgb, var(--framework-color) 62%, rgba(31, 26, 22, 0.12));
-}
-
-.flow-agent.role-specialist.active {
-  background: rgba(31, 95, 91, 0.12);
-  border-color: rgba(31, 95, 91, 0.35);
-}
-
-.flow-agent.role-reviewer.active {
-  background: rgba(207, 143, 46, 0.15);
-  border-color: rgba(207, 143, 46, 0.4);
-}
-
-.flow-agent.role-decision.active {
-  background: rgba(170, 59, 42, 0.13);
-  border-color: rgba(170, 59, 42, 0.38);
 }
 
 .tool-ribbon {
@@ -796,8 +759,8 @@ select {
 }
 
 .tool-chip.active {
-  background: color-mix(in srgb, var(--framework-color) 14%, white);
-  border-color: color-mix(in srgb, var(--framework-color) 34%, rgba(31, 26, 22, 0.12));
+  background: rgba(40, 112, 255, 0.1);
+  border-color: rgba(40, 112, 255, 0.3);
   color: var(--text);
   animation: pop-in 260ms ease;
 }
