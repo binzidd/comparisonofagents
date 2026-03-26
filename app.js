@@ -1832,9 +1832,23 @@ class Decision(BaseModel):
     confidence: float
     reviewer_notes: list[str]
 
-principal = Agent("openai:gpt-4.1", result_type=Decision)
-specialist = Agent("openai:gpt-4.1", result_type=Finding)
-reviewer = Agent("openai:gpt-4.1", result_type=list[str])
+MODEL = "openai:gpt-4.1"
+
+principal = Agent(
+    MODEL,
+    result_type=Decision,
+    system_prompt="Return a policy answer with citations, confidence, and reviewer notes.",
+)
+specialist = Agent(
+    MODEL,
+    result_type=Finding,
+    system_prompt="Return one structured finding with a citation and precise conclusion.",
+)
+reviewer = Agent(
+    MODEL,
+    result_type=list[str],
+    system_prompt="Return reviewer notes when claims are unsupported or missing caveats.",
+)
 
 # [review]
 case = PolicyCase(
@@ -2196,6 +2210,9 @@ function renderCodeHint(framework, stageId) {
   const implementationCode = frameworkExampleCode(framework, getQuestion());
   const highlightedImplementation = renderHighlightedCode(implementationCode, stageId);
   const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
+  const frameworkNote = framework
+    ? `${framework.name} example and ${traceStage?.runtime || framework.pattern} harness view. Provider strings in code examples are not the same thing as the orchestration framework.`
+    : "Reference-only implementation view.";
   return `
     <section class="code-hint">
       <div class="code-panel code-panel-wide">
@@ -2212,7 +2229,7 @@ function renderCodeHint(framework, stageId) {
             <span>${traceStage.metrics.time_ms} ms · ${traceStage.metrics.token_total_estimate} tok · $${traceStage.metrics.usd_cost_estimate}</span>
           </div>
           <pre><code>${escapeHtml(JSON.stringify(traceStage.output, null, 2))}</code></pre>
-          <p class="trace-footnote">Executed by the repo’s Python comparison harness for this framework shape, not the official SDK runtime.</p>
+          <p class="trace-footnote">${frameworkNote} Executed by the repo’s Python comparison harness for this framework shape, not the official SDK runtime.</p>
         </div>
       ` : ""}
     </section>
