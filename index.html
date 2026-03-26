@@ -19,29 +19,39 @@
           <p class="eyebrow">Agent-to-Agent Comparison Studio</p>
           <h1>Compare frameworks for principal-agent systems.</h1>
         </div>
-        <section class="hero-panel">
-          <div class="panel-header">
-            <span>Focus</span>
-            <span>Framework choice</span>
-          </div>
-          <div class="signal-grid">
-            <article>
-              <span class="signal-label">Principal agent</span>
-              <strong>Owns routing and final verdict</strong>
-            </article>
-            <article>
-              <span class="signal-label">Specialists</span>
-              <strong>Compliance, security, legal, finance</strong>
-            </article>
-            <article>
-              <span class="signal-label">Reviewer</span>
-              <strong>Challenges weak assumptions</strong>
-            </article>
-          </div>
-        </section>
       </header>
 
       <main>
+        <section class="section" id="catalog-section">
+          <div class="section-heading">
+            <p class="eyebrow">Catalog</p>
+            <h2>Frameworks in scope</h2>
+          </div>
+
+          <div class="catalog-legend">
+            <span class="legend-pill framework">Framework</span>
+            <span class="legend-pill adjacent">Adjacent Standard</span>
+          </div>
+
+          <div class="catalog-stack">
+            <section class="catalog-group">
+              <div class="catalog-head">
+                <h3>Frameworks</h3>
+                <p>Included in the interactive comparison.</p>
+              </div>
+              <div class="catalog-grid" id="framework-catalog-cards"></div>
+            </section>
+
+            <section class="catalog-group">
+              <div class="catalog-head">
+                <h3>Adjacent Standards</h3>
+                <p>Useful context, but not shown as framework demos.</p>
+              </div>
+              <div class="catalog-grid" id="adjacent-catalog-cards"></div>
+            </section>
+          </div>
+        </section>
+
         <section class="section lab-section" id="comparison-lab">
           <div class="section-heading">
             <p class="eyebrow">Interactive Lab</p>
@@ -53,18 +63,12 @@
 
           <div class="lab-toolbar">
             <div class="toolbar-group">
-              <span class="control-label">Audience</span>
-              <div class="chip-row" id="audience-chip-row"></div>
-            </div>
-
-            <div class="toolbar-group">
               <span class="control-label">Stage</span>
               <div class="chip-row" id="stage-chip-row"></div>
             </div>
 
             <div class="toolbar-actions">
-              <button class="primary-btn" id="play-demo-btn">Play Both Demos</button>
-              <button class="secondary-btn compact" id="step-demo-btn">Advance</button>
+              <button class="secondary-btn compact" id="step-demo-btn">Next Stage</button>
             </div>
           </div>
 
@@ -83,45 +87,6 @@
           </section>
 
           <div class="comparison-lanes" id="comparison-lanes"></div>
-        </section>
-
-        <section class="section" id="catalog-section">
-          <div class="section-heading">
-            <p class="eyebrow">Catalog</p>
-            <h2>Frameworks, protocols, and adjacent standards</h2>
-          </div>
-
-          <div class="catalog-legend">
-            <span class="legend-pill framework">Framework</span>
-            <span class="legend-pill protocol">Protocol</span>
-            <span class="legend-pill adjacent">Adjacent Standard</span>
-          </div>
-
-          <div class="catalog-stack">
-            <section class="catalog-group">
-              <div class="catalog-head">
-                <h3>Frameworks</h3>
-                <p>Included in the interactive demos.</p>
-              </div>
-              <div class="catalog-grid" id="framework-catalog-cards"></div>
-            </section>
-
-            <section class="catalog-group">
-              <div class="catalog-head">
-                <h3>Protocols</h3>
-                <p>Useful for interoperability, but not used as demo frameworks.</p>
-              </div>
-              <div class="catalog-grid" id="protocol-catalog-cards"></div>
-            </section>
-
-            <section class="catalog-group">
-              <div class="catalog-head">
-                <h3>Adjacent Standards</h3>
-                <p>Important infrastructure that complements the frameworks.</p>
-              </div>
-              <div class="catalog-grid" id="adjacent-catalog-cards"></div>
-            </section>
-          </div>
         </section>
       </main>
     </div>

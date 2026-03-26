@@ -266,57 +266,39 @@ const policyQuestions = [
   }
 ];
 
-const audiences = [
-  {
-    id: "business",
-    label: "Business View",
-    helper: "Shows who owns the decision and where the review gate lives."
-  },
-  {
-    id: "technical",
-    label: "Technical View",
-    helper: "Shows state movement, tool access, and orchestration style."
-  }
-];
-
 const stages = [
   {
     id: "intake",
     label: "Intake",
-    captionBusiness: "The principal agent turns the selected policy question into a reviewable case.",
-    captionTechnical: "Supervisor loads the policy corpus, chosen question, and expected answer shape into state.",
+    caption: "Supervisor loads the policy corpus, chosen question, and expected answer shape into state.",
     activeAgents: ["principal"],
     activeTools: ["policy_text", "question_bank"]
   },
   {
     id: "review",
     label: "Review",
-    captionBusiness: "Specialists pull different clauses and test whether the answer is supported.",
-    captionTechnical: "Compliance, security, legal, and data ops agents run clause retrieval and scoped checks in parallel.",
+    caption: "Compliance, security, legal, and data ops agents run clause retrieval and scoped checks in parallel.",
     activeAgents: ["principal", "compliance", "security", "legal", "finance"],
     activeTools: ["clause_index", "rights_matrix", "retention_map", "exception_checker"]
   },
   {
     id: "challenge",
     label: "Challenge",
-    captionBusiness: "A reviewer asks whether the draft answer overclaims, misses conditions, or loses policy nuance.",
-    captionTechnical: "Reviewer checks unsupported claims, clause coverage, and contradiction across agent outputs.",
+    caption: "Reviewer checks unsupported claims, clause coverage, and contradiction across agent outputs.",
     activeAgents: ["compliance", "security", "legal", "finance", "reviewer"],
     activeTools: ["evidence_matrix", "claim_checker"]
   },
   {
     id: "synthesis",
     label: "Synthesis",
-    captionBusiness: "The principal agent turns the evidence into one answer with caveats and cited support.",
-    captionTechnical: "Supervisor merges clause evidence, reviewer objections, and structured findings into one answer object.",
+    caption: "Supervisor merges clause evidence, reviewer objections, and structured findings into one answer object.",
     activeAgents: ["principal", "reviewer", "security", "legal"],
     activeTools: ["answer_builder", "evidence_matrix"]
   },
   {
     id: "verdict",
     label: "Verdict",
-    captionBusiness: "The system returns a final policy answer, confidence level, and what a human should still verify.",
-    captionTechnical: "Supervisor emits a structured answer with citations, confidence, and reviewer notes.",
+    caption: "Supervisor emits a structured answer with citations, confidence, and reviewer notes.",
     activeAgents: ["principal", "reviewer", "decision"],
     activeTools: ["answer_builder", "confidence_score"]
   }
@@ -343,6 +325,14 @@ const toolCatalog = {
   claim_checker: "Claim checker",
   answer_builder: "Answer builder",
   confidence_score: "Confidence score"
+};
+
+const stageTheme = {
+  intake: "86, 132, 255",
+  review: "68, 181, 129",
+  challenge: "255, 168, 76",
+  synthesis: "175, 110, 255",
+  verdict: "255, 96, 134"
 };
 
 const linkIds = [
@@ -689,19 +679,14 @@ const frameworkPatterns = {
   }
 };
 
-let audienceId = "technical";
 let currentStage = 0;
-let autoplay = null;
 let compareIds = ["langgraph", "openai-agents"];
 let selectedQuestionId = "retention";
 
 let frameworkCatalogCards;
-let protocolCatalogCards;
 let adjacentCatalogCards;
 let policyCasePanel;
-let audienceChipRow;
 let stageChipRow;
-let playDemoBtn;
 let stepDemoBtn;
 let frameworkSummary;
 let appStatus;
@@ -710,10 +695,6 @@ let skeletonBoard;
 let scenarioHeadline;
 let scenarioSupport;
 let comparisonLanes;
-
-function getAudience() {
-  return audiences.find((item) => item.id === audienceId);
-}
 
 function getStage() {
   return stages[currentStage];
@@ -741,7 +722,6 @@ function cardMarkup(item) {
 
 function renderCatalog() {
   frameworkCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "framework").map(cardMarkup).join("");
-  protocolCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "protocol").map(cardMarkup).join("");
   adjacentCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "adjacent").map(cardMarkup).join("");
 }
 
@@ -805,25 +785,6 @@ function renderPolicyCase() {
   });
 }
 
-function renderAudienceChips() {
-  audienceChipRow.innerHTML = audiences
-    .map(
-      (audience) => `
-        <button class="chip ${audience.id === audienceId ? "active" : ""}" data-audience="${audience.id}">
-          ${audience.label}
-        </button>
-      `
-    )
-    .join("");
-
-  audienceChipRow.querySelectorAll("[data-audience]").forEach((button) => {
-    button.addEventListener("click", () => {
-      audienceId = button.dataset.audience;
-      render();
-    });
-  });
-}
-
 function renderStageChips() {
   stageChipRow.innerHTML = stages
     .map(
@@ -844,19 +805,18 @@ function renderStageChips() {
 }
 
 function renderSummary() {
-  const audience = getAudience();
   const stage = getStage();
   const question = getQuestion();
 
   scenarioHeadline.textContent = "Public policy checker across frameworks";
-  scenarioSupport.textContent = `${audience.helper} Shared question: ${question.label}`;
+  scenarioSupport.textContent = `Click through one stage at a time to compare orchestration, eval, and risk handling for the same question: ${question.label}`;
   frameworkSummary.innerHTML = `
     <div class="summary-pill">Policy: ${policyPack.title}</div>
     <div class="summary-pill">Question: ${question.label}</div>
     <div class="summary-pill">Stage: ${stage.label}</div>
   `;
-  appStatus.textContent = `${stage.label} active. ${audience.id === "business" ? stage.captionBusiness : stage.captionTechnical}`;
-  skeletonCaption.textContent = audience.id === "business" ? stage.captionBusiness : stage.captionTechnical;
+  appStatus.textContent = `${stage.label} active. ${stage.caption}`;
+  skeletonCaption.textContent = "Reference only: principal routes work to specialists, reviewer challenges weak claims, and output returns one policy answer.";
 }
 
 function getAgentRole(agentId) {
@@ -917,7 +877,7 @@ function renderStepTrail() {
         .map((stage, index) => {
           const activeClass = index === currentStage ? "active" : index < currentStage ? "complete" : "";
           return `
-            <div class="step-item ${activeClass}">
+            <div class="step-item ${activeClass}" style="--item-rgb:${stageTheme[stage.id]}">
               <span class="step-number">${index + 1}</span>
               <span class="step-name">${stage.label}</span>
             </div>
@@ -2098,7 +2058,6 @@ function renderFrameworkScorecard(framework) {
 
 function renderCodeHint(framework, stageId) {
   const profile = frameworkTechProfile(framework);
-  const stageCode = stageImplementationCode(framework, stageId);
   const question = getQuestion();
   const clauseList = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId].title).join(", ");
   const codeSourceLabel = framework ? framework.name : "Reference skeleton";
@@ -2107,24 +2066,12 @@ function renderCodeHint(framework, stageId) {
   const highlightedImplementation = renderHighlightedCode(implementationCode, implementationHighlightLines(framework, stageId));
   return `
     <section class="code-hint">
-      <div class="code-hint-grid">
-        <div class="code-panel">
-          <div class="code-hint-head">
-            <strong>Current step code</strong>
-            <span>${stageId}</span>
-          </div>
-          <pre><code>question = "${question.prompt}"
-relevant_clauses = [${question.relevantClauses.map((clauseId) => `"${clauseId}"`).join(", ")}]
-
-${stageCode}</code></pre>
+      <div class="code-panel">
+        <div class="code-hint-head">
+          <strong>Eval + controls</strong>
+          <span>${clauseList}</span>
         </div>
-        <div class="code-panel">
-          <div class="code-hint-head">
-            <strong>Eval + controls</strong>
-            <span>${clauseList}</span>
-          </div>
-          <pre><code>${profile.evalCode}</code></pre>
-        </div>
+        <pre><code>${profile.evalCode}</code></pre>
       </div>
       <div class="code-panel code-panel-wide">
         <div class="code-hint-head">
@@ -2220,10 +2167,9 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
 }
 
 function renderBoard({ framework, color, activeAgents, activeTools, messages, stageId, neutral = false }) {
-  const stageOrder = getStageOrder(stageId);
   const profile = frameworkTechProfile(framework);
   return `
-    <div class="flow-board ${neutral ? "neutral" : ""}" style="--framework-color:${color}">
+    <div class="flow-board ${neutral ? "neutral" : ""}" style="--framework-color:${color}; --stage-rgb:${stageTheme[stageId] || stageTheme.review}">
       <div class="tool-ribbon tool-ribbon-top">
         ${Object.entries(toolCatalog)
           .map(
@@ -2237,14 +2183,12 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
       <section class="flow-section ${activeAgents.has("principal") ? "active" : ""}">
         <div class="flow-section-head">
           <span class="flow-section-label">Principal</span>
-          ${stageOrder.principal ? `<span class="flow-stage-chip">${stageOrder.principal}</span>` : ""}
         </div>
         ${agentRoster
           .filter((agent) => agent.id === "principal")
           .map(
             (agent) => `
               <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
-                ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
                 <span>${agent.sublabel}</span>
                 <strong>${agent.label}</strong>
               </article>
@@ -2261,7 +2205,6 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
       <section class="flow-section ${["compliance", "security", "legal", "finance"].some((id) => activeAgents.has(id)) ? "active" : ""}">
         <div class="flow-section-head">
           <span class="flow-section-label">Specialists</span>
-          ${["compliance", "security", "legal", "finance"].some((id) => stageOrder[id]) ? `<span class="flow-stage-chip">${stageOrder.compliance || stageOrder.security || stageOrder.legal || stageOrder.finance}</span>` : ""}
         </div>
         <div class="specialist-grid">
           ${agentRoster
@@ -2269,7 +2212,6 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
             .map(
               (agent) => `
                 <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
-                  ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
                   <span>${agent.sublabel}</span>
                   <strong>${agent.label}</strong>
                 </article>
@@ -2287,14 +2229,12 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
       <section class="flow-section ${activeAgents.has("reviewer") ? "active" : ""}">
         <div class="flow-section-head">
           <span class="flow-section-label">Review</span>
-          ${stageOrder.reviewer ? `<span class="flow-stage-chip">${stageOrder.reviewer}</span>` : ""}
         </div>
         ${agentRoster
           .filter((agent) => agent.id === "reviewer")
           .map(
             (agent) => `
               <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
-                ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
                 <span>${agent.sublabel}</span>
                 <strong>${agent.label}</strong>
               </article>
@@ -2311,14 +2251,12 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
       <section class="flow-section ${activeAgents.has("decision") ? "active" : ""}">
         <div class="flow-section-head">
           <span class="flow-section-label">Output</span>
-          ${stageOrder.decision ? `<span class="flow-stage-chip">${stageOrder.decision}</span>` : ""}
         </div>
         ${agentRoster
           .filter((agent) => agent.id === "decision")
           .map(
             (agent) => `
               <article class="flow-agent role-${getAgentRole(agent.id)} ${activeAgents.has(agent.id) ? "active" : ""}">
-                ${activeAgents.has(agent.id) && stageOrder[agent.id] ? `<span class="agent-progress-badge">${stageOrder[agent.id]}</span>` : ""}
                 <span>${agent.sublabel}</span>
                 <strong>${agent.label}</strong>
               </article>
@@ -2337,25 +2275,20 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 }
 
 function renderSkeleton() {
-  const stage = getStage();
-  const question = getQuestion();
   skeletonBoard.innerHTML = `
-    ${renderStepTrail()}
-    ${renderFrameworkTechStrip(null)}
-    <div class="lane-role-box lane-role-box-top">
-      <strong>${stage.label}</strong>
-      <p>${stage.captionTechnical} Current question: ${question.label}</p>
+    <div class="lane-role-box lane-role-box-top" style="--stage-rgb:${stageTheme.review}">
+      <strong>Static reference structure</strong>
+      <p>Principal routes work to specialists, reviewer challenges weak claims, and output returns one policy answer.</p>
     </div>
     ${renderBoard({
       framework: null,
       color: "#7d6f62",
-      activeAgents: new Set(stage.activeAgents),
-      activeTools: new Set(stage.activeTools),
-      messages: ["Reference structure only: every framework answers the same public-policy question, but with different state, eval, and context behavior."],
-      stageId: stage.id,
+      activeAgents: new Set(agentRoster.map((agent) => agent.id)),
+      activeTools: new Set(["policy_text", "question_bank", "clause_index", "evidence_matrix", "answer_builder"]),
+      messages: ["Reference only: use the framework panes below to step through how orchestration changes at each stage."],
+      stageId: "review",
       neutral: true
     })}
-    ${renderCodeHint(null, stage.id)}
   `;
 }
 
@@ -2385,12 +2318,11 @@ function renderFrameworkAnalysis(framework) {
 
 function laneMarkup(frameworkId, laneIndex) {
   const framework = getFramework(frameworkId);
-  const audience = getAudience();
   const stage = getStage();
   const highlights = flowHighlights(framework.pattern, stage.id);
 
   return `
-    <article class="compare-lane">
+    <article class="compare-lane" style="--stage-rgb:${stageTheme[stage.id]}">
       <div class="lane-top">
         <div>
           <p class="eyebrow">Demo ${laneIndex + 1}</p>
@@ -2414,7 +2346,7 @@ function laneMarkup(frameworkId, laneIndex) {
 
       <div class="lane-role-box lane-role-box-top">
         <strong>${stage.label}</strong>
-        <p>${audience.id === "business" ? highlights.business : highlights.technical}</p>
+        <p>${highlights.technical}</p>
       </div>
 
       ${renderGraphMap({
@@ -2451,22 +2383,9 @@ function nextStage() {
   render();
 }
 
-function toggleAutoplay() {
-  if (autoplay) {
-    window.clearInterval(autoplay);
-    autoplay = null;
-    playDemoBtn.textContent = "Play Both Demos";
-    return;
-  }
-
-  playDemoBtn.textContent = "Pause Demos";
-  autoplay = window.setInterval(nextStage, 4200);
-}
-
 function render() {
   renderCatalog();
   renderPolicyCase();
-  renderAudienceChips();
   renderStageChips();
   renderSummary();
   renderSkeleton();
@@ -2475,12 +2394,9 @@ function render() {
 
 function initApp() {
   frameworkCatalogCards = document.getElementById("framework-catalog-cards");
-  protocolCatalogCards = document.getElementById("protocol-catalog-cards");
   adjacentCatalogCards = document.getElementById("adjacent-catalog-cards");
   policyCasePanel = document.getElementById("policy-case-panel");
-  audienceChipRow = document.getElementById("audience-chip-row");
   stageChipRow = document.getElementById("stage-chip-row");
-  playDemoBtn = document.getElementById("play-demo-btn");
   stepDemoBtn = document.getElementById("step-demo-btn");
   frameworkSummary = document.getElementById("framework-summary");
   appStatus = document.getElementById("app-status");
@@ -2492,12 +2408,9 @@ function initApp() {
 
   const requiredElements = [
     ["framework-catalog-cards", frameworkCatalogCards],
-    ["protocol-catalog-cards", protocolCatalogCards],
     ["adjacent-catalog-cards", adjacentCatalogCards],
     ["policy-case-panel", policyCasePanel],
-    ["audience-chip-row", audienceChipRow],
     ["stage-chip-row", stageChipRow],
-    ["play-demo-btn", playDemoBtn],
     ["step-demo-btn", stepDemoBtn],
     ["framework-summary", frameworkSummary],
     ["app-status", appStatus],
@@ -2513,7 +2426,6 @@ function initApp() {
     throw new Error(`Missing DOM nodes: ${missingIds.join(", ")}`);
   }
 
-  playDemoBtn.addEventListener("click", toggleAutoplay);
   stepDemoBtn.addEventListener("click", nextStage);
   render();
 }
