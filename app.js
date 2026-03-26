@@ -802,6 +802,29 @@ function getTraceStage(frameworkId, stageId) {
   return traceStore?.questions?.[selectedQuestionId]?.frameworks?.[frameworkId]?.stages?.[stageId] || null;
 }
 
+function getTraceTotals(frameworkId) {
+  const frameworkStages = traceStore?.questions?.[selectedQuestionId]?.frameworks?.[frameworkId]?.stages;
+  if (!frameworkStages) {
+    return null;
+  }
+
+  return stages.reduce(
+    (totals, stage) => {
+      const metrics = frameworkStages[stage.id]?.metrics;
+      if (!metrics) {
+        return totals;
+      }
+
+      return {
+        timeMs: totals.timeMs + metrics.time_ms,
+        tokens: totals.tokens + metrics.token_total_estimate,
+        cost: totals.cost + metrics.usd_cost_estimate
+      };
+    },
+    { timeMs: 0, tokens: 0, cost: 0 }
+  );
+}
+
 function cardMarkup(item) {
   return `
     <article class="catalog-card ${item.kind}">
@@ -2210,11 +2233,13 @@ function renderCodeHint(framework, stageId) {
   const implementationCode = frameworkExampleCode(framework, getQuestion());
   const highlightedImplementation = renderHighlightedCode(implementationCode, stageId);
   const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
+  const traceTotals = framework ? getTraceTotals(framework.id) : null;
   const verdictMetricChips = stageId === "verdict" && traceStage?.metrics
     ? `
       <div class="verdict-metric-row" aria-label="Verdict metrics">
-        <span class="verdict-metric-chip">Total tokens: ${traceStage.metrics.token_total_estimate}</span>
-        <span class="verdict-metric-chip">Total cost: $${traceStage.metrics.usd_cost_estimate}</span>
+        <span class="verdict-metric-chip">Total time: ${traceTotals ? traceTotals.timeMs : traceStage.metrics.time_ms} ms</span>
+        <span class="verdict-metric-chip">Total tokens: ${traceTotals ? traceTotals.tokens : traceStage.metrics.token_total_estimate}</span>
+        <span class="verdict-metric-chip">Total cost: $${traceTotals ? traceTotals.cost.toFixed(5) : traceStage.metrics.usd_cost_estimate}</span>
       </div>
     `
     : "";
