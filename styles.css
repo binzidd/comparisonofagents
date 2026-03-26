@@ -168,43 +168,6 @@ p {
   margin-bottom: 18px;
 }
 
-/* Matrix mono font + signature green for Catalog, Interactive Lab, Score Rationale */
-#catalog-section .section-heading h2,
-#catalog-section .section-heading .eyebrow,
-#comparison-lab > .section-heading h2,
-#comparison-lab > .section-heading .eyebrow,
-#score-rationale .section-heading h3,
-#score-rationale .section-heading .eyebrow,
-.lab-block-label,
-.lab-block-num {
-  font-family: "IBM Plex Mono", monospace;
-  color: #00e676;
-}
-
-#catalog-section .section-heading h2,
-#comparison-lab > .section-heading h2 {
-  letter-spacing: -0.01em;
-  color: #00e676;
-}
-
-#score-rationale .section-heading h3 {
-  color: #00e676;
-}
-
-#catalog-section .section-heading .eyebrow,
-#comparison-lab > .section-heading .eyebrow,
-#score-rationale .section-heading .eyebrow {
-  letter-spacing: 0.12em;
-  color: rgba(0, 230, 118, 0.7);
-}
-
-.lab-block-num {
-  color: rgba(0, 230, 118, 0.55);
-}
-
-.lab-block-label {
-  color: rgba(0, 230, 118, 0.75);
-}
 
 .lab-block {
   display: grid;
@@ -845,7 +808,6 @@ select {
   letter-spacing: 0.14em;
   color: var(--muted);
   font-weight: 600;
-  font-family: "IBM Plex Mono", monospace;
 }
 
 .exec-summary-groups {
@@ -868,7 +830,6 @@ select {
   min-width: 58px;
   padding-top: 3px;
   flex-shrink: 0;
-  font-family: "IBM Plex Mono", monospace;
 }
 
 .exec-pills {
@@ -882,7 +843,6 @@ select {
   padding: 2px 9px;
   border-radius: 999px;
   border: 1px solid;
-  font-family: "IBM Plex Mono", monospace;
   white-space: nowrap;
 }
 
