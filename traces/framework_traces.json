@@ -1,7 +1,15 @@
 {
   "generated_by": "scripts/generate_traces.py",
-  "execution_mode": "python-harness",
-  "note": "These traces are produced by Python framework-shaped runners in this repo, not by the official framework SDKs.",
+  "execution_mode": "mixed",
+  "real_frameworks": [
+    "ag2",
+    "langgraph",
+    "llamaindex",
+    "mastra",
+    "openai-agents",
+    "pydanticai"
+  ],
+  "note": "Metrics for ['ag2', 'langgraph', 'llamaindex', 'mastra', 'openai-agents', 'pydanticai'] are from real SDK runs (model: gpt-4o-mini). All other metrics are simulated Python harnesses.",
   "questions": {
     "retention": {
       "frameworks": {
@@ -46,11 +54,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 340,
-                "token_input_estimate": 430,
-                "token_output_estimate": 65,
-                "token_total_estimate": 495,
-                "usd_cost_estimate": 0.00168
+                "time_ms": 3958,
+                "token_input_estimate": 398,
+                "token_output_estimate": 200,
+                "token_total_estimate": 598,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -108,11 +116,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1160,
-                "token_input_estimate": 1320,
-                "token_output_estimate": 240,
-                "token_total_estimate": 1560,
-                "usd_cost_estimate": 0.0053
+                "time_ms": 3555,
+                "token_input_estimate": 508,
+                "token_output_estimate": 361,
+                "token_total_estimate": 869,
+                "usd_cost_estimate": 0.00029
               },
               "output": {
                 "specialist_findings": 4,
@@ -173,11 +181,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 820,
-                "token_input_estimate": 880,
-                "token_output_estimate": 170,
-                "token_total_estimate": 1050,
-                "usd_cost_estimate": 0.00357
+                "time_ms": 4371,
+                "token_input_estimate": 434,
+                "token_output_estimate": 200,
+                "token_total_estimate": 634,
+                "usd_cost_estimate": 0.00019
               },
               "output": {
                 "reviewer_action": "branch_to_revision",
@@ -221,11 +229,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 510,
-                "token_input_estimate": 640,
-                "token_output_estimate": 210,
-                "token_total_estimate": 850,
-                "usd_cost_estimate": 0.00289
+                "time_ms": 1771,
+                "token_input_estimate": 166,
+                "token_output_estimate": 61,
+                "token_total_estimate": 227,
+                "usd_cost_estimate": 6e-05
               },
               "output": {
                 "draft_answer": "Yes, but only under the retention exceptions the graph gathered: GitHub can keep personal data for contracts, legal duties, disputes, and agreement enforcement, and the period depends on purpose.",
@@ -267,11 +275,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 280,
-                "token_input_estimate": 320,
-                "token_output_estimate": 170,
-                "token_total_estimate": 490,
-                "usd_cost_estimate": 0.00167
+                "time_ms": 2566,
+                "token_input_estimate": 126,
+                "token_output_estimate": 78,
+                "token_total_estimate": 204,
+                "usd_cost_estimate": 7e-05
               },
               "output": {
                 "answer": "Yes, but only under the retention exceptions the graph gathered: GitHub can keep personal data for contracts, legal duties, disputes, and agreement enforcement, and the period depends on purpose.",
@@ -320,11 +328,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 290,
-                "token_input_estimate": 390,
-                "token_output_estimate": 60,
-                "token_total_estimate": 450,
-                "usd_cost_estimate": 0.00144
+                "time_ms": 9610,
+                "token_input_estimate": 393,
+                "token_output_estimate": 408,
+                "token_total_estimate": 801,
+                "usd_cost_estimate": 0.0003
               },
               "output": {
                 "status": "case_opened",
@@ -382,11 +390,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1490,
-                "token_input_estimate": 1410,
-                "token_output_estimate": 230,
-                "token_total_estimate": 1640,
-                "usd_cost_estimate": 0.00525
+                "time_ms": 34618,
+                "token_input_estimate": 417,
+                "token_output_estimate": 1502,
+                "token_total_estimate": 1919,
+                "usd_cost_estimate": 0.00096
               },
               "output": {
                 "specialist_findings": 3,
@@ -437,11 +445,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 670,
-                "token_input_estimate": 610,
-                "token_output_estimate": 135,
-                "token_total_estimate": 745,
-                "usd_cost_estimate": 0.00238
+                "time_ms": 17406,
+                "token_input_estimate": 1569,
+                "token_output_estimate": 609,
+                "token_total_estimate": 2178,
+                "usd_cost_estimate": 0.0006
               },
               "output": {
                 "reviewer_action": "reject_handoff",
@@ -485,11 +493,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 420,
-                "token_input_estimate": 540,
-                "token_output_estimate": 190,
-                "token_total_estimate": 730,
-                "usd_cost_estimate": 0.00234
+                "time_ms": 1924,
+                "token_input_estimate": 151,
+                "token_output_estimate": 105,
+                "token_total_estimate": 256,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
                 "draft_answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
@@ -531,11 +539,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 240,
-                "token_input_estimate": 290,
-                "token_output_estimate": 150,
-                "token_total_estimate": 440,
-                "usd_cost_estimate": 0.00141
+                "time_ms": 3459,
+                "token_input_estimate": 131,
+                "token_output_estimate": 160,
+                "token_total_estimate": 291,
+                "usd_cost_estimate": 0.00012
               },
               "output": {
                 "answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
@@ -589,11 +597,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 420,
-                "token_input_estimate": 520,
-                "token_output_estimate": 75,
+                "time_ms": 4051,
+                "token_input_estimate": 395,
+                "token_output_estimate": 200,
                 "token_total_estimate": 595,
-                "usd_cost_estimate": 0.00244
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -651,11 +659,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1840,
-                "token_input_estimate": 1920,
-                "token_output_estimate": 310,
-                "token_total_estimate": 2230,
-                "usd_cost_estimate": 0.00914
+                "time_ms": 8799,
+                "token_input_estimate": 431,
+                "token_output_estimate": 370,
+                "token_total_estimate": 801,
+                "usd_cost_estimate": 0.00029
               },
               "output": {
                 "specialist_findings": 3,
@@ -716,11 +724,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 1220,
-                "token_input_estimate": 1180,
-                "token_output_estimate": 240,
-                "token_total_estimate": 1420,
-                "usd_cost_estimate": 0.00582
+                "time_ms": 11250,
+                "token_input_estimate": 606,
+                "token_output_estimate": 480,
+                "token_total_estimate": 1086,
+                "usd_cost_estimate": 0.00038
               },
               "output": {
                 "reviewer_action": "stop_debate_and_ground",
@@ -774,11 +782,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 760,
-                "token_input_estimate": 830,
-                "token_output_estimate": 260,
-                "token_total_estimate": 1090,
-                "usd_cost_estimate": 0.00447
+                "time_ms": 2353,
+                "token_input_estimate": 180,
+                "token_output_estimate": 108,
+                "token_total_estimate": 288,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
                 "draft_answer": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
@@ -825,11 +833,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 340,
-                "token_input_estimate": 360,
-                "token_output_estimate": 190,
-                "token_total_estimate": 550,
-                "usd_cost_estimate": 0.00225
+                "time_ms": 4394,
+                "token_input_estimate": 129,
+                "token_output_estimate": 153,
+                "token_total_estimate": 282,
+                "usd_cost_estimate": 0.00011
               },
               "output": {
                 "answer": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
@@ -1426,11 +1434,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 270,
-                "token_input_estimate": 350,
-                "token_output_estimate": 56,
-                "token_total_estimate": 406,
-                "usd_cost_estimate": 0.00118
+                "time_ms": 4203,
+                "token_input_estimate": 398,
+                "token_output_estimate": 124,
+                "token_total_estimate": 522,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "status": "case_opened",
@@ -1488,11 +1496,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 980,
-                "token_input_estimate": 1090,
-                "token_output_estimate": 185,
-                "token_total_estimate": 1275,
-                "usd_cost_estimate": 0.0037
+                "time_ms": 2799,
+                "token_input_estimate": 484,
+                "token_output_estimate": 366,
+                "token_total_estimate": 850,
+                "usd_cost_estimate": 0.00029
               },
               "output": {
                 "specialist_findings": 3,
@@ -1543,11 +1551,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 620,
-                "token_input_estimate": 550,
-                "token_output_estimate": 125,
-                "token_total_estimate": 675,
-                "usd_cost_estimate": 0.00196
+                "time_ms": 5201,
+                "token_input_estimate": 442,
+                "token_output_estimate": 200,
+                "token_total_estimate": 642,
+                "usd_cost_estimate": 0.00019
               },
               "output": {
                 "reviewer_action": "emit_followup_event",
@@ -1591,11 +1599,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 410,
-                "token_input_estimate": 510,
-                "token_output_estimate": 175,
-                "token_total_estimate": 685,
-                "usd_cost_estimate": 0.00199
+                "time_ms": 2349,
+                "token_input_estimate": 153,
+                "token_output_estimate": 90,
+                "token_total_estimate": 243,
+                "usd_cost_estimate": 8e-05
               },
               "output": {
                 "draft_answer": "Yes. The aggregated evidence points to continued retention for contracts, legal obligations, disputes, and agreement enforcement, with no single universal retention period.",
@@ -1637,11 +1645,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 230,
-                "token_input_estimate": 260,
-                "token_output_estimate": 145,
-                "token_total_estimate": 405,
-                "usd_cost_estimate": 0.00117
+                "time_ms": 2807,
+                "token_input_estimate": 132,
+                "token_output_estimate": 125,
+                "token_total_estimate": 257,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
                 "answer": "Yes. The aggregated evidence points to continued retention for contracts, legal obligations, disputes, and agreement enforcement, with no single universal retention period.",
@@ -1695,11 +1703,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 310,
-                "token_input_estimate": 400,
-                "token_output_estimate": 55,
-                "token_total_estimate": 455,
-                "usd_cost_estimate": 0.00137
+                "time_ms": 10306,
+                "token_input_estimate": 362,
+                "token_output_estimate": 513,
+                "token_total_estimate": 875,
+                "usd_cost_estimate": 0.00036
               },
               "output": {
                 "status": "case_opened",
@@ -1757,11 +1765,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1210,
-                "token_input_estimate": 1170,
-                "token_output_estimate": 210,
-                "token_total_estimate": 1380,
-                "usd_cost_estimate": 0.00414
+                "time_ms": 7751,
+                "token_input_estimate": 496,
+                "token_output_estimate": 237,
+                "token_total_estimate": 733,
+                "usd_cost_estimate": 0.00022
               },
               "output": {
                 "specialist_findings": 3,
@@ -1817,11 +1825,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 690,
-                "token_input_estimate": 610,
-                "token_output_estimate": 132,
-                "token_total_estimate": 742,
-                "usd_cost_estimate": 0.00223
+                "time_ms": 7381,
+                "token_input_estimate": 307,
+                "token_output_estimate": 378,
+                "token_total_estimate": 685,
+                "usd_cost_estimate": 0.00027
               },
               "output": {
                 "reviewer_action": "branch_guardrail_review",
@@ -1865,11 +1873,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 460,
-                "token_input_estimate": 540,
-                "token_output_estimate": 182,
-                "token_total_estimate": 722,
-                "usd_cost_estimate": 0.00217
+                "time_ms": 2630,
+                "token_input_estimate": 159,
+                "token_output_estimate": 74,
+                "token_total_estimate": 233,
+                "usd_cost_estimate": 7e-05
               },
               "output": {
                 "draft_answer": "Yes, with a workflow-style caveat: GitHub can retain data after closure when contract, legal, dispute, or enforcement conditions still exist.",
@@ -1911,11 +1919,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 245,
-                "token_input_estimate": 285,
-                "token_output_estimate": 150,
-                "token_total_estimate": 435,
-                "usd_cost_estimate": 0.0013
+                "time_ms": 4223,
+                "token_input_estimate": 132,
+                "token_output_estimate": 187,
+                "token_total_estimate": 319,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "answer": "Yes, with a workflow-style caveat: GitHub can retain data after closure when contract, legal, dispute, or enforcement conditions still exist.",
@@ -1964,11 +1972,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 280,
-                "token_input_estimate": 360,
-                "token_output_estimate": 54,
-                "token_total_estimate": 414,
-                "usd_cost_estimate": 0.00116
+                "time_ms": 12342,
+                "token_input_estimate": 393,
+                "token_output_estimate": 454,
+                "token_total_estimate": 847,
+                "usd_cost_estimate": 0.00033
               },
               "output": {
                 "status": "case_opened",
@@ -2026,11 +2034,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1120,
-                "token_input_estimate": 1010,
-                "token_output_estimate": 175,
-                "token_total_estimate": 1185,
-                "usd_cost_estimate": 0.00332
+                "time_ms": 36294,
+                "token_input_estimate": 468,
+                "token_output_estimate": 1806,
+                "token_total_estimate": 2274,
+                "usd_cost_estimate": 0.00115
               },
               "output": {
                 "specialist_findings": 3,
@@ -2086,11 +2094,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 650,
-                "token_input_estimate": 530,
-                "token_output_estimate": 118,
-                "token_total_estimate": 648,
-                "usd_cost_estimate": 0.00181
+                "time_ms": 9639,
+                "token_input_estimate": 1881,
+                "token_output_estimate": 565,
+                "token_total_estimate": 2446,
+                "usd_cost_estimate": 0.00062
               },
               "output": {
                 "reviewer_action": "model_validation_reject",
@@ -2134,11 +2142,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 430,
-                "token_input_estimate": 500,
-                "token_output_estimate": 168,
-                "token_total_estimate": 668,
-                "usd_cost_estimate": 0.00187
+                "time_ms": 2987,
+                "token_input_estimate": 155,
+                "token_output_estimate": 215,
+                "token_total_estimate": 370,
+                "usd_cost_estimate": 0.00015
               },
               "output": {
                 "draft_answer": "Yes. The validated answer model keeps the condition explicit: retention may continue for contracts, legal obligations, disputes, or agreement enforcement, and duration depends on purpose.",
@@ -2180,11 +2188,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 220,
-                "token_input_estimate": 250,
-                "token_output_estimate": 142,
-                "token_total_estimate": 392,
-                "usd_cost_estimate": 0.0011
+                "time_ms": 5484,
+                "token_input_estimate": 137,
+                "token_output_estimate": 201,
+                "token_total_estimate": 338,
+                "usd_cost_estimate": 0.00014
               },
               "output": {
                 "answer": "Yes. The validated answer model keeps the condition explicit: retention may continue for contracts, legal obligations, disputes, or agreement enforcement, and duration depends on purpose.",
@@ -2243,11 +2251,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 340,
-                "token_input_estimate": 430,
-                "token_output_estimate": 65,
-                "token_total_estimate": 495,
-                "usd_cost_estimate": 0.00168
+                "time_ms": 3807,
+                "token_input_estimate": 398,
+                "token_output_estimate": 200,
+                "token_total_estimate": 598,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -2306,11 +2314,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1160,
-                "token_input_estimate": 1320,
-                "token_output_estimate": 240,
-                "token_total_estimate": 1560,
-                "usd_cost_estimate": 0.0053
+                "time_ms": 2854,
+                "token_input_estimate": 504,
+                "token_output_estimate": 396,
+                "token_total_estimate": 900,
+                "usd_cost_estimate": 0.00031
               },
               "output": {
                 "specialist_findings": 5,
@@ -2372,11 +2380,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 820,
-                "token_input_estimate": 880,
-                "token_output_estimate": 170,
-                "token_total_estimate": 1050,
-                "usd_cost_estimate": 0.00357
+                "time_ms": 4285,
+                "token_input_estimate": 469,
+                "token_output_estimate": 200,
+                "token_total_estimate": 669,
+                "usd_cost_estimate": 0.00019
               },
               "output": {
                 "reviewer_action": "branch_to_revision",
@@ -2421,11 +2429,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 510,
-                "token_input_estimate": 640,
-                "token_output_estimate": 210,
-                "token_total_estimate": 850,
-                "usd_cost_estimate": 0.00289
+                "time_ms": 2582,
+                "token_input_estimate": 167,
+                "token_output_estimate": 136,
+                "token_total_estimate": 303,
+                "usd_cost_estimate": 0.00011
               },
               "output": {
                 "draft_answer": "GitHub may share personal data with affiliates, organization accounts, competent authorities, fraud-prevention parties, and third-party apps when the user directs that sharing.",
@@ -2470,11 +2478,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 280,
-                "token_input_estimate": 320,
-                "token_output_estimate": 170,
-                "token_total_estimate": 490,
-                "usd_cost_estimate": 0.00167
+                "time_ms": 4791,
+                "token_input_estimate": 151,
+                "token_output_estimate": 171,
+                "token_total_estimate": 322,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "answer": "GitHub may share personal data with affiliates, organization accounts, competent authorities, fraud-prevention parties, and third-party apps when the user directs that sharing.",
@@ -2526,11 +2534,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 290,
-                "token_input_estimate": 390,
-                "token_output_estimate": 60,
-                "token_total_estimate": 450,
-                "usd_cost_estimate": 0.00144
+                "time_ms": 9502,
+                "token_input_estimate": 393,
+                "token_output_estimate": 500,
+                "token_total_estimate": 893,
+                "usd_cost_estimate": 0.00036
               },
               "output": {
                 "status": "case_opened",
@@ -2589,11 +2597,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1490,
-                "token_input_estimate": 1410,
-                "token_output_estimate": 230,
-                "token_total_estimate": 1640,
-                "usd_cost_estimate": 0.00525
+                "time_ms": 40370,
+                "token_input_estimate": 416,
+                "token_output_estimate": 1779,
+                "token_total_estimate": 2195,
+                "usd_cost_estimate": 0.00113
               },
               "output": {
                 "specialist_findings": 4,
@@ -2645,11 +2653,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 670,
-                "token_input_estimate": 610,
-                "token_output_estimate": 135,
-                "token_total_estimate": 745,
-                "usd_cost_estimate": 0.00238
+                "time_ms": 12208,
+                "token_input_estimate": 1846,
+                "token_output_estimate": 571,
+                "token_total_estimate": 2417,
+                "usd_cost_estimate": 0.00062
               },
               "output": {
                 "reviewer_action": "reject_handoff",
@@ -2694,11 +2702,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 420,
-                "token_input_estimate": 540,
-                "token_output_estimate": 190,
-                "token_total_estimate": 730,
-                "usd_cost_estimate": 0.00234
+                "time_ms": 4618,
+                "token_input_estimate": 152,
+                "token_output_estimate": 198,
+                "token_total_estimate": 350,
+                "usd_cost_estimate": 0.00014
               },
               "output": {
                 "draft_answer": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
@@ -2742,11 +2750,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 240,
-                "token_input_estimate": 290,
-                "token_output_estimate": 150,
-                "token_total_estimate": 440,
-                "usd_cost_estimate": 0.00141
+                "time_ms": 5383,
+                "token_input_estimate": 135,
+                "token_output_estimate": 273,
+                "token_total_estimate": 408,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "answer": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
@@ -2802,11 +2810,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 420,
-                "token_input_estimate": 520,
-                "token_output_estimate": 75,
+                "time_ms": 3568,
+                "token_input_estimate": 395,
+                "token_output_estimate": 200,
                 "token_total_estimate": 595,
-                "usd_cost_estimate": 0.00244
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -2865,11 +2873,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1840,
-                "token_input_estimate": 1920,
-                "token_output_estimate": 310,
-                "token_total_estimate": 2230,
-                "usd_cost_estimate": 0.00914
+                "time_ms": 10965,
+                "token_input_estimate": 429,
+                "token_output_estimate": 425,
+                "token_total_estimate": 854,
+                "usd_cost_estimate": 0.00032
               },
               "output": {
                 "specialist_findings": 4,
@@ -2931,11 +2939,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 1220,
-                "token_input_estimate": 1180,
-                "token_output_estimate": 240,
-                "token_total_estimate": 1420,
-                "usd_cost_estimate": 0.00582
+                "time_ms": 10886,
+                "token_input_estimate": 661,
+                "token_output_estimate": 480,
+                "token_total_estimate": 1141,
+                "usd_cost_estimate": 0.00039
               },
               "output": {
                 "reviewer_action": "stop_debate_and_ground",
@@ -2990,11 +2998,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 760,
-                "token_input_estimate": 830,
-                "token_output_estimate": 260,
-                "token_total_estimate": 1090,
-                "usd_cost_estimate": 0.00447
+                "time_ms": 2724,
+                "token_input_estimate": 177,
+                "token_output_estimate": 130,
+                "token_total_estimate": 307,
+                "usd_cost_estimate": 0.0001
               },
               "output": {
                 "draft_answer": "The debate outcome is that sharing is conditional rather than open-ended: GitHub may share with affiliates, organization accounts, authorities, fraud-prevention entities, and third-party apps under user instruction.",
@@ -3042,11 +3050,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 340,
-                "token_input_estimate": 360,
-                "token_output_estimate": 190,
-                "token_total_estimate": 550,
-                "usd_cost_estimate": 0.00225
+                "time_ms": 2687,
+                "token_input_estimate": 138,
+                "token_output_estimate": 120,
+                "token_total_estimate": 258,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
                 "answer": "The debate outcome is that sharing is conditional rather than open-ended: GitHub may share with affiliates, organization accounts, authorities, fraud-prevention entities, and third-party apps under user instruction.",
@@ -3660,11 +3668,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 270,
-                "token_input_estimate": 350,
-                "token_output_estimate": 56,
-                "token_total_estimate": 406,
-                "usd_cost_estimate": 0.00118
+                "time_ms": 4493,
+                "token_input_estimate": 398,
+                "token_output_estimate": 200,
+                "token_total_estimate": 598,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -3723,11 +3731,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 980,
-                "token_input_estimate": 1090,
-                "token_output_estimate": 185,
-                "token_total_estimate": 1275,
-                "usd_cost_estimate": 0.0037
+                "time_ms": 2938,
+                "token_input_estimate": 488,
+                "token_output_estimate": 421,
+                "token_total_estimate": 909,
+                "usd_cost_estimate": 0.00033
               },
               "output": {
                 "specialist_findings": 4,
@@ -3779,11 +3787,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 620,
-                "token_input_estimate": 550,
-                "token_output_estimate": 125,
-                "token_total_estimate": 675,
-                "usd_cost_estimate": 0.00196
+                "time_ms": 4394,
+                "token_input_estimate": 497,
+                "token_output_estimate": 200,
+                "token_total_estimate": 697,
+                "usd_cost_estimate": 0.00019
               },
               "output": {
                 "reviewer_action": "emit_followup_event",
@@ -3828,11 +3836,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 410,
-                "token_input_estimate": 510,
-                "token_output_estimate": 175,
-                "token_total_estimate": 685,
-                "usd_cost_estimate": 0.00199
+                "time_ms": 2422,
+                "token_input_estimate": 147,
+                "token_output_estimate": 92,
+                "token_total_estimate": 239,
+                "usd_cost_estimate": 8e-05
               },
               "output": {
                 "draft_answer": "The evidence pipeline supports sharing with affiliates, organization accounts, competent authorities, anti-abuse actors, and third-party apps when instructed by the user.",
@@ -3876,11 +3884,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 230,
-                "token_input_estimate": 260,
-                "token_output_estimate": 145,
-                "token_total_estimate": 405,
-                "usd_cost_estimate": 0.00117
+                "time_ms": 2799,
+                "token_input_estimate": 125,
+                "token_output_estimate": 156,
+                "token_total_estimate": 281,
+                "usd_cost_estimate": 0.00011
               },
               "output": {
                 "answer": "The evidence pipeline supports sharing with affiliates, organization accounts, competent authorities, anti-abuse actors, and third-party apps when instructed by the user.",
@@ -3936,11 +3944,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 310,
-                "token_input_estimate": 400,
-                "token_output_estimate": 55,
-                "token_total_estimate": 455,
-                "usd_cost_estimate": 0.00137
+                "time_ms": 11396,
+                "token_input_estimate": 362,
+                "token_output_estimate": 510,
+                "token_total_estimate": 872,
+                "usd_cost_estimate": 0.00036
               },
               "output": {
                 "status": "case_opened",
@@ -3999,11 +4007,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1210,
-                "token_input_estimate": 1170,
-                "token_output_estimate": 210,
-                "token_total_estimate": 1380,
-                "usd_cost_estimate": 0.00414
+                "time_ms": 18179,
+                "token_input_estimate": 500,
+                "token_output_estimate": 331,
+                "token_total_estimate": 831,
+                "usd_cost_estimate": 0.00027
               },
               "output": {
                 "specialist_findings": 4,
@@ -4060,11 +4068,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 690,
-                "token_input_estimate": 610,
-                "token_output_estimate": 132,
-                "token_total_estimate": 742,
-                "usd_cost_estimate": 0.00223
+                "time_ms": 8681,
+                "token_input_estimate": 401,
+                "token_output_estimate": 443,
+                "token_total_estimate": 844,
+                "usd_cost_estimate": 0.00033
               },
               "output": {
                 "reviewer_action": "branch_guardrail_review",
@@ -4109,11 +4117,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 460,
-                "token_input_estimate": 540,
-                "token_output_estimate": 182,
-                "token_total_estimate": 722,
-                "usd_cost_estimate": 0.00217
+                "time_ms": 2603,
+                "token_input_estimate": 155,
+                "token_output_estimate": 73,
+                "token_total_estimate": 228,
+                "usd_cost_estimate": 7e-05
               },
               "output": {
                 "draft_answer": "Workflow output says sharing can happen with affiliates, organization accounts, public authorities, abuse-prevention entities, and user-directed third-party apps.",
@@ -4157,11 +4165,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 245,
-                "token_input_estimate": 285,
-                "token_output_estimate": 150,
-                "token_total_estimate": 435,
-                "usd_cost_estimate": 0.0013
+                "time_ms": 3765,
+                "token_input_estimate": 132,
+                "token_output_estimate": 168,
+                "token_total_estimate": 300,
+                "usd_cost_estimate": 0.00012
               },
               "output": {
                 "answer": "Workflow output says sharing can happen with affiliates, organization accounts, public authorities, abuse-prevention entities, and user-directed third-party apps.",
@@ -4212,11 +4220,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 280,
-                "token_input_estimate": 360,
-                "token_output_estimate": 54,
-                "token_total_estimate": 414,
-                "usd_cost_estimate": 0.00116
+                "time_ms": 6280,
+                "token_input_estimate": 393,
+                "token_output_estimate": 407,
+                "token_total_estimate": 800,
+                "usd_cost_estimate": 0.0003
               },
               "output": {
                 "status": "case_opened",
@@ -4275,11 +4283,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1120,
-                "token_input_estimate": 1010,
-                "token_output_estimate": 175,
-                "token_total_estimate": 1185,
-                "usd_cost_estimate": 0.00332
+                "time_ms": 27373,
+                "token_input_estimate": 472,
+                "token_output_estimate": 1181,
+                "token_total_estimate": 1653,
+                "usd_cost_estimate": 0.00078
               },
               "output": {
                 "specialist_findings": 4,
@@ -4336,11 +4344,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 650,
-                "token_input_estimate": 530,
-                "token_output_estimate": 118,
-                "token_total_estimate": 648,
-                "usd_cost_estimate": 0.00181
+                "time_ms": 8785,
+                "token_input_estimate": 1256,
+                "token_output_estimate": 493,
+                "token_total_estimate": 1749,
+                "usd_cost_estimate": 0.00048
               },
               "output": {
                 "reviewer_action": "model_validation_reject",
@@ -4385,11 +4393,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 430,
-                "token_input_estimate": 500,
-                "token_output_estimate": 168,
-                "token_total_estimate": 668,
-                "usd_cost_estimate": 0.00187
+                "time_ms": 4348,
+                "token_input_estimate": 157,
+                "token_output_estimate": 221,
+                "token_total_estimate": 378,
+                "usd_cost_estimate": 0.00016
               },
               "output": {
                 "draft_answer": "The validated answer separates lawful disclosure from user-directed sharing, covering affiliates, organization accounts, authorities, anti-abuse parties, and third-party apps.",
@@ -4434,11 +4442,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 220,
-                "token_input_estimate": 250,
-                "token_output_estimate": 142,
-                "token_total_estimate": 392,
-                "usd_cost_estimate": 0.0011
+                "time_ms": 4918,
+                "token_input_estimate": 137,
+                "token_output_estimate": 251,
+                "token_total_estimate": 388,
+                "usd_cost_estimate": 0.00017
               },
               "output": {
                 "answer": "The validated answer separates lawful disclosure from user-directed sharing, covering affiliates, organization accounts, authorities, anti-abuse parties, and third-party apps.",
@@ -4499,11 +4507,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 340,
-                "token_input_estimate": 430,
-                "token_output_estimate": 65,
-                "token_total_estimate": 495,
-                "usd_cost_estimate": 0.00168
+                "time_ms": 8304,
+                "token_input_estimate": 405,
+                "token_output_estimate": 200,
+                "token_total_estimate": 605,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -4562,11 +4570,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1160,
-                "token_input_estimate": 1320,
-                "token_output_estimate": 240,
-                "token_total_estimate": 1560,
-                "usd_cost_estimate": 0.0053
+                "time_ms": 2612,
+                "token_input_estimate": 532,
+                "token_output_estimate": 397,
+                "token_total_estimate": 929,
+                "usd_cost_estimate": 0.00032
               },
               "output": {
                 "specialist_findings": 5,
@@ -4628,11 +4636,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 820,
-                "token_input_estimate": 880,
-                "token_output_estimate": 170,
-                "token_total_estimate": 1050,
-                "usd_cost_estimate": 0.00357
+                "time_ms": 4316,
+                "token_input_estimate": 477,
+                "token_output_estimate": 200,
+                "token_total_estimate": 677,
+                "usd_cost_estimate": 0.00019
               },
               "output": {
                 "reviewer_action": "branch_to_revision",
@@ -4677,11 +4685,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 510,
-                "token_input_estimate": 640,
-                "token_output_estimate": 210,
-                "token_total_estimate": 850,
-                "usd_cost_estimate": 0.00289
+                "time_ms": 2218,
+                "token_input_estimate": 183,
+                "token_output_estimate": 100,
+                "token_total_estimate": 283,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
                 "draft_answer": "Users may have access, correction, erasure in some cases, objection, consent-withdrawal, portability, and region-specific rights; the graph also preserves that some rights depend on applicable law.",
@@ -4725,11 +4733,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 280,
-                "token_input_estimate": 320,
-                "token_output_estimate": 170,
-                "token_total_estimate": 490,
-                "usd_cost_estimate": 0.00167
+                "time_ms": 3471,
+                "token_input_estimate": 148,
+                "token_output_estimate": 200,
+                "token_total_estimate": 348,
+                "usd_cost_estimate": 0.00014
               },
               "output": {
                 "answer": "Users may have access, correction, erasure in some cases, objection, consent-withdrawal, portability, and region-specific rights; the graph also preserves that some rights depend on applicable law.",
@@ -4780,11 +4788,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 290,
-                "token_input_estimate": 390,
-                "token_output_estimate": 60,
-                "token_total_estimate": 450,
-                "usd_cost_estimate": 0.00144
+                "time_ms": 12990,
+                "token_input_estimate": 400,
+                "token_output_estimate": 485,
+                "token_total_estimate": 885,
+                "usd_cost_estimate": 0.00035
               },
               "output": {
                 "status": "case_opened",
@@ -4843,11 +4851,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1490,
-                "token_input_estimate": 1410,
-                "token_output_estimate": 230,
-                "token_total_estimate": 1640,
-                "usd_cost_estimate": 0.00525
+                "time_ms": 49461,
+                "token_input_estimate": 448,
+                "token_output_estimate": 2607,
+                "token_total_estimate": 3055,
+                "usd_cost_estimate": 0.00163
               },
               "output": {
                 "specialist_findings": 4,
@@ -4899,11 +4907,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 670,
-                "token_input_estimate": 610,
-                "token_output_estimate": 135,
-                "token_total_estimate": 745,
-                "usd_cost_estimate": 0.00238
+                "time_ms": 13566,
+                "token_input_estimate": 2681,
+                "token_output_estimate": 694,
+                "token_total_estimate": 3375,
+                "usd_cost_estimate": 0.00082
               },
               "output": {
                 "reviewer_action": "reject_handoff",
@@ -4948,11 +4956,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 420,
-                "token_input_estimate": 540,
-                "token_output_estimate": 190,
-                "token_total_estimate": 730,
-                "usd_cost_estimate": 0.00234
+                "time_ms": 6846,
+                "token_input_estimate": 165,
+                "token_output_estimate": 372,
+                "token_total_estimate": 537,
+                "usd_cost_estimate": 0.00025
               },
               "output": {
                 "draft_answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
@@ -4996,11 +5004,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 240,
-                "token_input_estimate": 290,
-                "token_output_estimate": 150,
-                "token_total_estimate": 440,
-                "usd_cost_estimate": 0.00141
+                "time_ms": 6701,
+                "token_input_estimate": 149,
+                "token_output_estimate": 407,
+                "token_total_estimate": 556,
+                "usd_cost_estimate": 0.00027
               },
               "output": {
                 "answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
@@ -5056,11 +5064,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 420,
-                "token_input_estimate": 520,
-                "token_output_estimate": 75,
-                "token_total_estimate": 595,
-                "usd_cost_estimate": 0.00244
+                "time_ms": 4053,
+                "token_input_estimate": 402,
+                "token_output_estimate": 200,
+                "token_total_estimate": 602,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -5119,11 +5127,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1840,
-                "token_input_estimate": 1920,
-                "token_output_estimate": 310,
-                "token_total_estimate": 2230,
-                "usd_cost_estimate": 0.00914
+                "time_ms": 11901,
+                "token_input_estimate": 484,
+                "token_output_estimate": 481,
+                "token_total_estimate": 965,
+                "usd_cost_estimate": 0.00036
               },
               "output": {
                 "specialist_findings": 4,
@@ -5185,11 +5193,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 1220,
-                "token_input_estimate": 1180,
-                "token_output_estimate": 240,
-                "token_total_estimate": 1420,
-                "usd_cost_estimate": 0.00582
+                "time_ms": 11761,
+                "token_input_estimate": 745,
+                "token_output_estimate": 480,
+                "token_total_estimate": 1225,
+                "usd_cost_estimate": 0.0004
               },
               "output": {
                 "reviewer_action": "stop_debate_and_ground",
@@ -5244,11 +5252,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 760,
-                "token_input_estimate": 830,
-                "token_output_estimate": 260,
-                "token_total_estimate": 1090,
-                "usd_cost_estimate": 0.00447
+                "time_ms": 4964,
+                "token_input_estimate": 194,
+                "token_output_estimate": 241,
+                "token_total_estimate": 435,
+                "usd_cost_estimate": 0.00017
               },
               "output": {
                 "draft_answer": "The team converged on a qualified rights answer: access, correction, deletion in some cases, objection, consent withdrawal, portability, and some state-specific rights exist, but they depend on jurisdiction.",
@@ -5296,11 +5304,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 340,
-                "token_input_estimate": 360,
-                "token_output_estimate": 190,
-                "token_total_estimate": 550,
-                "usd_cost_estimate": 0.00225
+                "time_ms": 4625,
+                "token_input_estimate": 150,
+                "token_output_estimate": 200,
+                "token_total_estimate": 350,
+                "usd_cost_estimate": 0.00014
               },
               "output": {
                 "answer": "The team converged on a qualified rights answer: access, correction, deletion in some cases, objection, consent withdrawal, portability, and some state-specific rights exist, but they depend on jurisdiction.",
@@ -5912,11 +5920,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 270,
-                "token_input_estimate": 350,
-                "token_output_estimate": 56,
-                "token_total_estimate": 406,
-                "usd_cost_estimate": 0.00118
+                "time_ms": 3639,
+                "token_input_estimate": 405,
+                "token_output_estimate": 200,
+                "token_total_estimate": 605,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "status": "case_opened",
@@ -5975,11 +5983,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 980,
-                "token_input_estimate": 1090,
-                "token_output_estimate": 185,
-                "token_total_estimate": 1275,
-                "usd_cost_estimate": 0.0037
+                "time_ms": 3073,
+                "token_input_estimate": 532,
+                "token_output_estimate": 470,
+                "token_total_estimate": 1002,
+                "usd_cost_estimate": 0.00036
               },
               "output": {
                 "specialist_findings": 4,
@@ -6031,11 +6039,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 620,
-                "token_input_estimate": 550,
-                "token_output_estimate": 125,
-                "token_total_estimate": 675,
-                "usd_cost_estimate": 0.00196
+                "time_ms": 4169,
+                "token_input_estimate": 554,
+                "token_output_estimate": 200,
+                "token_total_estimate": 754,
+                "usd_cost_estimate": 0.0002
               },
               "output": {
                 "reviewer_action": "emit_followup_event",
@@ -6080,11 +6088,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 410,
-                "token_input_estimate": 510,
-                "token_output_estimate": 175,
-                "token_total_estimate": 685,
-                "usd_cost_estimate": 0.00199
+                "time_ms": 9474,
+                "token_input_estimate": 171,
+                "token_output_estimate": 206,
+                "token_total_estimate": 377,
+                "usd_cost_estimate": 0.00015
               },
               "output": {
                 "draft_answer": "Aggregated evidence points to access, correction, deletion or erasure in some contexts, objection, consent withdrawal, portability, and jurisdiction-dependent rights in the EEA, UK, and some US states.",
@@ -6128,11 +6136,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 230,
-                "token_input_estimate": 260,
-                "token_output_estimate": 145,
-                "token_total_estimate": 405,
-                "usd_cost_estimate": 0.00117
+                "time_ms": 4322,
+                "token_input_estimate": 150,
+                "token_output_estimate": 180,
+                "token_total_estimate": 330,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "answer": "Aggregated evidence points to access, correction, deletion or erasure in some contexts, objection, consent withdrawal, portability, and jurisdiction-dependent rights in the EEA, UK, and some US states.",
@@ -6188,11 +6196,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 310,
-                "token_input_estimate": 400,
-                "token_output_estimate": 55,
-                "token_total_estimate": 455,
-                "usd_cost_estimate": 0.00137
+                "time_ms": 13466,
+                "token_input_estimate": 366,
+                "token_output_estimate": 498,
+                "token_total_estimate": 864,
+                "usd_cost_estimate": 0.00035
               },
               "output": {
                 "status": "case_opened",
@@ -6251,11 +6259,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1210,
-                "token_input_estimate": 1170,
-                "token_output_estimate": 210,
-                "token_total_estimate": 1380,
-                "usd_cost_estimate": 0.00414
+                "time_ms": 9149,
+                "token_input_estimate": 516,
+                "token_output_estimate": 338,
+                "token_total_estimate": 854,
+                "usd_cost_estimate": 0.00028
               },
               "output": {
                 "specialist_findings": 4,
@@ -6312,11 +6320,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 690,
-                "token_input_estimate": 610,
-                "token_output_estimate": 132,
-                "token_total_estimate": 742,
-                "usd_cost_estimate": 0.00223
+                "time_ms": 12082,
+                "token_input_estimate": 412,
+                "token_output_estimate": 445,
+                "token_total_estimate": 857,
+                "usd_cost_estimate": 0.00033
               },
               "output": {
                 "reviewer_action": "branch_guardrail_review",
@@ -6361,11 +6369,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 460,
-                "token_input_estimate": 540,
-                "token_output_estimate": 182,
-                "token_total_estimate": 722,
-                "usd_cost_estimate": 0.00217
+                "time_ms": 6039,
+                "token_input_estimate": 173,
+                "token_output_estimate": 181,
+                "token_total_estimate": 354,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "draft_answer": "Workflow output says users may have access, correction, deletion in some cases, objection, portability, consent withdrawal, and region-specific rights depending on law.",
@@ -6409,11 +6417,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 245,
-                "token_input_estimate": 285,
-                "token_output_estimate": 150,
-                "token_total_estimate": 435,
-                "usd_cost_estimate": 0.0013
+                "time_ms": 5734,
+                "token_input_estimate": 155,
+                "token_output_estimate": 224,
+                "token_total_estimate": 379,
+                "usd_cost_estimate": 0.00016
               },
               "output": {
                 "answer": "Workflow output says users may have access, correction, deletion in some cases, objection, portability, consent withdrawal, and region-specific rights depending on law.",
@@ -6464,11 +6472,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 280,
-                "token_input_estimate": 360,
-                "token_output_estimate": 54,
-                "token_total_estimate": 414,
-                "usd_cost_estimate": 0.00116
+                "time_ms": 10046,
+                "token_input_estimate": 400,
+                "token_output_estimate": 559,
+                "token_total_estimate": 959,
+                "usd_cost_estimate": 0.0004
               },
               "output": {
                 "status": "case_opened",
@@ -6527,11 +6535,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1120,
-                "token_input_estimate": 1010,
-                "token_output_estimate": 175,
-                "token_total_estimate": 1185,
-                "usd_cost_estimate": 0.00332
+                "time_ms": 37644,
+                "token_input_estimate": 516,
+                "token_output_estimate": 2049,
+                "token_total_estimate": 2565,
+                "usd_cost_estimate": 0.00131
               },
               "output": {
                 "specialist_findings": 4,
@@ -6588,11 +6596,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 650,
-                "token_input_estimate": 530,
-                "token_output_estimate": 118,
-                "token_total_estimate": 648,
-                "usd_cost_estimate": 0.00181
+                "time_ms": 13533,
+                "token_input_estimate": 2131,
+                "token_output_estimate": 630,
+                "token_total_estimate": 2761,
+                "usd_cost_estimate": 0.0007
               },
               "output": {
                 "reviewer_action": "model_validation_reject",
@@ -6637,11 +6645,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 430,
-                "token_input_estimate": 500,
-                "token_output_estimate": 168,
-                "token_total_estimate": 668,
-                "usd_cost_estimate": 0.00187
+                "time_ms": 6200,
+                "token_input_estimate": 164,
+                "token_output_estimate": 344,
+                "token_total_estimate": 508,
+                "usd_cost_estimate": 0.00023
               },
               "output": {
                 "draft_answer": "The validated answer model preserves both the core rights and the qualifier: access, correction, deletion in some cases, objection, consent withdrawal, portability, and region-specific rights depend on applicable law.",
@@ -6685,11 +6693,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 220,
-                "token_input_estimate": 250,
-                "token_output_estimate": 142,
-                "token_total_estimate": 392,
-                "usd_cost_estimate": 0.0011
+                "time_ms": 7009,
+                "token_input_estimate": 150,
+                "token_output_estimate": 391,
+                "token_total_estimate": 541,
+                "usd_cost_estimate": 0.00026
               },
               "output": {
                 "answer": "The validated answer model preserves both the core rights and the qualifier: access, correction, deletion in some cases, objection, consent withdrawal, portability, and region-specific rights depend on applicable law.",

@@ -1,0 +1,100 @@
+{
+  "questions": {
+    "retention": {
+      "intake": {
+        "time_ms": 10306,
+        "tokens_in": 362,
+        "tokens_out": 513,
+        "usd": 0.0003621
+      },
+      "review": {
+        "time_ms": 7751,
+        "tokens_in": 496,
+        "tokens_out": 237,
+        "usd": 0.0002166
+      },
+      "challenge": {
+        "time_ms": 7381,
+        "tokens_in": 307,
+        "tokens_out": 378,
+        "usd": 0.0002728
+      },
+      "synthesis": {
+        "time_ms": 2630,
+        "tokens_in": 159,
+        "tokens_out": 74,
+        "usd": 0.0000682
+      },
+      "verdict": {
+        "time_ms": 4223,
+        "tokens_in": 132,
+        "tokens_out": 187,
+        "usd": 0.000132
+      }
+    },
+    "sharing": {
+      "intake": {
+        "time_ms": 11396,
+        "tokens_in": 362,
+        "tokens_out": 510,
+        "usd": 0.0003603
+      },
+      "review": {
+        "time_ms": 18179,
+        "tokens_in": 500,
+        "tokens_out": 331,
+        "usd": 0.0002736
+      },
+      "challenge": {
+        "time_ms": 8681,
+        "tokens_in": 401,
+        "tokens_out": 443,
+        "usd": 0.0003259
+      },
+      "synthesis": {
+        "time_ms": 2603,
+        "tokens_in": 155,
+        "tokens_out": 73,
+        "usd": 0.0000671
+      },
+      "verdict": {
+        "time_ms": 3765,
+        "tokens_in": 132,
+        "tokens_out": 168,
+        "usd": 0.0001206
+      }
+    },
+    "rights": {
+      "intake": {
+        "time_ms": 13466,
+        "tokens_in": 366,
+        "tokens_out": 498,
+        "usd": 0.0003537
+      },
+      "review": {
+        "time_ms": 9149,
+        "tokens_in": 516,
+        "tokens_out": 338,
+        "usd": 0.0002802
+      },
+      "challenge": {
+        "time_ms": 12082,
+        "tokens_in": 412,
+        "tokens_out": 445,
+        "usd": 0.0003288
+      },
+      "synthesis": {
+        "time_ms": 6039,
+        "tokens_in": 173,
+        "tokens_out": 181,
+        "usd": 0.0001345
+      },
+      "verdict": {
+        "time_ms": 5734,
+        "tokens_in": 155,
+        "tokens_out": 224,
+        "usd": 0.0001576
+      }
+    }
+  }
+}

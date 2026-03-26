@@ -8,6 +8,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 TRACE_DIR = ROOT / "traces"
 TRACE_PATH = TRACE_DIR / "framework_traces.json"
+REAL_METRICS_PATH = TRACE_DIR / "real_metrics.json"
+MASTRA_METRICS_PATH = TRACE_DIR / "mastra_metrics.json"
+
+# Load real metrics if available (produced by scripts/run_real_harnesses.py)
+_real: dict = {}
+if REAL_METRICS_PATH.exists():
+    _real = json.loads(REAL_METRICS_PATH.read_text(encoding="utf-8"))
+
+# Merge Mastra metrics (produced by scripts/run_mastra_harness.mjs)
+if MASTRA_METRICS_PATH.exists():
+    _mastra = json.loads(MASTRA_METRICS_PATH.read_text(encoding="utf-8"))
+    for q_id, fw_data in _mastra.get("questions", {}).items():
+        _real.setdefault("questions", {}).setdefault(q_id, {}).setdefault("frameworks", {})["mastra"] = fw_data
 
 
 QUESTIONS = {
@@ -246,7 +259,29 @@ STAGE_MESSAGE_TEMPLATES = {
 }
 
 
-def framework_metrics(framework_id: str, stage_id: str) -> dict:
+def _real_stage(framework_id: str, question_id: str, stage_id: str) -> dict | None:
+    """Return real per-stage metrics if a run captured them, else None."""
+    try:
+        return (
+            _real["questions"][question_id]["frameworks"][framework_id][stage_id]
+        )
+    except (KeyError, TypeError):
+        return None
+
+
+def framework_metrics(framework_id: str, stage_id: str, question_id: str = "retention") -> dict:
+    real = _real_stage(framework_id, question_id, stage_id)
+    if real:
+        ti = real.get("tokens_in", 0)
+        to = real.get("tokens_out", 0)
+        return {
+            "time_ms": real.get("time_ms", 0),
+            "token_input_estimate": ti,
+            "token_output_estimate": to,
+            "token_total_estimate": ti + to,
+            "usd_cost_estimate": round(real.get("usd", (ti + to) * FRAMEWORKS[framework_id]["cost_multiplier"]), 5),
+        }
+    # Fallback to hardcoded simulated values
     meta = FRAMEWORKS[framework_id]
     tokens_in = meta["metrics"]["tokens_in"][stage_id]
     tokens_out = meta["metrics"]["tokens_out"][stage_id]
@@ -417,10 +452,23 @@ def stage_messages(question: dict, framework_id: str, links: list[str], stage_id
 
 
 def build_trace_store() -> dict:
+    real_frameworks = sorted({
+        fw
+        for q in _real.get("questions", {}).values()
+        for fw, stages in q.get("frameworks", {}).items()
+        if stages  # only include frameworks with actual stage data
+    })
+    note = (
+        f"Metrics for {real_frameworks} are from real SDK runs (model: {_real.get('model', 'gpt-4o-mini')}). "
+        "All other metrics are simulated Python harnesses."
+        if real_frameworks
+        else "These traces are produced by Python framework-shaped runners in this repo, not by the official framework SDKs."
+    )
     payload = {
         "generated_by": "scripts/generate_traces.py",
-        "execution_mode": "python-harness",
-        "note": "These traces are produced by Python framework-shaped runners in this repo, not by the official framework SDKs.",
+        "execution_mode": "mixed" if real_frameworks else "python-harness",
+        "real_frameworks": real_frameworks,
+        "note": note,
         "questions": {},
     }
     for question_id, question in QUESTIONS.items():
@@ -435,7 +483,7 @@ def build_trace_store() -> dict:
                     "active_links": links,
                     "messages": stage_messages(question, framework_id, links, stage_id),
                     "state": stage_state(question, framework_id, stage_id, meta["state_container"]),
-                    "metrics": framework_metrics(framework_id, stage_id),
+                    "metrics": framework_metrics(framework_id, stage_id, question_id),
                     "output": stage_output(question, framework_id, stage_id),
                 }
             payload["questions"][question_id]["frameworks"][framework_id] = {"stages": stages}

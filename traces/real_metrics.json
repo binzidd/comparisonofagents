@@ -1,0 +1,498 @@
+{
+  "execution_mode": "real-sdk-calls",
+  "model": "gpt-4o-mini",
+  "questions": {
+    "retention": {
+      "frameworks": {
+        "langgraph": {
+          "intake": {
+            "time_ms": 3958,
+            "tokens_in": 398,
+            "tokens_out": 200,
+            "usd": 0.0001797
+          },
+          "review": {
+            "time_ms": 3555,
+            "tokens_in": 508,
+            "tokens_out": 361,
+            "usd": 0.0002928
+          },
+          "challenge": {
+            "time_ms": 4371,
+            "tokens_in": 434,
+            "tokens_out": 200,
+            "usd": 0.0001851
+          },
+          "synthesis": {
+            "time_ms": 1771,
+            "tokens_in": 166,
+            "tokens_out": 61,
+            "usd": 6.15e-05
+          },
+          "verdict": {
+            "time_ms": 2566,
+            "tokens_in": 126,
+            "tokens_out": 78,
+            "usd": 6.57e-05
+          }
+        },
+        "openai-agents": {
+          "intake": {
+            "time_ms": 9610,
+            "tokens_in": 393,
+            "tokens_out": 408,
+            "usd": 0.0003037
+          },
+          "review": {
+            "time_ms": 34618,
+            "tokens_in": 417,
+            "tokens_out": 1502,
+            "usd": 0.0009637
+          },
+          "challenge": {
+            "time_ms": 17406,
+            "tokens_in": 1569,
+            "tokens_out": 609,
+            "usd": 0.0006007
+          },
+          "synthesis": {
+            "time_ms": 1924,
+            "tokens_in": 151,
+            "tokens_out": 105,
+            "usd": 8.56e-05
+          },
+          "verdict": {
+            "time_ms": 3459,
+            "tokens_in": 131,
+            "tokens_out": 160,
+            "usd": 0.0001157
+          }
+        },
+        "ag2": {
+          "intake": {
+            "time_ms": 4051,
+            "tokens_in": 395,
+            "tokens_out": 200,
+            "usd": 0.0001792
+          },
+          "review": {
+            "time_ms": 8799,
+            "tokens_in": 431,
+            "tokens_out": 370,
+            "usd": 0.0002867
+          },
+          "challenge": {
+            "time_ms": 11250,
+            "tokens_in": 606,
+            "tokens_out": 480,
+            "usd": 0.0003789
+          },
+          "synthesis": {
+            "time_ms": 2353,
+            "tokens_in": 180,
+            "tokens_out": 108,
+            "usd": 9.18e-05
+          },
+          "verdict": {
+            "time_ms": 4394,
+            "tokens_in": 129,
+            "tokens_out": 153,
+            "usd": 0.0001111
+          }
+        },
+        "llamaindex": {
+          "intake": {
+            "time_ms": 4203,
+            "tokens_in": 398,
+            "tokens_out": 124,
+            "usd": 0.0001341
+          },
+          "review": {
+            "time_ms": 2799,
+            "tokens_in": 484,
+            "tokens_out": 366,
+            "usd": 0.0002922
+          },
+          "challenge": {
+            "time_ms": 5201,
+            "tokens_in": 442,
+            "tokens_out": 200,
+            "usd": 0.0001863
+          },
+          "synthesis": {
+            "time_ms": 2349,
+            "tokens_in": 153,
+            "tokens_out": 90,
+            "usd": 7.7e-05
+          },
+          "verdict": {
+            "time_ms": 2807,
+            "tokens_in": 132,
+            "tokens_out": 125,
+            "usd": 9.48e-05
+          }
+        },
+        "pydanticai": {
+          "intake": {
+            "time_ms": 12342,
+            "tokens_in": 393,
+            "tokens_out": 454,
+            "usd": 0.0003314
+          },
+          "review": {
+            "time_ms": 36294,
+            "tokens_in": 468,
+            "tokens_out": 1806,
+            "usd": 0.0011538
+          },
+          "challenge": {
+            "time_ms": 9639,
+            "tokens_in": 1881,
+            "tokens_out": 565,
+            "usd": 0.0006212
+          },
+          "synthesis": {
+            "time_ms": 2987,
+            "tokens_in": 155,
+            "tokens_out": 215,
+            "usd": 0.0001522
+          },
+          "verdict": {
+            "time_ms": 5484,
+            "tokens_in": 137,
+            "tokens_out": 201,
+            "usd": 0.0001411
+          }
+        }
+      }
+    },
+    "sharing": {
+      "frameworks": {
+        "langgraph": {
+          "intake": {
+            "time_ms": 3807,
+            "tokens_in": 398,
+            "tokens_out": 200,
+            "usd": 0.0001797
+          },
+          "review": {
+            "time_ms": 2854,
+            "tokens_in": 504,
+            "tokens_out": 396,
+            "usd": 0.0003132
+          },
+          "challenge": {
+            "time_ms": 4285,
+            "tokens_in": 469,
+            "tokens_out": 200,
+            "usd": 0.0001903
+          },
+          "synthesis": {
+            "time_ms": 2582,
+            "tokens_in": 167,
+            "tokens_out": 136,
+            "usd": 0.0001066
+          },
+          "verdict": {
+            "time_ms": 4791,
+            "tokens_in": 151,
+            "tokens_out": 171,
+            "usd": 0.0001253
+          }
+        },
+        "openai-agents": {
+          "intake": {
+            "time_ms": 9502,
+            "tokens_in": 393,
+            "tokens_out": 500,
+            "usd": 0.0003589
+          },
+          "review": {
+            "time_ms": 40370,
+            "tokens_in": 416,
+            "tokens_out": 1779,
+            "usd": 0.0011298
+          },
+          "challenge": {
+            "time_ms": 12208,
+            "tokens_in": 1846,
+            "tokens_out": 571,
+            "usd": 0.0006195
+          },
+          "synthesis": {
+            "time_ms": 4618,
+            "tokens_in": 152,
+            "tokens_out": 198,
+            "usd": 0.0001416
+          },
+          "verdict": {
+            "time_ms": 5383,
+            "tokens_in": 135,
+            "tokens_out": 273,
+            "usd": 0.0001841
+          }
+        },
+        "ag2": {
+          "intake": {
+            "time_ms": 3568,
+            "tokens_in": 395,
+            "tokens_out": 200,
+            "usd": 0.0001792
+          },
+          "review": {
+            "time_ms": 10965,
+            "tokens_in": 429,
+            "tokens_out": 425,
+            "usd": 0.0003193
+          },
+          "challenge": {
+            "time_ms": 10886,
+            "tokens_in": 661,
+            "tokens_out": 480,
+            "usd": 0.0003872
+          },
+          "synthesis": {
+            "time_ms": 2724,
+            "tokens_in": 177,
+            "tokens_out": 130,
+            "usd": 0.0001045
+          },
+          "verdict": {
+            "time_ms": 2687,
+            "tokens_in": 138,
+            "tokens_out": 120,
+            "usd": 9.27e-05
+          }
+        },
+        "llamaindex": {
+          "intake": {
+            "time_ms": 4493,
+            "tokens_in": 398,
+            "tokens_out": 200,
+            "usd": 0.0001797
+          },
+          "review": {
+            "time_ms": 2938,
+            "tokens_in": 488,
+            "tokens_out": 421,
+            "usd": 0.0003258
+          },
+          "challenge": {
+            "time_ms": 4394,
+            "tokens_in": 497,
+            "tokens_out": 200,
+            "usd": 0.0001945
+          },
+          "synthesis": {
+            "time_ms": 2422,
+            "tokens_in": 147,
+            "tokens_out": 92,
+            "usd": 7.73e-05
+          },
+          "verdict": {
+            "time_ms": 2799,
+            "tokens_in": 125,
+            "tokens_out": 156,
+            "usd": 0.0001123
+          }
+        },
+        "pydanticai": {
+          "intake": {
+            "time_ms": 6280,
+            "tokens_in": 393,
+            "tokens_out": 407,
+            "usd": 0.0003031
+          },
+          "review": {
+            "time_ms": 27373,
+            "tokens_in": 472,
+            "tokens_out": 1181,
+            "usd": 0.0007794
+          },
+          "challenge": {
+            "time_ms": 8785,
+            "tokens_in": 1256,
+            "tokens_out": 493,
+            "usd": 0.0004842
+          },
+          "synthesis": {
+            "time_ms": 4348,
+            "tokens_in": 157,
+            "tokens_out": 221,
+            "usd": 0.0001562
+          },
+          "verdict": {
+            "time_ms": 4918,
+            "tokens_in": 137,
+            "tokens_out": 251,
+            "usd": 0.0001712
+          }
+        }
+      }
+    },
+    "rights": {
+      "frameworks": {
+        "langgraph": {
+          "intake": {
+            "time_ms": 8304,
+            "tokens_in": 405,
+            "tokens_out": 200,
+            "usd": 0.0001807
+          },
+          "review": {
+            "time_ms": 2612,
+            "tokens_in": 532,
+            "tokens_out": 397,
+            "usd": 0.000318
+          },
+          "challenge": {
+            "time_ms": 4316,
+            "tokens_in": 477,
+            "tokens_out": 200,
+            "usd": 0.0001915
+          },
+          "synthesis": {
+            "time_ms": 2218,
+            "tokens_in": 183,
+            "tokens_out": 100,
+            "usd": 8.74e-05
+          },
+          "verdict": {
+            "time_ms": 3471,
+            "tokens_in": 148,
+            "tokens_out": 200,
+            "usd": 0.0001422
+          }
+        },
+        "openai-agents": {
+          "intake": {
+            "time_ms": 12990,
+            "tokens_in": 400,
+            "tokens_out": 485,
+            "usd": 0.000351
+          },
+          "review": {
+            "time_ms": 49461,
+            "tokens_in": 448,
+            "tokens_out": 2607,
+            "usd": 0.0016314
+          },
+          "challenge": {
+            "time_ms": 13566,
+            "tokens_in": 2681,
+            "tokens_out": 694,
+            "usd": 0.0008185
+          },
+          "synthesis": {
+            "time_ms": 6846,
+            "tokens_in": 165,
+            "tokens_out": 372,
+            "usd": 0.0002479
+          },
+          "verdict": {
+            "time_ms": 6701,
+            "tokens_in": 149,
+            "tokens_out": 407,
+            "usd": 0.0002665
+          }
+        },
+        "ag2": {
+          "intake": {
+            "time_ms": 4053,
+            "tokens_in": 402,
+            "tokens_out": 200,
+            "usd": 0.0001803
+          },
+          "review": {
+            "time_ms": 11901,
+            "tokens_in": 484,
+            "tokens_out": 481,
+            "usd": 0.0003612
+          },
+          "challenge": {
+            "time_ms": 11761,
+            "tokens_in": 745,
+            "tokens_out": 480,
+            "usd": 0.0003997
+          },
+          "synthesis": {
+            "time_ms": 4964,
+            "tokens_in": 194,
+            "tokens_out": 241,
+            "usd": 0.0001737
+          },
+          "verdict": {
+            "time_ms": 4625,
+            "tokens_in": 150,
+            "tokens_out": 200,
+            "usd": 0.0001425
+          }
+        },
+        "llamaindex": {
+          "intake": {
+            "time_ms": 3639,
+            "tokens_in": 405,
+            "tokens_out": 200,
+            "usd": 0.0001807
+          },
+          "review": {
+            "time_ms": 3073,
+            "tokens_in": 532,
+            "tokens_out": 470,
+            "usd": 0.0003618
+          },
+          "challenge": {
+            "time_ms": 4169,
+            "tokens_in": 554,
+            "tokens_out": 200,
+            "usd": 0.0002031
+          },
+          "synthesis": {
+            "time_ms": 9474,
+            "tokens_in": 171,
+            "tokens_out": 206,
+            "usd": 0.0001492
+          },
+          "verdict": {
+            "time_ms": 4322,
+            "tokens_in": 150,
+            "tokens_out": 180,
+            "usd": 0.0001305
+          }
+        },
+        "pydanticai": {
+          "intake": {
+            "time_ms": 10046,
+            "tokens_in": 400,
+            "tokens_out": 559,
+            "usd": 0.0003954
+          },
+          "review": {
+            "time_ms": 37644,
+            "tokens_in": 516,
+            "tokens_out": 2049,
+            "usd": 0.0013068
+          },
+          "challenge": {
+            "time_ms": 13533,
+            "tokens_in": 2131,
+            "tokens_out": 630,
+            "usd": 0.0006976
+          },
+          "synthesis": {
+            "time_ms": 6200,
+            "tokens_in": 164,
+            "tokens_out": 344,
+            "usd": 0.000231
+          },
+          "verdict": {
+            "time_ms": 7009,
+            "tokens_in": 150,
+            "tokens_out": 391,
+            "usd": 0.0002571
+          }
+        }
+      }
+    }
+  }
+}
