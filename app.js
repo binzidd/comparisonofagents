@@ -648,7 +648,7 @@ const frameworkPatterns = {
       technical: "Shared plugins and controls drive specialist checks."
     },
     challenge: {
-      links: ["reviewer-security", "reviewer-legal"],
+      links: ["reviewer-security", "reviewer-legal", "reviewer-finance"],
       messages: ["Formal review gate requests more proof."],
       business: "The review gate is formal and explicit.",
       technical: "Governed validation blocks completion."
@@ -680,7 +680,7 @@ const frameworkPatterns = {
       technical: "Intermediate events carry specialist payloads."
     },
     challenge: {
-      links: ["legal-reviewer", "security-reviewer"],
+      links: ["legal-reviewer", "security-reviewer", "finance-reviewer"],
       messages: ["Review event requests follow-up evidence."],
       business: "Challenge is another pipeline step, not a side conversation.",
       technical: "Reviewer step emits follow-up events."
@@ -744,7 +744,7 @@ const frameworkPatterns = {
       technical: "Tool calls and outputs are validated against schemas."
     },
     challenge: {
-      links: ["compliance-reviewer", "legal-reviewer", "security-reviewer"],
+      links: ["compliance-reviewer", "legal-reviewer", "security-reviewer", "finance-reviewer"],
       messages: ["Reviewer forces typed rebuttals on conflicting claims."],
       business: "The challenge loop stays structured instead of fuzzy.",
       technical: "Reviewer checks contradictions across validated outputs."
@@ -1398,6 +1398,7 @@ function frameworkBaseLinks(framework) {
       "principal-finance",
       "reviewer-security",
       "reviewer-legal",
+      "reviewer-finance",
       "reviewer-principal",
       "principal-decision"
     ],
@@ -1408,6 +1409,7 @@ function frameworkBaseLinks(framework) {
       "principal-finance",
       "security-reviewer",
       "legal-reviewer",
+      "finance-reviewer",
       "reviewer-principal",
       "principal-decision"
     ],
@@ -1430,6 +1432,7 @@ function frameworkBaseLinks(framework) {
       "compliance-reviewer",
       "security-reviewer",
       "legal-reviewer",
+      "finance-reviewer",
       "reviewer-principal",
       "principal-decision"
     ]
@@ -1562,6 +1565,10 @@ def legal_node(state):
     state["findings"]["legal"] = retrieve_clause(state["question"], "rights")
     return state
 
+def data_ops_node(state):
+    state["findings"]["data_ops"] = retrieve_clause(state["question"], "retention")
+    return state
+
 def reviewer_node(state):
     state["reviewer_notes"] = check_for_unsupported_claims(state["findings"])
     return state
@@ -1580,17 +1587,20 @@ graph.add_node("principal", principal_node)
 graph.add_node("compliance", compliance_node)
 graph.add_node("security", security_node)
 graph.add_node("legal", legal_node)
+graph.add_node("data_ops", data_ops_node)
 graph.add_node("reviewer", reviewer_node)
 
 # [intake]
 graph.add_edge("principal", "compliance")
 graph.add_edge("principal", "security")
 graph.add_edge("principal", "legal")
+graph.add_edge("principal", "data_ops")
 
 # [challenge]
 graph.add_edge("compliance", "reviewer")
 graph.add_edge("security", "reviewer")
 graph.add_edge("legal", "reviewer")
+graph.add_edge("data_ops", "reviewer")
 
 # [verdict]
 graph.add_edge("reviewer", "principal")
@@ -1632,6 +1642,13 @@ legal = Agent(
     tools=[retrieve_clause],
 )
 
+finance = Agent(
+    name="DataOps",
+    instructions="Assess retention lifecycle and operational data implications.",
+    tools=[retrieve_clause],
+)
+
+# [challenge]
 reviewer = Agent(
     name="Reviewer",
     instructions="Reject answers that lack clause support or overclaim policy rights.",
@@ -1641,7 +1658,7 @@ reviewer = Agent(
 principal = Agent(
     name="Principal",
     instructions="Own the final policy answer and include confidence plus citations. Use compose_answer once findings are returned.",
-    handoffs=[compliance, security, legal, reviewer],
+    handoffs=[compliance, security, legal, finance, reviewer],
 )
 
 # [verdict]
@@ -1728,6 +1745,7 @@ principal = ChatCompletionAgent(service=kernel, name="Principal")
 compliance = ChatCompletionAgent(service=kernel, name="Compliance")
 security = ChatCompletionAgent(service=kernel, name="Security")
 legal = ChatCompletionAgent(service=kernel, name="Legal")
+data_ops = ChatCompletionAgent(service=kernel, name="DataOps")
 reviewer = ChatCompletionAgent(service=kernel, name="Reviewer")
 
 # [review]
@@ -1735,6 +1753,7 @@ findings = {
     "compliance": compliance.get_response(policy_case),
     "security": security.get_response(policy_case),
     "legal": legal.get_response(policy_case),
+    "data_ops": data_ops.get_response(policy_case),
 }
 
 # [challenge]
@@ -1769,6 +1788,7 @@ class PolicyWorkflow(Workflow):
             retrieve_clause(event["question"], "retention"),
             retrieve_clause(event["question"], "private_repos"),
             retrieve_clause(event["question"], "rights"),
+            retrieve_clause(event["question"], "data_ops"),
         ]
         return {"question": event["question"], "findings": findings}
 
@@ -1884,6 +1904,7 @@ findings = [
     specialist.run_sync(f"Compliance review: {case.model_dump_json()}").output,
     specialist.run_sync(f"Security review: {case.model_dump_json()}").output,
     specialist.run_sync(f"Legal review: {case.model_dump_json()}").output,
+    specialist.run_sync(f"DataOps review: {case.model_dump_json()}").output,
 ]
 
 # [challenge]
