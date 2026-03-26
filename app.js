@@ -381,13 +381,13 @@ const graphLayouts = {
     decision: { x: 50, y: 92, labelX: 50, labelY: 99 }
   },
   "sequential-handoffs": {
-    principal: { x: 10, y: 16, labelX: 16, labelY: 26 },
-    compliance: { x: 34, y: 16, labelX: 34, labelY: 26 },
-    security: { x: 58, y: 16, labelX: 58, labelY: 26 },
-    legal: { x: 82, y: 16, labelX: 78, labelY: 26 },
-    finance: { x: 82, y: 52, labelX: 78, labelY: 62 },
-    reviewer: { x: 52, y: 74, labelX: 52, labelY: 84 },
-    decision: { x: 16, y: 90, labelX: 22, labelY: 98 }
+    principal: { x: 10, y: 46, labelX: 10, labelY: 60 },
+    compliance: { x: 32, y: 10, labelX: 32, labelY: 22 },
+    security: { x: 58, y: 10, labelX: 58, labelY: 22 },
+    legal: { x: 84, y: 10, labelX: 84, labelY: 22 },
+    finance: { x: 84, y: 50, labelX: 84, labelY: 62 },
+    reviewer: { x: 54, y: 82, labelX: 54, labelY: 94 },
+    decision: { x: 26, y: 82, labelX: 26, labelY: 94 }
   },
   "conversation-mesh": {
     principal: { x: 50, y: 12, labelX: 50, labelY: 22 },
@@ -468,6 +468,21 @@ const graphLabelOffsets = {
   "security-principal": { dx: -8, dy: 0 },
   "legal-principal": { dx: -2, dy: -5 },
   "finance-principal": { dx: 10, dy: -2 }
+};
+
+const METRIC_DEFINITIONS = {
+  "Latency": "How fast the framework completes a full multi-agent pipeline run end to end.",
+  "Observability": "How visible agent decisions, state transitions, and errors are during a live run.",
+  "Replayability": "Whether runs can be checkpointed and resumed, or replayed from a failure point.",
+  "Human Review": "How well the framework supports human-in-the-loop pauses and approval gates.",
+  "Context Loss": "Risk that earlier findings or policy clauses get dropped across agent steps. Higher = worse.",
+  "Unsupported Answer Risk": "Risk that the final answer lacks citations or makes ungrounded claims. Higher = worse.",
+  "Error Recovery": "Resilience to agent or tool failures: retries, fallbacks, and partial-run rollback.",
+  "Parallelism": "Native support for running multiple agents concurrently rather than sequentially.",
+  "Testability": "Ease of writing deterministic unit tests, mocking LLM calls, and isolating agent behavior.",
+  "Type Safety": "Degree of structured output validation, schema enforcement, and typed agent interfaces.",
+  "Time Cost": "Measured wall-clock time for the verdict stage of this real SDK pipeline run.",
+  "Token Cost": "Total tokens consumed at the verdict stage across all agent calls."
 };
 
 const NODE_DESCRIPTIONS = {
@@ -764,6 +779,12 @@ const frameworkPatterns = {
   }
 };
 
+function formatMs(ms) {
+  if (ms >= 60000) return `${(ms / 60000).toFixed(1)} min`;
+  if (ms >= 1000) return `${(ms / 1000).toFixed(1)} s`;
+  return `${ms} ms`;
+}
+
 let currentStage = 0;
 let compareIds = ["langgraph", "openai-agents"];
 let selectedQuestionId = "retention";
@@ -772,6 +793,7 @@ let frameworkCatalogCards;
 let policyCasePanel;
 let stageChipRow;
 let graphTooltip;
+let metricTooltip;
 let prevStageBtn;
 let stepDemoBtn;
 let frameworkSummary;
@@ -1056,12 +1078,16 @@ function frameworkTechProfile(framework) {
         { label: "Tools", value: "Node-scoped tools keep retrieval and checks tightly bounded" }
       ],
       scorecard: [
-        { label: "Latency", value: 3 },
-        { label: "Observability", value: 5 },
-        { label: "Replayability", value: 5 },
-        { label: "Human Review", value: 5 },
-        { label: "Context Loss", value: 2 },
-        { label: "Unsupported Answer Risk", value: 2 }
+        { label: "Latency", value: 3, reason: "Parallel branches help, but graph compilation and state serialization add measurable overhead." },
+        { label: "Observability", value: 5, reason: "LangSmith tracing gives node-level diffs, step timing, and token counts per branch." },
+        { label: "Replayability", value: 5, reason: "Checkpoint-and-resume is a core primitive; any node can be rolled back and re-run from state." },
+        { label: "Human Review", value: 5, reason: "interrupt_before breakpoints pause execution at any named node for human approval." },
+        { label: "Context Loss", value: 2, reason: "A single shared state dict holds all findings — nothing drops on branch crossings." },
+        { label: "Unsupported Answer Risk", value: 2, reason: "Conditional edges gate the answer path on reviewer approval and clause coverage checks." },
+        { label: "Error Recovery", value: 5, reason: "Checkpoints mean partial failures resume from the last stable state without re-running early nodes." },
+        { label: "Parallelism", value: 5, reason: "Fan-out branches are the primary execution pattern; specialists run truly in parallel." },
+        { label: "Testability", value: 4, reason: "Individual nodes can be unit-tested against mocked state; checkpoint replay aids debugging." },
+        { label: "Type Safety", value: 3, reason: "TypedDict state provides basic structure but graph edges carry no schema-validated payloads." }
       ],
       arrowA: "branch",
       arrowB: "gate",
@@ -1081,12 +1107,16 @@ replay_if_clause_coverage_fails()`
         { label: "Tools", value: "Agent-local tools stay clean, but cross-agent evidence stitching matters" }
       ],
       scorecard: [
-        { label: "Latency", value: 2 },
-        { label: "Observability", value: 4 },
-        { label: "Replayability", value: 4 },
-        { label: "Human Review", value: 4 },
-        { label: "Context Loss", value: 3 },
-        { label: "Unsupported Answer Risk", value: 3 }
+        { label: "Latency", value: 2, reason: "Every specialist handoff is sequential; total latency is the sum of all individual agent calls." },
+        { label: "Observability", value: 4, reason: "SDK tracing captures handoff boundaries and tool calls but no per-node state diffs." },
+        { label: "Replayability", value: 4, reason: "Run context is serializable but replay requires re-triggering the full handoff chain from scratch." },
+        { label: "Human Review", value: 4, reason: "Input and output guardrails provide review hooks at each handoff boundary." },
+        { label: "Context Loss", value: 3, reason: "Each agent receives prior output but aggressive summarization can compress clause detail." },
+        { label: "Unsupported Answer Risk", value: 3, reason: "Reviewer agent can block but no automatic citation check enforces answer grounding." },
+        { label: "Error Recovery", value: 3, reason: "SDK handles basic retries but no checkpoint rollback if a mid-chain failure occurs." },
+        { label: "Parallelism", value: 2, reason: "Handoffs are inherently linear; no native fan-out exists for concurrent specialist execution." },
+        { label: "Testability", value: 3, reason: "Agents can be tested individually with mock runners but there is no built-in deterministic test mode." },
+        { label: "Type Safety", value: 4, reason: "Tool function JSON schemas are enforced; structured_output constrains the final response type." }
       ],
       arrowA: "handoff",
       arrowB: "review",
@@ -1105,12 +1135,16 @@ reviewer.must_reject_if_support_missing()`
         { label: "Tools", value: "Tools are easy to invoke, but evidence grounding must stay explicit" }
       ],
       scorecard: [
-        { label: "Latency", value: 1 },
-        { label: "Observability", value: 2 },
-        { label: "Replayability", value: 2 },
-        { label: "Human Review", value: 4 },
-        { label: "Context Loss", value: 5 },
-        { label: "Unsupported Answer Risk", value: 4 }
+        { label: "Latency", value: 1, reason: "Multi-round group chat debate is token-heavy and synchronous; latency compounds with every turn." },
+        { label: "Observability", value: 2, reason: "Conversation transcript is accessible but there is no structured step-level tracing or state diff." },
+        { label: "Replayability", value: 2, reason: "No built-in checkpoint; replaying requires seeding the full prior message history manually." },
+        { label: "Human Review", value: 4, reason: "Human proxy agents can be injected to pause and provide input at any conversation turn." },
+        { label: "Context Loss", value: 5, reason: "Long threads bury early policy context under later debate turns — a structural risk of the mesh pattern." },
+        { label: "Unsupported Answer Risk", value: 4, reason: "Non-deterministic debate can produce confident but poorly cited conclusions." },
+        { label: "Error Recovery", value: 3, reason: "Basic API retry on transient failures but no structured rollback or turn-level checkpoint." },
+        { label: "Parallelism", value: 3, reason: "Group chat turns are sequential internally but multiple independent chats can run in parallel." },
+        { label: "Testability", value: 2, reason: "Non-deterministic conversation flow makes test assertions fragile; no mock LLM mode built in." },
+        { label: "Type Safety", value: 2, reason: "Agent messages are unstructured strings with no enforced output schema." }
       ],
       arrowA: "debate",
       arrowB: "challenge",
@@ -1129,12 +1163,16 @@ force_reviewer_to_request_clause_ids()`
         { label: "Tools", value: "Role-scoped tools map cleanly to specialist task ownership" }
       ],
       scorecard: [
-        { label: "Latency", value: 3 },
-        { label: "Observability", value: 4 },
-        { label: "Replayability", value: 4 },
-        { label: "Human Review", value: 5 },
-        { label: "Context Loss", value: 3 },
-        { label: "Unsupported Answer Risk", value: 3 }
+        { label: "Latency", value: 3, reason: "Sequential task execution with moderate crew orchestration overhead per task." },
+        { label: "Observability", value: 4, reason: "Task-level logging and crew run events give good per-task visibility across the pipeline." },
+        { label: "Replayability", value: 4, reason: "Task outputs can be cached and individual tasks retried without re-running the full crew." },
+        { label: "Human Review", value: 5, reason: "human_input=True on any task halts execution until manual review confirms the result." },
+        { label: "Context Loss", value: 3, reason: "Task outputs are explicit objects but manager synthesis can lose clause-level nuance." },
+        { label: "Unsupported Answer Risk", value: 3, reason: "Reviewer task can block but relies on LLM judgment without enforced citation checks." },
+        { label: "Error Recovery", value: 3, reason: "Task-level retry is available but crew state is not checkpointed for mid-run failures." },
+        { label: "Parallelism", value: 4, reason: "Process.parallel runs independent specialist tasks concurrently within the crew." },
+        { label: "Testability", value: 3, reason: "Tasks and agents can be unit-tested but crew dynamics require integration-level validation." },
+        { label: "Type Safety", value: 3, reason: "Pydantic output models are available for task results but not enforced by default." }
       ],
       arrowA: "assign",
       arrowB: "checkpoint",
@@ -1155,12 +1193,16 @@ force_reviewer_to_request_clause_ids()`
         { label: "Tools", value: "Enterprise plugins centralize retrieval, logging, and review policies" }
       ],
       scorecard: [
-        { label: "Latency", value: 2 },
-        { label: "Observability", value: 5 },
-        { label: "Replayability", value: 4 },
-        { label: "Human Review", value: 5 },
-        { label: "Context Loss", value: 2 },
-        { label: "Unsupported Answer Risk", value: 2 }
+        { label: "Latency", value: 2, reason: "Enterprise platform overhead and synchronous plugin calls add latency at each step." },
+        { label: "Observability", value: 5, reason: "OpenTelemetry integration and kernel events give deep platform-level tracing out of the box." },
+        { label: "Replayability", value: 4, reason: "Kernel state and plan steps are serializable; replay requires re-driving the plan with saved state." },
+        { label: "Human Review", value: 5, reason: "Function filters and step-level hooks provide formal review gates in the execution plan." },
+        { label: "Context Loss", value: 2, reason: "Kernel memory and shared plugin context preserve evidence across all specialist calls." },
+        { label: "Unsupported Answer Risk", value: 2, reason: "Governance gate explicitly requires verified evidence before the plan is allowed to proceed." },
+        { label: "Error Recovery", value: 4, reason: "Platform-level retry policies and circuit breakers handle transient service failures." },
+        { label: "Parallelism", value: 3, reason: "Parallel function invocation is supported but plan steps tend to be sequential in practice." },
+        { label: "Testability", value: 4, reason: "Plugin interfaces and kernel abstractions are easily mockable in .NET and Python test suites." },
+        { label: "Type Safety", value: 4, reason: "Plugin input and output schemas are strictly typed; kernel functions use validated parameters." }
       ],
       arrowA: "route",
       arrowB: "govern",
@@ -1178,12 +1220,16 @@ require_exception_path_for_ambiguous_answers()`
         { label: "Tools", value: "Step-level evidence calls fit clause extraction and answer building" }
       ],
       scorecard: [
-        { label: "Latency", value: 4 },
-        { label: "Observability", value: 4 },
-        { label: "Replayability", value: 5 },
-        { label: "Human Review", value: 3 },
-        { label: "Context Loss", value: 3 },
-        { label: "Unsupported Answer Risk", value: 3 }
+        { label: "Latency", value: 4, reason: "Async event emission lets steps progress without blocking; pipeline throughput is high." },
+        { label: "Observability", value: 4, reason: "Step-level event tracing and LlamaTrace integration provide solid run visibility." },
+        { label: "Replayability", value: 5, reason: "Event payloads are serializable; failed steps can be replayed by re-emitting their input event." },
+        { label: "Human Review", value: 3, reason: "Human input can be modeled as an event but requires custom wiring rather than built-in support." },
+        { label: "Context Loss", value: 3, reason: "Evidence travels in event payloads; over-aggregation at steps can silently drop clause-level detail." },
+        { label: "Unsupported Answer Risk", value: 3, reason: "No automatic citation gate; the reviewer step relies on LLM judgment without schema enforcement." },
+        { label: "Error Recovery", value: 4, reason: "Step isolation means a failed step can be retried without re-running earlier pipeline stages." },
+        { label: "Parallelism", value: 4, reason: "Async event pipeline naturally supports concurrent step execution across specialists." },
+        { label: "Testability", value: 3, reason: "Workflow steps can be unit-tested with mock events; full pipeline requires integration testing." },
+        { label: "Type Safety", value: 3, reason: "Event types are defined but payload schemas are loosely enforced at runtime." }
       ],
       arrowA: "emit",
       arrowB: "recheck",
@@ -1202,12 +1248,16 @@ aggregate_only_supported_findings()`
         { label: "Tools", value: "Workflow steps make it easy to attach retrieval and scoring tools" }
       ],
       scorecard: [
-        { label: "Latency", value: 3 },
-        { label: "Observability", value: 4 },
-        { label: "Replayability", value: 4 },
-        { label: "Human Review", value: 4 },
-        { label: "Context Loss", value: 3 },
-        { label: "Unsupported Answer Risk", value: 3 }
+        { label: "Latency", value: 3, reason: "Workflow overhead is moderate; parallel steps help but HTTP API adds round-trip cost per call." },
+        { label: "Observability", value: 4, reason: "Workflow run logs and step traces are accessible; OpenTelemetry support is included." },
+        { label: "Replayability", value: 4, reason: "Workflow runs are stored with step outputs; resuming from a checkpoint step is supported." },
+        { label: "Human Review", value: 4, reason: "Workflows can pause at approval steps and wait for external human input via trigger." },
+        { label: "Context Loss", value: 3, reason: "App-facing state helps but workflow branches can omit evidence if not explicitly threaded through." },
+        { label: "Unsupported Answer Risk", value: 3, reason: "Guardrail branch exists but enforcement depends on how each individual step is designed." },
+        { label: "Error Recovery", value: 4, reason: "Workflow-level retry and step isolation allow partial re-runs on failure without starting over." },
+        { label: "Parallelism", value: 4, reason: "Parallel step execution is a first-class workflow primitive in Mastra." },
+        { label: "Testability", value: 4, reason: "TypeScript-native testing with isolated step mocks and full workflow simulation." },
+        { label: "Type Safety", value: 5, reason: "TypeScript and Zod schemas validate all step inputs and outputs at compile time." }
       ],
       arrowA: "step",
       arrowB: "branch",
@@ -1225,12 +1275,16 @@ if (confidence < 0.7) branch("human_check")`
         { label: "Tools", value: "Typed tools and result models suit policy answers with citations and confidence" }
       ],
       scorecard: [
-        { label: "Latency", value: 3 },
-        { label: "Observability", value: 4 },
-        { label: "Replayability", value: 4 },
-        { label: "Human Review", value: 4 },
-        { label: "Context Loss", value: 2 },
-        { label: "Unsupported Answer Risk", value: 1 }
+        { label: "Latency", value: 3, reason: "Sequential agent calls add up, but validated outputs reduce costly downstream retries." },
+        { label: "Observability", value: 4, reason: "Logfire integration provides detailed span-level tracing for each individual agent run." },
+        { label: "Replayability", value: 4, reason: "Agent runs can be logged and replayed using model overrides for offline testing and debug." },
+        { label: "Human Review", value: 4, reason: "Validator functions can pause and request human confirmation on schema violations." },
+        { label: "Context Loss", value: 2, reason: "Structured output models preserve all required fields across agent boundaries by design." },
+        { label: "Unsupported Answer Risk", value: 1, reason: "Pydantic validation rejects any answer missing required citation or confidence fields at runtime." },
+        { label: "Error Recovery", value: 3, reason: "Basic retry on validation failures; no checkpoint rollback across multi-agent runs." },
+        { label: "Parallelism", value: 2, reason: "Agent calls are sequential by default; asyncio is needed for manual parallel execution." },
+        { label: "Testability", value: 5, reason: "TestModel provides fully deterministic runs; mock providers make unit testing trivial." },
+        { label: "Type Safety", value: 5, reason: "Pydantic models are the execution primitive; every output is validated against a schema." }
       ],
       arrowA: "validate",
       arrowB: "rebut",
@@ -1333,7 +1387,7 @@ function traceScoreRows(framework) {
     {
       label: "Time Cost",
       value: scoreFromTimeMs(verdictTrace.metrics.time_ms),
-      detail: `${verdictTrace.metrics.time_ms} ms`
+      detail: formatMs(verdictTrace.metrics.time_ms)
     },
     {
       label: "Token Cost",
@@ -2222,7 +2276,7 @@ function scorePillMarkup(score) {
 
 function renderFrameworkScorecard(framework) {
   const profile = frameworkTechProfile(framework);
-  const rows = [...traceScoreRows(framework), ...profile.scorecard];
+  const rows = [...traceScoreRows(framework), ...profile.scorecard].sort((a, b) => a.value - b.value);
   return `
     <section class="framework-scorecard">
       <div class="framework-scorecard-head">
@@ -2233,9 +2287,15 @@ function renderFrameworkScorecard(framework) {
         ${rows
           .map((item) => {
             const state = scoreState(item.label, item.value);
+            const def = METRIC_DEFINITIONS[item.label] || "";
+            const reason = item.reason || "";
             return `
-              <article class="framework-score-row ${state.tone}">
-                <strong>${item.label}${item.detail ? ` <em>${item.detail}</em>` : ""}</strong>
+              <article class="framework-score-row ${state.tone}"
+                data-metric-def="${def.replaceAll('"', '&quot;')}"
+                data-metric-reason="${reason.replaceAll('"', '&quot;')}"
+                data-metric-label="${item.label}"
+                data-metric-score="${item.value}">
+                <strong>${item.label}${item.detail ? ` <em>${item.detail}</em>` : ""} <span class="metric-info-icon" aria-hidden="true">ℹ</span></strong>
                 <div class="score-dot-row" aria-label="${item.label} score ${item.value} out of 5">
                   ${scorePillMarkup(item.value)}
                 </div>
@@ -2259,7 +2319,7 @@ function renderCodeHint(framework, stageId) {
   const verdictMetricChips = stageId === "verdict" && traceStage?.metrics
     ? `
       <div class="verdict-metric-row" aria-label="Verdict metrics">
-        <span class="verdict-metric-chip">Total time: ${traceTotals ? traceTotals.timeMs : traceStage.metrics.time_ms} ms</span>
+        <span class="verdict-metric-chip">Total time: ${formatMs(traceTotals ? traceTotals.timeMs : traceStage.metrics.time_ms)}</span>
         <span class="verdict-metric-chip">Total tokens: ${traceTotals ? traceTotals.tokens : traceStage.metrics.token_total_estimate}</span>
         <span class="verdict-metric-chip">Total cost: $${traceTotals ? traceTotals.cost.toFixed(5) : traceStage.metrics.usd_cost_estimate}</span>
       </div>
@@ -2284,7 +2344,7 @@ function renderCodeHint(framework, stageId) {
         <div class="code-panel code-panel-wide">
           <div class="code-hint-head">
             <strong>${isRealRun ? "SDK run output" : "Python harness output"}</strong>
-            <span>${traceStage.metrics.time_ms} ms · ${traceStage.metrics.token_total_estimate} tok · $${traceStage.metrics.usd_cost_estimate}</span>
+            <span>${formatMs(traceStage.metrics.time_ms)} · ${traceStage.metrics.token_total_estimate} tok · $${traceStage.metrics.usd_cost_estimate}</span>
           </div>
           ${verdictMetricChips}
           <pre><code>${escapeHtml(JSON.stringify(traceStage.output, null, 2))}</code></pre>
@@ -2556,11 +2616,15 @@ function renderScoreRationale() {
                 ${flagged
                   .map((item) => {
                     const reason =
-                      item.label === "Time Cost" || item.label === "Token Cost" || item.label === "Latency"
+                      item.label === "Time Cost" || item.label === "Token Cost" || item.label === "Latency" || item.label === "Parallelism"
                         ? profile.cards[1].value
-                        : item.label === "Observability" || item.label === "Replayability" || item.label === "Human Review"
+                        : item.label === "Observability" || item.label === "Replayability" || item.label === "Human Review" || item.label === "Testability"
                           ? profile.cards[2].value
-                          : profile.cards[3].value;
+                          : item.label === "Type Safety"
+                            ? profile.cards[5].value
+                            : item.label === "Error Recovery"
+                              ? profile.cards[0].value
+                              : profile.cards[3].value;
                     const detail = item.detail ? ` Measured: ${item.detail}.` : "";
                     return `<li><strong>${item.label}:</strong> ${reason}${detail} Score: ${item.value}/5.</li>`;
                   })
@@ -2666,6 +2730,35 @@ function handleNodeMove(e) {
   graphTooltip.style.top = `${e.clientY - 36}px`;
 }
 
+function handleMetricHover(e) {
+  const row = e.target.closest("[data-metric-label]");
+  if (!row) return;
+  const label = row.dataset.metricLabel;
+  const def = row.dataset.metricDef;
+  const reason = row.dataset.metricReason;
+  const score = row.dataset.metricScore;
+  metricTooltip.innerHTML = `
+    <div class="metric-tooltip-label">${label}</div>
+    ${def ? `<div class="metric-tooltip-def">${def}</div>` : ""}
+    ${reason ? `<div class="metric-tooltip-reason">Score ${score}/5 — ${reason}</div>` : ""}
+  `;
+  metricTooltip.removeAttribute("hidden");
+}
+
+function handleMetricOut(e) {
+  if (!e.relatedTarget?.closest("[data-metric-label]")) {
+    metricTooltip.setAttribute("hidden", "");
+  }
+}
+
+function handleMetricMove(e) {
+  const rect = metricTooltip.getBoundingClientRect();
+  const x = e.clientX + 14;
+  const y = e.clientY - 36;
+  metricTooltip.style.left = `${Math.min(x, window.innerWidth - rect.width - 16)}px`;
+  metricTooltip.style.top = `${Math.max(4, y - rect.height)}px`;
+}
+
 function nextStage() {
   currentStage = (currentStage + 1) % stages.length;
   render();
@@ -2740,6 +2833,7 @@ async function initApp() {
   footerLikeBtn = document.getElementById("footer-like-btn");
   footerLikeCount = document.getElementById("footer-like-count");
   graphTooltip = document.getElementById("graph-tooltip");
+  metricTooltip = document.getElementById("metric-tooltip");
 
   const requiredElements = [
     ["framework-catalog-cards", frameworkCatalogCards],
@@ -2757,7 +2851,8 @@ async function initApp() {
     ["score-rationale", scoreRationale],
     ["footer-like-btn", footerLikeBtn],
     ["footer-like-count", footerLikeCount],
-    ["graph-tooltip", graphTooltip]
+    ["graph-tooltip", graphTooltip],
+    ["metric-tooltip", metricTooltip]
   ];
 
   const missingIds = requiredElements.filter(([, element]) => !element).map(([id]) => id);
@@ -2772,6 +2867,9 @@ async function initApp() {
   comparisonLanes.addEventListener("mouseover", handleNodeHover);
   comparisonLanes.addEventListener("mouseout", handleNodeOut);
   comparisonLanes.addEventListener("mousemove", handleNodeMove);
+  comparisonLanes.addEventListener("mouseover", handleMetricHover);
+  comparisonLanes.addEventListener("mouseout", handleMetricOut);
+  comparisonLanes.addEventListener("mousemove", handleMetricMove);
   renderFooterLike();
   render();
 }

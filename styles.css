@@ -1128,49 +1128,100 @@ button.step-item:hover {
 }
 
 .framework-score-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .framework-score-row {
   display: grid;
-  gap: 8px;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px 12px;
   border: 1px solid rgba(126, 155, 196, 0.12);
-  border-radius: 14px;
-  padding: 12px;
+  border-radius: 10px;
+  padding: 7px 12px;
   background: rgba(17, 26, 39, 0.7);
+  cursor: default;
 }
 
 .framework-score-row strong {
-  font-size: 0.92rem;
+  font-size: 0.84rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .framework-score-row strong em {
   font-style: normal;
   color: #a9bbd7;
-  font-size: 0.82rem;
-  margin-left: 6px;
+  font-size: 0.76rem;
+}
+
+.metric-info-icon {
+  font-size: 0.65rem;
+  opacity: 0.45;
+  cursor: help;
+  user-select: none;
+  line-height: 1;
 }
 
 .score-status {
-  font-size: 0.76rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--muted);
+  white-space: nowrap;
+}
+
+.metric-tooltip-box {
+  position: fixed;
+  z-index: 1000;
+  max-width: 280px;
+  background: rgba(14, 22, 36, 0.98);
+  border: 1px solid rgba(75, 141, 255, 0.28);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.81rem;
+  font-family: "IBM Plex Sans", sans-serif;
+  color: var(--text);
+  pointer-events: none;
+  white-space: normal;
+  line-height: 1.5;
+  box-shadow: 0 8px 28px rgba(2, 8, 18, 0.55);
+}
+
+.metric-tooltip-box[hidden] { display: none; }
+
+.metric-tooltip-label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--text);
+}
+
+.metric-tooltip-def {
+  color: var(--muted);
+  margin-bottom: 6px;
+  font-size: 0.78rem;
+}
+
+.metric-tooltip-reason {
+  color: #b8d0f5;
+  font-size: 0.78rem;
 }
 
 .score-dot-row {
   display: flex;
-  gap: 6px;
+  gap: 4px;
 }
 
 .score-dot {
-  width: 12px;
-  height: 12px;
+  width: 9px;
+  height: 9px;
   border-radius: 999px;
   background: rgba(126, 155, 196, 0.16);
   border: 1px solid rgba(126, 155, 196, 0.22);
+  flex-shrink: 0;
 }
 
 .score-dot.active {
