@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
 from pathlib import Path
 
 
@@ -32,7 +31,7 @@ QUESTIONS = {
 
 FRAMEWORKS = {
     "langgraph": {
-        "runtime": "python-exec:graph",
+        "runtime": "python-harness:graph",
         "state_container": "shared_graph_state",
         "links": {
             "intake": ["principal-compliance", "principal-security"],
@@ -41,9 +40,16 @@ FRAMEWORKS = {
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 340, "review": 1160, "challenge": 820, "synthesis": 510, "verdict": 280},
+            "tokens_in": {"intake": 430, "review": 1320, "challenge": 880, "synthesis": 640, "verdict": 320},
+            "tokens_out": {"intake": 65, "review": 240, "challenge": 170, "synthesis": 210, "verdict": 170},
+        },
+        "confidence": 0.89,
+        "cost_multiplier": 0.0000034,
     },
     "openai-agents": {
-        "runtime": "python-exec:handoff",
+        "runtime": "python-harness:handoff",
         "state_container": "run_context",
         "links": {
             "intake": ["principal-compliance"],
@@ -52,9 +58,16 @@ FRAMEWORKS = {
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 290, "review": 1490, "challenge": 670, "synthesis": 420, "verdict": 240},
+            "tokens_in": {"intake": 390, "review": 1410, "challenge": 610, "synthesis": 540, "verdict": 290},
+            "tokens_out": {"intake": 60, "review": 230, "challenge": 135, "synthesis": 190, "verdict": 150},
+        },
+        "confidence": 0.81,
+        "cost_multiplier": 0.0000032,
     },
     "ag2": {
-        "runtime": "python-exec:conversation",
+        "runtime": "python-harness:conversation",
         "state_container": "chat_transcript",
         "links": {
             "intake": ["principal-compliance", "principal-security"],
@@ -63,9 +76,16 @@ FRAMEWORKS = {
             "synthesis": ["security-principal", "legal-principal", "finance-principal"],
             "verdict": ["principal-decision", "reviewer-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 420, "review": 1840, "challenge": 1220, "synthesis": 760, "verdict": 340},
+            "tokens_in": {"intake": 520, "review": 1920, "challenge": 1180, "synthesis": 830, "verdict": 360},
+            "tokens_out": {"intake": 75, "review": 310, "challenge": 240, "synthesis": 260, "verdict": 190},
+        },
+        "confidence": 0.73,
+        "cost_multiplier": 0.0000041,
     },
     "crewai": {
-        "runtime": "python-exec:crew",
+        "runtime": "python-harness:crew",
         "state_container": "task_outputs",
         "links": {
             "intake": ["principal-compliance", "principal-legal"],
@@ -74,9 +94,16 @@ FRAMEWORKS = {
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 320, "review": 1280, "challenge": 760, "synthesis": 470, "verdict": 250},
+            "tokens_in": {"intake": 410, "review": 1240, "challenge": 780, "synthesis": 560, "verdict": 310},
+            "tokens_out": {"intake": 58, "review": 210, "challenge": 150, "synthesis": 185, "verdict": 160},
+        },
+        "confidence": 0.8,
+        "cost_multiplier": 0.0000031,
     },
     "semantic-kernel": {
-        "runtime": "python-exec:governed",
+        "runtime": "python-harness:governed",
         "state_container": "governed_case",
         "links": {
             "intake": ["principal-compliance", "principal-security"],
@@ -85,9 +112,16 @@ FRAMEWORKS = {
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 360, "review": 1360, "challenge": 710, "synthesis": 500, "verdict": 270},
+            "tokens_in": {"intake": 430, "review": 1280, "challenge": 640, "synthesis": 590, "verdict": 300},
+            "tokens_out": {"intake": 62, "review": 220, "challenge": 140, "synthesis": 180, "verdict": 155},
+        },
+        "confidence": 0.86,
+        "cost_multiplier": 0.0000035,
     },
     "llamaindex": {
-        "runtime": "python-exec:event-workflow",
+        "runtime": "python-harness:event-workflow",
         "state_container": "event_payload",
         "links": {
             "intake": ["principal-compliance"],
@@ -96,9 +130,16 @@ FRAMEWORKS = {
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 270, "review": 980, "challenge": 620, "synthesis": 410, "verdict": 230},
+            "tokens_in": {"intake": 350, "review": 1090, "challenge": 550, "synthesis": 510, "verdict": 260},
+            "tokens_out": {"intake": 56, "review": 185, "challenge": 125, "synthesis": 175, "verdict": 145},
+        },
+        "confidence": 0.84,
+        "cost_multiplier": 0.0000029,
     },
     "mastra": {
-        "runtime": "python-exec:workflow-client",
+        "runtime": "python-harness:workflow-client",
         "state_container": "workflow_context",
         "links": {
             "intake": ["principal-compliance", "principal-security"],
@@ -107,9 +148,16 @@ FRAMEWORKS = {
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 310, "review": 1210, "challenge": 690, "synthesis": 460, "verdict": 245},
+            "tokens_in": {"intake": 400, "review": 1170, "challenge": 610, "synthesis": 540, "verdict": 285},
+            "tokens_out": {"intake": 55, "review": 210, "challenge": 132, "synthesis": 182, "verdict": 150},
+        },
+        "confidence": 0.79,
+        "cost_multiplier": 0.0000030,
     },
     "pydanticai": {
-        "runtime": "python-exec:typed-agents",
+        "runtime": "python-harness:typed-agents",
         "state_container": "typed_models",
         "links": {
             "intake": ["principal-compliance"],
@@ -118,6 +166,13 @@ FRAMEWORKS = {
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
+        "metrics": {
+            "time_ms": {"intake": 280, "review": 1120, "challenge": 650, "synthesis": 430, "verdict": 220},
+            "tokens_in": {"intake": 360, "review": 1010, "challenge": 530, "synthesis": 500, "verdict": 250},
+            "tokens_out": {"intake": 54, "review": 175, "challenge": 118, "synthesis": 168, "verdict": 142},
+        },
+        "confidence": 0.9,
+        "cost_multiplier": 0.0000028,
     },
 }
 
@@ -131,12 +186,87 @@ STAGE_AGENTS = {
 }
 
 
+STAGE_MESSAGE_TEMPLATES = {
+    "langgraph": {
+        "intake": "graph state seeded",
+        "review": "branch writes evidence",
+        "challenge": "review edge opened",
+        "synthesis": "merge node collecting",
+        "verdict": "terminal node emits answer",
+    },
+    "openai-agents": {
+        "intake": "run context opened",
+        "review": "handoff passes findings",
+        "challenge": "reviewer handoff blocks",
+        "synthesis": "reviewed context returns",
+        "verdict": "final agent responds",
+    },
+    "ag2": {
+        "intake": "conversation starts",
+        "review": "specialists debate",
+        "challenge": "reviewer injects rebuttal",
+        "synthesis": "council converges",
+        "verdict": "closing turn publishes",
+    },
+    "crewai": {
+        "intake": "manager assigns",
+        "review": "crew task completes",
+        "challenge": "checkpoint requests revision",
+        "synthesis": "manager merges outputs",
+        "verdict": "crew result returned",
+    },
+    "semantic-kernel": {
+        "intake": "governed case opened",
+        "review": "plugin-backed review runs",
+        "challenge": "governance gate challenges",
+        "synthesis": "approved packet assembled",
+        "verdict": "governed result published",
+    },
+    "llamaindex": {
+        "intake": "intake event emitted",
+        "review": "evidence events written",
+        "challenge": "follow-up event requested",
+        "synthesis": "aggregator combines evidence",
+        "verdict": "terminal event emitted",
+    },
+    "mastra": {
+        "intake": "workflow opened",
+        "review": "workflow step records finding",
+        "challenge": "guardrail branch fires",
+        "synthesis": "workflow resumes",
+        "verdict": "app workflow returns",
+    },
+    "pydanticai": {
+        "intake": "typed case initialized",
+        "review": "validated finding returned",
+        "challenge": "typed rebuttal requested",
+        "synthesis": "validated result composed",
+        "verdict": "typed output emitted",
+    },
+}
+
+
+def framework_metrics(framework_id: str, stage_id: str) -> dict:
+    meta = FRAMEWORKS[framework_id]
+    tokens_in = meta["metrics"]["tokens_in"][stage_id]
+    tokens_out = meta["metrics"]["tokens_out"][stage_id]
+    total_tokens = tokens_in + tokens_out
+    return {
+        "time_ms": meta["metrics"]["time_ms"][stage_id],
+        "token_input_estimate": tokens_in,
+        "token_output_estimate": tokens_out,
+        "token_total_estimate": total_tokens,
+        "usd_cost_estimate": round(total_tokens * meta["cost_multiplier"], 5),
+    }
+
+
 def stage_state(question: dict, framework_id: str, stage_id: str, container: str) -> dict:
     base = {
         "state_container": container,
         "question": question["prompt"],
         "clauses": question["clauses"],
         "stage": stage_id,
+        "framework": framework_id,
     }
     if stage_id == "intake":
         return {
@@ -163,46 +293,136 @@ def stage_state(question: dict, framework_id: str, stage_id: str, container: str
     if stage_id == "synthesis":
         return {
             **base,
-            "draft_answer": question["answer"],
-            "reviewer_notes": ["cite clauses directly", "state limits of policy text"],
+            "draft_answer": verdict_answer(question, framework_id),
+            "reviewer_notes": reviewer_notes(framework_id, question["clauses"][0]),
         }
     return {
         **base,
-        "final_answer": question["answer"],
-        "confidence": 0.82,
-        "citations": question["clauses"],
+        "final_answer": verdict_answer(question, framework_id),
+        "confidence": FRAMEWORKS[framework_id]["confidence"],
+        "citations": verdict_citations(question, framework_id),
     }
 
 
-def stage_output(question: dict, stage_id: str) -> dict:
+def reviewer_notes(framework_id: str, lead_clause: str) -> list[str]:
+    by_framework = {
+        "langgraph": [f"cite {lead_clause} clause explicitly", "retain conditional wording"],
+        "openai-agents": [f"carry {lead_clause} citation through handoff", "do not drop reviewer caveat"],
+        "ag2": [f"trim unsupported debate around {lead_clause}", "pin the final claim to policy text"],
+        "crewai": [f"manager must keep {lead_clause} evidence attached", "check task summaries for drift"],
+        "semantic-kernel": [f"governance gate requires {lead_clause}", "record explicit ambiguity note"],
+        "llamaindex": [f"aggregate {lead_clause} events only", "discard unsupported event payloads"],
+        "mastra": [f"guardrail branch must preserve {lead_clause}", "resume with reviewer warnings attached"],
+        "pydanticai": [f"validate {lead_clause} field presence", "reject answer model if caveat missing"],
+    }
+    return by_framework[framework_id]
+
+
+def verdict_citations(question: dict, framework_id: str) -> list[str]:
+    clause_ids = list(question["clauses"])
+    if framework_id in {"langgraph", "semantic-kernel", "pydanticai"} and "rights" not in clause_ids:
+        clause_ids.append("rights")
+    if framework_id == "ag2" and len(clause_ids) > 2:
+        return clause_ids[:2]
+    return clause_ids
+
+
+def verdict_answer(question: dict, framework_id: str) -> str:
+    answers = {
+        "retention": {
+            "langgraph": "Yes, but only under the retention exceptions the graph gathered: GitHub can keep personal data for contracts, legal duties, disputes, and agreement enforcement, and the period depends on purpose.",
+            "openai-agents": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
+            "ag2": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
+            "crewai": "Yes. The manager summary says data retention may continue where contracts, legal obligations, disputes, or agreement enforcement require it, with duration tied to purpose.",
+            "semantic-kernel": "Yes, subject to the governed caveat that retention remains purpose-bound: GitHub may keep data for contracts, legal duties, disputes, and agreement enforcement.",
+            "llamaindex": "Yes. The aggregated evidence points to continued retention for contracts, legal obligations, disputes, and agreement enforcement, with no single universal retention period.",
+            "mastra": "Yes, with a workflow-style caveat: GitHub can retain data after closure when contract, legal, dispute, or enforcement conditions still exist.",
+            "pydanticai": "Yes. The validated answer model keeps the condition explicit: retention may continue for contracts, legal obligations, disputes, or agreement enforcement, and duration depends on purpose.",
+        },
+        "sharing": {
+            "langgraph": "GitHub may share personal data with affiliates, organization accounts, competent authorities, fraud-prevention parties, and third-party apps when the user directs that sharing.",
+            "openai-agents": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
+            "ag2": "The debate outcome is that sharing is conditional rather than open-ended: GitHub may share with affiliates, organization accounts, authorities, fraud-prevention entities, and third-party apps under user instruction.",
+            "crewai": "Yes, but under scoped pathways. Crew outputs point to affiliates, organization accounts, authorities, abuse-prevention actors, and instructed third-party applications.",
+            "semantic-kernel": "The governed answer distinguishes user-directed sharing from authority-driven disclosure, and includes affiliates, organization accounts, and anti-abuse disclosures.",
+            "llamaindex": "The evidence pipeline supports sharing with affiliates, organization accounts, competent authorities, anti-abuse actors, and third-party apps when instructed by the user.",
+            "mastra": "Workflow output says sharing can happen with affiliates, organization accounts, public authorities, abuse-prevention entities, and user-directed third-party apps.",
+            "pydanticai": "The validated answer separates lawful disclosure from user-directed sharing, covering affiliates, organization accounts, authorities, anti-abuse parties, and third-party apps.",
+        },
+        "rights": {
+            "langgraph": "Users may have access, correction, erasure in some cases, objection, consent-withdrawal, portability, and region-specific rights; the graph also preserves that some rights depend on applicable law.",
+            "openai-agents": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
+            "ag2": "The team converged on a qualified rights answer: access, correction, deletion in some cases, objection, consent withdrawal, portability, and some state-specific rights exist, but they depend on jurisdiction.",
+            "crewai": "Crew outputs identify access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights that vary with applicable law.",
+            "semantic-kernel": "The governed answer distinguishes baseline privacy rights from region-specific rights, including access, correction, deletion in some cases, objection, consent withdrawal, portability, and appeal pathways.",
+            "llamaindex": "Aggregated evidence points to access, correction, deletion or erasure in some contexts, objection, consent withdrawal, portability, and jurisdiction-dependent rights in the EEA, UK, and some US states.",
+            "mastra": "Workflow output says users may have access, correction, deletion in some cases, objection, portability, consent withdrawal, and region-specific rights depending on law.",
+            "pydanticai": "The validated answer model preserves both the core rights and the qualifier: access, correction, deletion in some cases, objection, consent withdrawal, portability, and region-specific rights depend on applicable law.",
+        },
+    }
+    return answers[question_key(question)][framework_id]
+
+
+def question_key(question: dict) -> str:
+    for key, candidate in QUESTIONS.items():
+        if candidate["prompt"] == question["prompt"]:
+            return key
+    raise KeyError("Unknown question")
+
+
+def stage_output(question: dict, framework_id: str, stage_id: str) -> dict:
     if stage_id == "verdict":
         return {
-            "answer": question["answer"],
-            "citations": question["clauses"],
-            "confidence": 0.82,
+            "answer": verdict_answer(question, framework_id),
+            "citations": verdict_citations(question, framework_id),
+            "confidence": FRAMEWORKS[framework_id]["confidence"],
         }
     if stage_id == "synthesis":
-        return {"draft_answer": question["answer"], "status": "ready_for_verdict"}
+        return {
+            "draft_answer": verdict_answer(question, framework_id),
+            "status": "ready_for_verdict",
+            "merge_style": FRAMEWORKS[framework_id]["runtime"].split(":")[1],
+        }
     if stage_id == "challenge":
-        return {"reviewer_action": "revise_claims", "notes": ["cite policy limits", "keep caveats"]}
+        by_framework = {
+            "langgraph": {"reviewer_action": "branch_to_revision", "notes": ["missing conditional caveat", "add explicit clause citation"]},
+            "openai-agents": {"reviewer_action": "reject_handoff", "notes": ["summary compressed legal caveat", "rehydrate retention limits"]},
+            "ag2": {"reviewer_action": "stop_debate_and_ground", "notes": ["debate drift detected", "anchor final answer to source clause"]},
+            "crewai": {"reviewer_action": "return_task_bundle", "notes": ["manager summary needs source wording", "task outputs disagree on scope"]},
+            "semantic-kernel": {"reviewer_action": "fail_governance_gate", "notes": ["audit note missing", "ambiguity statement required"]},
+            "llamaindex": {"reviewer_action": "emit_followup_event", "notes": ["evidence payload incomplete", "re-run clause coverage event"]},
+            "mastra": {"reviewer_action": "branch_guardrail_review", "notes": ["branch triggered by unsupported statement", "resume only after reviewer clear"]},
+            "pydanticai": {"reviewer_action": "model_validation_reject", "notes": ["citation field missing", "answer schema needs conditional qualifier"]},
+        }
+        return by_framework[framework_id]
     if stage_id == "review":
-        return {"specialist_findings": 4, "status": "review_complete"}
-    return {"status": "case_opened"}
+        return {
+            "specialist_findings": len(question["clauses"]) + (2 if framework_id in {"langgraph", "crewai"} else 1),
+            "status": "review_complete",
+            "review_shape": FRAMEWORKS[framework_id]["state_container"],
+        }
+    return {"status": "case_opened", "runtime": FRAMEWORKS[framework_id]["runtime"]}
 
 
-def stage_messages(links: list[str], stage_id: str) -> list[dict]:
-    labels = {
-        "intake": "open case",
-        "review": "specialist finding",
-        "challenge": "review challenge",
-        "synthesis": "merge answer",
-        "verdict": "final answer",
-    }
-    return [{"link_id": link_id, "message": labels[stage_id]} for link_id in links]
+def stage_messages(question: dict, framework_id: str, links: list[str], stage_id: str) -> list[dict]:
+    lead_clause = question["clauses"][0]
+    template = STAGE_MESSAGE_TEMPLATES[framework_id][stage_id]
+    return [
+        {
+            "link_id": link_id,
+            "message": f"{template} · {lead_clause}",
+        }
+        for link_id in links
+    ]
 
 
 def build_trace_store() -> dict:
-    payload = {"generated_by": "scripts/generate_traces.py", "questions": {}}
+    payload = {
+        "generated_by": "scripts/generate_traces.py",
+        "execution_mode": "python-harness",
+        "note": "These traces are produced by Python framework-shaped runners in this repo, not by the official framework SDKs.",
+        "questions": {},
+    }
     for question_id, question in QUESTIONS.items():
         payload["questions"][question_id] = {"frameworks": {}}
         for framework_id, meta in FRAMEWORKS.items():
@@ -210,11 +430,13 @@ def build_trace_store() -> dict:
             for stage_id, links in meta["links"].items():
                 stages[stage_id] = {
                     "runtime": meta["runtime"],
+                    "execution_mode": "python-harness",
                     "active_agents": STAGE_AGENTS[stage_id],
                     "active_links": links,
-                    "messages": stage_messages(links, stage_id),
+                    "messages": stage_messages(question, framework_id, links, stage_id),
                     "state": stage_state(question, framework_id, stage_id, meta["state_container"]),
-                    "output": stage_output(question, stage_id),
+                    "metrics": framework_metrics(framework_id, stage_id),
+                    "output": stage_output(question, framework_id, stage_id),
                 }
             payload["questions"][question_id]["frameworks"][framework_id] = {"stages": stages}
     return payload

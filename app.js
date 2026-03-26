@@ -360,14 +360,89 @@ const linkIds = [
   "finance-principal"
 ];
 
-const graphNodes = {
+const defaultGraphNodes = {
   principal: { x: 50, y: 10, label: "Principal", labelX: 50, labelY: 20 },
   compliance: { x: 14, y: 34, label: "Compliance", labelX: 14, labelY: 45 },
   security: { x: 38, y: 34, label: "Security", labelX: 38, labelY: 45 },
   legal: { x: 62, y: 34, label: "Legal", labelX: 62, labelY: 45 },
-  finance: { x: 86, y: 34, label: "Finance", labelX: 86, labelY: 45 },
+  finance: { x: 86, y: 34, label: "Data Ops", labelX: 86, labelY: 45 },
   reviewer: { x: 50, y: 62, label: "Reviewer", labelX: 50, labelY: 73 },
   decision: { x: 50, y: 92, label: "Output", labelX: 50, labelY: 99 }
+};
+
+const graphLayouts = {
+  "graph-branches": {
+    principal: { x: 50, y: 10, labelX: 50, labelY: 20 },
+    compliance: { x: 14, y: 34, labelX: 14, labelY: 45 },
+    security: { x: 38, y: 34, labelX: 38, labelY: 45 },
+    legal: { x: 62, y: 34, labelX: 62, labelY: 45 },
+    finance: { x: 86, y: 34, labelX: 86, labelY: 45 },
+    reviewer: { x: 50, y: 62, labelX: 50, labelY: 73 },
+    decision: { x: 50, y: 92, labelX: 50, labelY: 99 }
+  },
+  "sequential-handoffs": {
+    principal: { x: 16, y: 14, labelX: 16, labelY: 25 },
+    compliance: { x: 32, y: 32, labelX: 24, labelY: 43 },
+    security: { x: 50, y: 48, labelX: 50, labelY: 59 },
+    legal: { x: 68, y: 64, labelX: 68, labelY: 75 },
+    finance: { x: 84, y: 80, labelX: 84, labelY: 91 },
+    reviewer: { x: 50, y: 80, labelX: 50, labelY: 91 },
+    decision: { x: 50, y: 96, labelX: 50, labelY: 99 }
+  },
+  "conversation-mesh": {
+    principal: { x: 50, y: 12, labelX: 50, labelY: 22 },
+    compliance: { x: 18, y: 34, labelX: 18, labelY: 45 },
+    security: { x: 34, y: 64, labelX: 34, labelY: 75 },
+    legal: { x: 66, y: 64, labelX: 66, labelY: 75 },
+    finance: { x: 82, y: 34, labelX: 82, labelY: 45 },
+    reviewer: { x: 50, y: 46, labelX: 50, labelY: 57 },
+    decision: { x: 50, y: 92, labelX: 50, labelY: 99 }
+  },
+  "manager-review": {
+    principal: { x: 50, y: 10, labelX: 50, labelY: 20 },
+    compliance: { x: 14, y: 34, labelX: 14, labelY: 45 },
+    security: { x: 38, y: 34, labelX: 38, labelY: 45 },
+    legal: { x: 62, y: 34, labelX: 62, labelY: 45 },
+    finance: { x: 86, y: 34, labelX: 86, labelY: 45 },
+    reviewer: { x: 50, y: 58, labelX: 50, labelY: 69 },
+    decision: { x: 50, y: 88, labelX: 50, labelY: 97 }
+  },
+  "enterprise-gated": {
+    principal: { x: 50, y: 10, labelX: 50, labelY: 20 },
+    compliance: { x: 16, y: 34, labelX: 16, labelY: 45 },
+    security: { x: 38, y: 34, labelX: 38, labelY: 45 },
+    legal: { x: 62, y: 34, labelX: 62, labelY: 45 },
+    finance: { x: 84, y: 34, labelX: 84, labelY: 45 },
+    reviewer: { x: 50, y: 58, labelX: 50, labelY: 69 },
+    decision: { x: 50, y: 88, labelX: 50, labelY: 97 }
+  },
+  "event-pipeline": {
+    principal: { x: 14, y: 14, labelX: 14, labelY: 25 },
+    compliance: { x: 30, y: 34, labelX: 22, labelY: 45 },
+    security: { x: 46, y: 34, labelX: 46, labelY: 45 },
+    legal: { x: 62, y: 34, labelX: 62, labelY: 45 },
+    finance: { x: 78, y: 34, labelX: 78, labelY: 45 },
+    reviewer: { x: 50, y: 62, labelX: 50, labelY: 73 },
+    decision: { x: 86, y: 86, labelX: 86, labelY: 97 }
+  },
+  "app-workflow": {
+    principal: { x: 50, y: 10, labelX: 50, labelY: 20 },
+    compliance: { x: 18, y: 34, labelX: 18, labelY: 45 },
+    security: { x: 38, y: 34, labelX: 38, labelY: 45 },
+    legal: { x: 62, y: 34, labelX: 62, labelY: 45 },
+    finance: { x: 82, y: 34, labelX: 82, labelY: 45 },
+    reviewer: { x: 32, y: 64, labelX: 32, labelY: 75 },
+    decision: { x: 68, y: 64, labelX: 68, labelY: 75 }
+  },
+  "typed-review": {
+    principal: { x: 50, y: 10, labelX: 50, labelY: 20 },
+    compliance: { x: 14, y: 34, labelX: 14, labelY: 45 },
+    security: { x: 38, y: 34, labelX: 38, labelY: 45 },
+    legal: { x: 62, y: 34, labelX: 62, labelY: 45 },
+    finance: { x: 86, y: 34, labelX: 86, labelY: 45 },
+    reviewer: { x: 50, y: 58, labelX: 50, labelY: 69 },
+    decision: { x: 50, y: 86, labelX: 50, labelY: 97 }
+  }
 };
 
 const graphLabelOffsets = {
@@ -708,6 +783,19 @@ function getFramework(id) {
 
 function getQuestion() {
   return policyQuestions.find((item) => item.id === selectedQuestionId);
+}
+
+function getGraphNodes(framework) {
+  const layout = framework ? graphLayouts[framework.pattern] || {} : {};
+  return Object.fromEntries(
+    Object.entries(defaultGraphNodes).map(([nodeId, node]) => [
+      nodeId,
+      {
+        ...node,
+        ...(layout[nodeId] || {})
+      }
+    ])
+  );
 }
 
 function getTraceStage(frameworkId, stageId) {
@@ -1143,6 +1231,58 @@ function scoreState(label, value) {
   }
 
   return { tone: "safe", label: "Strong" };
+}
+
+function scoreFromTimeMs(timeMs) {
+  if (timeMs <= 260) {
+    return 5;
+  }
+  if (timeMs <= 360) {
+    return 4;
+  }
+  if (timeMs <= 520) {
+    return 3;
+  }
+  if (timeMs <= 700) {
+    return 2;
+  }
+  return 1;
+}
+
+function scoreFromTokens(tokens) {
+  if (tokens <= 420) {
+    return 5;
+  }
+  if (tokens <= 560) {
+    return 4;
+  }
+  if (tokens <= 700) {
+    return 3;
+  }
+  if (tokens <= 900) {
+    return 2;
+  }
+  return 1;
+}
+
+function traceScoreRows(framework) {
+  const verdictTrace = framework ? getTraceStage(framework.id, "verdict") : null;
+  if (!verdictTrace?.metrics) {
+    return [];
+  }
+
+  return [
+    {
+      label: "Time Cost",
+      value: scoreFromTimeMs(verdictTrace.metrics.time_ms),
+      detail: `${verdictTrace.metrics.time_ms} ms`
+    },
+    {
+      label: "Token Cost",
+      value: scoreFromTokens(verdictTrace.metrics.token_total_estimate),
+      detail: `${verdictTrace.metrics.token_total_estimate} tok`
+    }
+  ];
 }
 
 function frameworkBaseLinks(framework) {
@@ -2023,6 +2163,7 @@ function scorePillMarkup(score) {
 
 function renderFrameworkScorecard(framework) {
   const profile = frameworkTechProfile(framework);
+  const rows = [...traceScoreRows(framework), ...profile.scorecard];
   return `
     <section class="framework-scorecard">
       <div class="framework-scorecard-head">
@@ -2030,12 +2171,12 @@ function renderFrameworkScorecard(framework) {
         <span>1 low · 5 high</span>
       </div>
       <div class="framework-score-grid">
-        ${profile.scorecard
+        ${rows
           .map((item) => {
             const state = scoreState(item.label, item.value);
             return `
               <article class="framework-score-row ${state.tone}">
-                <strong>${item.label}</strong>
+                <strong>${item.label}${item.detail ? ` <em>${item.detail}</em>` : ""}</strong>
                 <div class="score-dot-row" aria-label="${item.label} score ${item.value} out of 5">
                   ${scorePillMarkup(item.value)}
                 </div>
@@ -2067,10 +2208,11 @@ function renderCodeHint(framework, stageId) {
       ${traceStage ? `
         <div class="code-panel code-panel-wide">
           <div class="code-hint-head">
-            <strong>Python trace output</strong>
-            <span>${stageId}</span>
+            <strong>Python harness output</strong>
+            <span>${traceStage.metrics.time_ms} ms · ${traceStage.metrics.token_total_estimate} tok · $${traceStage.metrics.usd_cost_estimate}</span>
           </div>
           <pre><code>${escapeHtml(JSON.stringify(traceStage.output, null, 2))}</code></pre>
+          <p class="trace-footnote">Executed by the repo’s Python comparison harness for this framework shape, not the official SDK runtime.</p>
         </div>
       ` : ""}
     </section>
@@ -2085,6 +2227,7 @@ function evidenceClauseForLink(linkId) {
 }
 
 function renderMessageList(framework, stageId) {
+  const graphNodes = getGraphNodes(framework);
   const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
   const messages = traceStage
     ? traceStage.messages.map((message) => [message.link_id, message.message])
@@ -2109,6 +2252,7 @@ function renderMessageList(framework, stageId) {
 }
 
 function renderGraphMap({ framework, activeAgents, stageId, color, neutral = false }) {
+  const graphNodes = getGraphNodes(framework);
   const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
   const stageHighlights = traceStage ? {
     links: traceStage.active_links,
@@ -2319,7 +2463,8 @@ function renderScoreRationale() {
       ${frameworks
         .map((framework) => {
           const profile = frameworkTechProfile(framework);
-          const flagged = profile.scorecard.filter((item) => {
+          const rows = [...traceScoreRows(framework), ...profile.scorecard];
+          const flagged = rows.filter((item) => {
             const state = scoreState(item.label, item.value);
             return state.tone !== "safe";
           });
@@ -2330,12 +2475,13 @@ function renderScoreRationale() {
                 ${flagged
                   .map((item) => {
                     const reason =
-                      item.label === "Latency"
+                      item.label === "Time Cost" || item.label === "Token Cost" || item.label === "Latency"
                         ? profile.cards[1].value
                         : item.label === "Observability" || item.label === "Replayability" || item.label === "Human Review"
                           ? profile.cards[2].value
                           : profile.cards[3].value;
-                    return `<li><strong>${item.label}:</strong> ${reason} Score: ${item.value}/5.</li>`;
+                    const detail = item.detail ? ` Measured: ${item.detail}.` : "";
+                    return `<li><strong>${item.label}:</strong> ${reason}${detail} Score: ${item.value}/5.</li>`;
                   })
                   .join("")}
               </ul>
