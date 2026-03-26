@@ -270,35 +270,40 @@ const stages = [
   {
     id: "intake",
     label: "Intake",
-    caption: "Supervisor loads the policy corpus, chosen question, and expected answer shape into state.",
+    persona: "Principal Agent",
+    caption: "The Principal Agent loads the policy corpus and question, setting up shared state before any specialist runs.",
     activeAgents: ["principal"],
     activeTools: ["policy_text", "question_bank"]
   },
   {
     id: "review",
     label: "Review",
-    caption: "Compliance, security, legal, and data ops agents run clause retrieval and scoped checks in parallel.",
+    persona: "Specialist Agents",
+    caption: "Four independent domain experts run in parallel: Compliance, Security, Legal, and Data Ops each check their own slice of the policy.",
     activeAgents: ["principal", "compliance", "security", "legal", "finance"],
     activeTools: ["clause_index", "rights_matrix", "retention_map", "exception_checker"]
   },
   {
     id: "challenge",
     label: "Challenge",
-    caption: "Reviewer checks unsupported claims, clause coverage, and contradiction across agent outputs.",
+    persona: "Reviewer Agent",
+    caption: "The Reviewer Agent — a dedicated adversarial persona — tests every specialist finding for unsupported claims, missing caveats, and contradictions.",
     activeAgents: ["compliance", "security", "legal", "finance", "reviewer"],
     activeTools: ["evidence_matrix", "claim_checker"]
   },
   {
     id: "synthesis",
     label: "Synthesis",
-    caption: "Supervisor merges clause evidence, reviewer objections, and structured findings into one answer object.",
+    persona: "Principal + Reviewer",
+    caption: "The Principal Agent merges reviewer objections and specialist findings into one coherent answer object.",
     activeAgents: ["principal", "reviewer", "security", "legal"],
     activeTools: ["answer_builder", "evidence_matrix"]
   },
   {
     id: "verdict",
     label: "Verdict",
-    caption: "Supervisor emits a structured answer with citations, confidence, and reviewer notes.",
+    persona: "Decision Output",
+    caption: "The Decision Output agent emits a structured verdict with citations, confidence rating, and reviewer notes.",
     activeAgents: ["principal", "reviewer", "decision"],
     activeTools: ["answer_builder", "confidence_score"]
   }
@@ -960,7 +965,8 @@ function renderStageChips() {
     .map(
       (stage, index) => `
         <button class="chip ${index === currentStage ? "active" : ""}" data-stage="${index}">
-          ${stage.label}
+          <span class="chip-persona">${stage.persona}</span>
+          <span class="chip-stage-label">${stage.label}</span>
         </button>
       `
     )
@@ -1059,7 +1065,7 @@ function renderStepTrail() {
           return `
             <button class="step-item ${activeClass}" style="--item-rgb:${stageTheme[stage.id]}" data-goto-stage="${index}">
               <span class="step-number">${index + 1}</span>
-              <span class="step-name">${stage.label}</span>
+              <span class="step-name">${stage.persona}</span>
             </button>
             ${index < stages.length - 1 ? '<span class="step-arrow">→</span>' : ""}
           `;
@@ -2476,7 +2482,7 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 
       <section class="flow-section ${activeAgents.has("principal") ? "active" : ""}">
         <div class="flow-section-head">
-          <span class="flow-section-label">Principal</span>
+          <span class="flow-section-label">Principal Agent</span>
         </div>
         ${agentRoster
           .filter((agent) => agent.id === "principal")
@@ -2498,7 +2504,7 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 
       <section class="flow-section ${["compliance", "security", "legal", "finance"].some((id) => activeAgents.has(id)) ? "active" : ""}">
         <div class="flow-section-head">
-          <span class="flow-section-label">Specialists</span>
+          <span class="flow-section-label">Specialist Agents</span>
         </div>
         <div class="specialist-grid">
           ${agentRoster
@@ -2522,7 +2528,7 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 
       <section class="flow-section ${activeAgents.has("reviewer") ? "active" : ""}">
         <div class="flow-section-head">
-          <span class="flow-section-label">Review</span>
+          <span class="flow-section-label">Reviewer Agent</span>
         </div>
         ${agentRoster
           .filter((agent) => agent.id === "reviewer")
@@ -2544,7 +2550,7 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 
       <section class="flow-section ${activeAgents.has("decision") ? "active" : ""}">
         <div class="flow-section-head">
-          <span class="flow-section-label">Output</span>
+          <span class="flow-section-label">Decision Output</span>
         </div>
         ${agentRoster
           .filter((agent) => agent.id === "decision")
@@ -2705,8 +2711,12 @@ function laneMarkup(frameworkId, laneIndex) {
       ${renderStepTrail()}
 
       <div class="lane-role-box lane-role-box-top">
-        <strong>${stage.label}</strong>
-        <p>${highlights.technical}</p>
+        <div class="lane-role-box-who">
+          <span class="lane-stage-eyebrow">${stage.label}</span>
+          <strong>${stage.persona}</strong>
+        </div>
+        <p>${stage.caption}</p>
+        <p class="lane-role-technical">${highlights.technical}</p>
       </div>
 
       ${renderGraphMap({

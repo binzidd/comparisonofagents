@@ -437,9 +437,30 @@ p {
   border-color: var(--line);
   color: var(--text);
   cursor: pointer;
-  font-size: 0.92rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 10px 14px;
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+}
+
+.chip-persona {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.chip-stage-label {
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
 }
 
 .chip.active {
@@ -447,6 +468,14 @@ p {
   color: var(--text);
   border-color: rgba(75, 141, 255, 0.32);
   box-shadow: 0 0 0 2px rgba(75, 141, 255, 0.12);
+}
+
+.chip.active .chip-persona {
+  color: #c8daff;
+}
+
+.chip.active .chip-stage-label {
+  color: rgba(75, 141, 255, 0.7);
 }
 
 
@@ -727,6 +756,34 @@ select {
   margin-top: -2px;
   border-color: rgba(var(--stage-rgb), 0.28);
   background: rgba(var(--stage-rgb), 0.08);
+}
+
+.lane-role-box-who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.lane-stage-eyebrow {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(var(--stage-rgb), 0.8);
+  font-weight: 600;
+}
+
+.lane-role-box-who strong {
+  font-size: 1.05rem;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text);
+}
+
+.lane-role-technical {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 6px 0 0;
+  opacity: 0.75;
 }
 
 .tech-strip {
