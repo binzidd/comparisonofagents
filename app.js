@@ -181,6 +181,91 @@ const catalogItems = [
 
 const demoFrameworks = catalogItems.filter((item) => item.kind === "framework");
 
+const policyPack = {
+  title: "GitHub General Privacy Statement",
+  source: "https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement",
+  effectiveDate: "February 1, 2024",
+  overview: "Public privacy policy used as the shared corpus for every framework demo.",
+  clauses: {
+    sharing: {
+      id: "sharing",
+      title: "Sharing of Personal Data",
+      summary: "GitHub may share data with affiliates, organization accounts, authorities, and third-party apps when instructed."
+    },
+    private_repos: {
+      id: "private_repos",
+      title: "Private repositories: GitHub Access",
+      summary: "Private repository access is restricted, with security, support, integrity, and legal exceptions."
+    },
+    rights: {
+      id: "rights",
+      title: "Your Privacy Rights",
+      summary: "Users may have rights to access, correct, erase or limit processing, object, withdraw consent, and obtain portability."
+    },
+    transfers: {
+      id: "transfers",
+      title: "International data transfers",
+      summary: "Transfers can occur across regions, including to the United States and other countries, with SCC-based protections where relevant."
+    },
+    retention: {
+      id: "retention",
+      title: "Security and Retention",
+      summary: "Personal data may be retained while accounts are active and as needed for contracts, legal obligations, disputes, and agreements."
+    }
+  }
+};
+
+const policyQuestions = [
+  {
+    id: "retention",
+    label: "Can GitHub retain personal data after an account is closed?",
+    prompt: "Can GitHub retain personal data after an account is closed, and under what conditions?",
+    expectedAnswer: "Yes. The policy says retention can continue where needed for contracts, legal requirements, disputes, or enforcing agreements, and the duration depends on purpose.",
+    answerShape: "Answer should be conditional, cite the retention clause, and avoid promising immediate deletion.",
+    relevantClauses: ["retention", "rights"],
+    specialistClauses: {
+      compliance: "retention",
+      security: "private_repos",
+      legal: "rights",
+      finance: "retention",
+      reviewer: "retention",
+      decision: "rights"
+    }
+  },
+  {
+    id: "sharing",
+    label: "When may GitHub share personal data with third parties or authorities?",
+    prompt: "When may GitHub share personal data with third parties, affiliates, or public authorities?",
+    expectedAnswer: "The policy allows sharing with affiliates, organization accounts, competent authorities, abuse and fraud prevention entities, and third-party applications when instructed by the user.",
+    answerShape: "Answer should separate user-directed sharing from legal or safety-driven disclosures.",
+    relevantClauses: ["sharing", "private_repos", "transfers"],
+    specialistClauses: {
+      compliance: "sharing",
+      security: "private_repos",
+      legal: "transfers",
+      finance: "sharing",
+      reviewer: "sharing",
+      decision: "transfers"
+    }
+  },
+  {
+    id: "rights",
+    label: "What rights do users have over their personal data?",
+    prompt: "What rights do users in the EEA, UK, and some US states have over their personal data under this policy?",
+    expectedAnswer: "The policy lists access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and state-specific rights such as deletion and appeal pathways.",
+    answerShape: "Answer should distinguish general privacy rights from region-specific rights and note that some rights depend on applicable law.",
+    relevantClauses: ["rights", "retention", "sharing"],
+    specialistClauses: {
+      compliance: "rights",
+      security: "private_repos",
+      legal: "rights",
+      finance: "retention",
+      reviewer: "rights",
+      decision: "rights"
+    }
+  }
+];
+
 const audiences = [
   {
     id: "business",
@@ -198,42 +283,42 @@ const stages = [
   {
     id: "intake",
     label: "Intake",
-    captionBusiness: "The principal agent opens the policy case and defines the approval bar.",
-    captionTechnical: "Supervisor initializes the case state and policy document.",
+    captionBusiness: "The principal agent turns the selected policy question into a reviewable case.",
+    captionTechnical: "Supervisor loads the policy corpus, chosen question, and expected answer shape into state.",
     activeAgents: ["principal"],
-    activeTools: ["policy_doc"]
+    activeTools: ["policy_text", "question_bank"]
   },
   {
     id: "review",
     label: "Review",
-    captionBusiness: "Specialists review the policy in parallel with their own tools.",
-    captionTechnical: "Compliance, security, legal, and finance perform scoped tool calls.",
+    captionBusiness: "Specialists pull different clauses and test whether the answer is supported.",
+    captionTechnical: "Compliance, security, legal, and data ops agents run clause retrieval and scoped checks in parallel.",
     activeAgents: ["principal", "compliance", "security", "legal", "finance"],
-    activeTools: ["policy_db", "risk_scan", "contract_diff", "cost_model"]
+    activeTools: ["clause_index", "rights_matrix", "retention_map", "exception_checker"]
   },
   {
     id: "challenge",
     label: "Challenge",
-    captionBusiness: "A reviewer forces rebuttals before a leadership-ready answer exists.",
-    captionTechnical: "Reviewer agent challenges contradictory findings and requests follow-ups.",
+    captionBusiness: "A reviewer asks whether the draft answer overclaims, misses conditions, or loses policy nuance.",
+    captionTechnical: "Reviewer checks unsupported claims, clause coverage, and contradiction across agent outputs.",
     activeAgents: ["compliance", "security", "legal", "finance", "reviewer"],
-    activeTools: ["risk_rubric", "evidence_board"]
+    activeTools: ["evidence_matrix", "claim_checker"]
   },
   {
     id: "synthesis",
     label: "Synthesis",
-    captionBusiness: "The principal agent weighs the tradeoffs and narrows toward a verdict.",
-    captionTechnical: "Supervisor merges findings, reviewer flags, and tool outputs into one decision state.",
+    captionBusiness: "The principal agent turns the evidence into one answer with caveats and cited support.",
+    captionTechnical: "Supervisor merges clause evidence, reviewer objections, and structured findings into one answer object.",
     activeAgents: ["principal", "reviewer", "security", "legal"],
-    activeTools: ["decision_score", "evidence_board"]
+    activeTools: ["answer_builder", "evidence_matrix"]
   },
   {
     id: "verdict",
     label: "Verdict",
-    captionBusiness: "The principal agent returns approve, reject, or revise-with-conditions.",
-    captionTechnical: "Supervisor emits the final structured verdict and remediation items.",
+    captionBusiness: "The system returns a final policy answer, confidence level, and what a human should still verify.",
+    captionTechnical: "Supervisor emits a structured answer with citations, confidence, and reviewer notes.",
     activeAgents: ["principal", "reviewer", "decision"],
-    activeTools: ["decision_score"]
+    activeTools: ["answer_builder", "confidence_score"]
   }
 ];
 
@@ -242,20 +327,22 @@ const agentRoster = [
   { id: "compliance", label: "Compliance", sublabel: "Regulatory fit", column: 2, row: 1 },
   { id: "security", label: "Security", sublabel: "Risk and abuse", column: 2, row: 2 },
   { id: "legal", label: "Legal", sublabel: "Terms and contracts", column: 3, row: 1 },
-  { id: "finance", label: "Finance", sublabel: "Cost and liability", column: 3, row: 2 },
+  { id: "finance", label: "Data Ops", sublabel: "Retention operations", column: 3, row: 2 },
   { id: "reviewer", label: "Challenge Agent", sublabel: "Rebuttal gate", column: 4, row: 1 },
   { id: "decision", label: "Decision Output", sublabel: "Approve or revise", column: 5, row: 1 }
 ];
 
 const toolCatalog = {
-  policy_doc: "Policy draft",
-  policy_db: "Policy DB",
-  risk_scan: "Risk scan",
-  contract_diff: "Contract diff",
-  cost_model: "Cost model",
-  risk_rubric: "Risk rubric",
-  evidence_board: "Evidence board",
-  decision_score: "Decision score"
+  policy_text: "Policy text",
+  question_bank: "Question bank",
+  clause_index: "Clause index",
+  rights_matrix: "Rights matrix",
+  retention_map: "Retention map",
+  exception_checker: "Exception checker",
+  evidence_matrix: "Evidence matrix",
+  claim_checker: "Claim checker",
+  answer_builder: "Answer builder",
+  confidence_score: "Confidence score"
 };
 
 const linkIds = [
@@ -602,14 +689,16 @@ const frameworkPatterns = {
   }
 };
 
-let audienceId = "business";
+let audienceId = "technical";
 let currentStage = 0;
 let autoplay = null;
 let compareIds = ["langgraph", "openai-agents"];
+let selectedQuestionId = "retention";
 
 let frameworkCatalogCards;
 let protocolCatalogCards;
 let adjacentCatalogCards;
+let policyCasePanel;
 let audienceChipRow;
 let stageChipRow;
 let playDemoBtn;
@@ -634,6 +723,10 @@ function getFramework(id) {
   return demoFrameworks.find((item) => item.id === id);
 }
 
+function getQuestion() {
+  return policyQuestions.find((item) => item.id === selectedQuestionId);
+}
+
 function cardMarkup(item) {
   return `
     <article class="catalog-card ${item.kind}">
@@ -650,6 +743,66 @@ function renderCatalog() {
   frameworkCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "framework").map(cardMarkup).join("");
   protocolCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "protocol").map(cardMarkup).join("");
   adjacentCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "adjacent").map(cardMarkup).join("");
+}
+
+function renderPolicyCase() {
+  const question = getQuestion();
+  const relevantClauses = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId]);
+
+  policyCasePanel.innerHTML = `
+    <div class="policy-case-head">
+      <div class="policy-case-copy">
+        <p class="eyebrow">Policy Corpus</p>
+        <h3>${policyPack.title}</h3>
+        <p>${policyPack.overview}</p>
+        <div class="policy-source-meta">
+          <span>Effective ${policyPack.effectiveDate}</span>
+          <a href="${policyPack.source}" target="_blank" rel="noreferrer">Open source policy</a>
+        </div>
+      </div>
+      <label class="policy-question-picker">
+        <span>Question</span>
+        <select id="policy-question-select">
+          ${policyQuestions
+            .map(
+              (item) => `
+                <option value="${item.id}" ${item.id === selectedQuestionId ? "selected" : ""}>${item.label}</option>
+              `
+            )
+            .join("")}
+        </select>
+      </label>
+    </div>
+
+    <div class="policy-answer-strip">
+      <article>
+        <span>Expected answer</span>
+        <strong>${question.expectedAnswer}</strong>
+      </article>
+      <article>
+        <span>What the framework should preserve</span>
+        <strong>${question.answerShape}</strong>
+      </article>
+    </div>
+
+    <div class="policy-clause-grid">
+      ${relevantClauses
+        .map(
+          (clause) => `
+            <article class="policy-clause-card">
+              <span>${clause.title}</span>
+              <strong>${clause.summary}</strong>
+            </article>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+
+  policyCasePanel.querySelector("#policy-question-select").addEventListener("change", (event) => {
+    selectedQuestionId = event.target.value;
+    render();
+  });
 }
 
 function renderAudienceChips() {
@@ -693,11 +846,13 @@ function renderStageChips() {
 function renderSummary() {
   const audience = getAudience();
   const stage = getStage();
+  const question = getQuestion();
 
-  scenarioHeadline.textContent = "Reference skeleton plus framework-specific demos";
-  scenarioSupport.textContent = audience.helper;
+  scenarioHeadline.textContent = "Public policy checker across frameworks";
+  scenarioSupport.textContent = `${audience.helper} Shared question: ${question.label}`;
   frameworkSummary.innerHTML = `
-    <div class="summary-pill">Structure: principal + 4 specialists + reviewer + decision output</div>
+    <div class="summary-pill">Policy: ${policyPack.title}</div>
+    <div class="summary-pill">Question: ${question.label}</div>
     <div class="summary-pill">Stage: ${stage.label}</div>
   `;
   appStatus.textContent = `${stage.label} active. ${audience.id === "business" ? stage.captionBusiness : stage.captionTechnical}`;
@@ -781,129 +936,221 @@ function flowHighlights(pattern, stageId) {
 function frameworkTechProfile(framework) {
   const profiles = {
     "graph-branches": {
-      topology: "Supervisor graph with parallel branches",
-      state: "Shared graph state",
-      tools: "Node-level tool calls",
-      review: "Conditional review edge",
+      cards: [
+        { label: "Execution", value: "Supervisor graph with explicit branch and merge nodes" },
+        { label: "Performance", value: "Higher setup cost, but review can run in parallel branches" },
+        { label: "Evals", value: "Best with node assertions, checkpoint replay, and branch-level tests" },
+        { label: "Context Risk", value: "Low to medium because one shared state object holds evidence" },
+        { label: "Challenge", value: "Exception paths can make the graph dense as policy rules expand" },
+        { label: "Tools", value: "Node-scoped tools keep retrieval and checks tightly bounded" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 3 },
+        { label: "Observability", value: 5 },
+        { label: "Replayability", value: 5 },
+        { label: "Human Review", value: 5 },
+        { label: "Context Loss", value: 2 },
+        { label: "Unsupported Answer Risk", value: 2 }
+      ],
       arrowA: "branch",
       arrowB: "gate",
       arrowC: "merge",
-      code: `graph.start("principal")
-.parallel(["compliance", "security", "legal", "finance"])
-.when("risk_flag", "reviewer")
-.then("principal")
-.finish("decision")`
+      evalCode: `assert cited_clauses_present(state)
+assert answer_is_conditional(state)
+checkpoint("before_reviewer")
+replay_if_clause_coverage_fails()`
     },
     "sequential-handoffs": {
-      topology: "Linear handoff chain",
-      state: "Run context passed forward",
-      tools: "Agent-local tools in one runtime",
-      review: "Reviewer handoff",
+      cards: [
+        { label: "Execution", value: "Linear baton-pass handoffs inside one run context" },
+        { label: "Performance", value: "Simple to reason about, but latency stacks if specialists are sequential" },
+        { label: "Evals", value: "Guardrails fit naturally at handoff boundaries and before final return" },
+        { label: "Context Risk", value: "Medium because each handoff can compress or reshape prior findings" },
+        { label: "Challenge", value: "Long policy chains can lose nuance if each agent summarizes too aggressively" },
+        { label: "Tools", value: "Agent-local tools stay clean, but cross-agent evidence stitching matters" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 2 },
+        { label: "Observability", value: 4 },
+        { label: "Replayability", value: 4 },
+        { label: "Human Review", value: 4 },
+        { label: "Context Loss", value: 3 },
+        { label: "Unsupported Answer Risk", value: 3 }
+      ],
       arrowA: "handoff",
       arrowB: "review",
       arrowC: "return",
-      code: `principal
-  -> compliance
-  -> security
-  -> legal
-  -> reviewer
-  -> principal
-  -> decision`
+      evalCode: `on_handoff(validate_schema)
+assert no_required_clause_dropped(ctx)
+reviewer.must_reject_if_support_missing()`
     },
     "conversation-mesh": {
-      topology: "Conversation mesh",
-      state: "Shared transcript and turns",
-      tools: "Tools inside agent turns",
-      review: "Reviewer injects rebuttals",
+      cards: [
+        { label: "Execution", value: "Conversation mesh with direct specialist challenge" },
+        { label: "Performance", value: "Great for exploration, but turn-taking can be token and latency heavy" },
+        { label: "Evals", value: "Needs transcript scoring, stop rules, and claim verification after debate" },
+        { label: "Context Risk", value: "High because long threads can bury the original policy question" },
+        { label: "Challenge", value: "Without hard stopping conditions, policy review can sprawl" },
+        { label: "Tools", value: "Tools are easy to invoke, but evidence grounding must stay explicit" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 1 },
+        { label: "Observability", value: 2 },
+        { label: "Replayability", value: 2 },
+        { label: "Human Review", value: 4 },
+        { label: "Context Loss", value: 5 },
+        { label: "Unsupported Answer Risk", value: 4 }
+      ],
       arrowA: "debate",
       arrowB: "challenge",
       arrowC: "converge",
-      code: `group_chat([
-  principal,
-  compliance,
-  security,
-  legal,
-  finance,
-  reviewer
-])`
+      evalCode: `score_transcript_for_support()
+limit_turns(max=8)
+force_reviewer_to_request_clause_ids()`
     },
     "manager-review": {
-      topology: "Manager plus role tasks",
-      state: "Task outputs and checkpoints",
-      tools: "Role-scoped tools",
-      review: "Checkpoint gate",
+      cards: [
+        { label: "Execution", value: "Manager assigns specialist tasks, then resumes after checkpoint review" },
+        { label: "Performance", value: "Operationally clear and easy to split, with moderate orchestration overhead" },
+        { label: "Evals", value: "Checkpoint validation is natural before manager synthesis" },
+        { label: "Context Risk", value: "Medium because task outputs may be concise but detached from source wording" },
+        { label: "Challenge", value: "Manager prompts can become the bottleneck if too much policy logic lives there" },
+        { label: "Tools", value: "Role-scoped tools map cleanly to specialist task ownership" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 3 },
+        { label: "Observability", value: 4 },
+        { label: "Replayability", value: 4 },
+        { label: "Human Review", value: 5 },
+        { label: "Context Loss", value: 3 },
+        { label: "Unsupported Answer Risk", value: 3 }
+      ],
       arrowA: "assign",
       arrowB: "checkpoint",
       arrowC: "approve",
-      code: `manager.assign(tasks)
-crew.execute()
-review_checkpoint()
-manager.finalize()`
+      evalCode: `checkpoint.requires([
+  "cited_clauses",
+  "unsupported_claims=0",
+  "human_review_note"
+])`
     },
     "enterprise-gated": {
-      topology: "Governed enterprise workflow",
-      state: "Platform-governed runtime state",
-      tools: "Enterprise plugins",
-      review: "Formal governance gate",
+      cards: [
+        { label: "Execution", value: "Governed workflow with platform-level checkpoints and controls" },
+        { label: "Performance", value: "Heavier platform cost, but strong fit when auditability matters" },
+        { label: "Evals", value: "Formal review gates and policy conformance checks fit well" },
+        { label: "Context Risk", value: "Low to medium because state is centralized but platform abstractions are heavier" },
+        { label: "Challenge", value: "Can feel heavyweight for a narrow policy checker unless governance is a requirement" },
+        { label: "Tools", value: "Enterprise plugins centralize retrieval, logging, and review policies" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 2 },
+        { label: "Observability", value: 5 },
+        { label: "Replayability", value: 4 },
+        { label: "Human Review", value: 5 },
+        { label: "Context Loss", value: 2 },
+        { label: "Unsupported Answer Risk", value: 2 }
+      ],
       arrowA: "route",
       arrowB: "govern",
       arrowC: "publish",
-      code: `policy_case
-  |> enterprise_agents
-  |> governance_review
-  |> final_packet`
+      evalCode: `governance_gate.assert_audit_fields()
+require_exception_path_for_ambiguous_answers()`
     },
     "event-pipeline": {
-      topology: "Event pipeline",
-      state: "Event payload aggregation",
-      tools: "Step-level evidence calls",
-      review: "Review event",
+      cards: [
+        { label: "Execution", value: "Event-driven evidence pipeline with aggregation steps" },
+        { label: "Performance", value: "Scales well when evidence extraction is eventful and decoupled" },
+        { label: "Evals", value: "Good for per-step validation and replay of failed events" },
+        { label: "Context Risk", value: "Medium because payload contracts matter more than conversational continuity" },
+        { label: "Challenge", value: "Policy nuance can fragment if events are too small or loosely typed" },
+        { label: "Tools", value: "Step-level evidence calls fit clause extraction and answer building" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 4 },
+        { label: "Observability", value: 4 },
+        { label: "Replayability", value: 5 },
+        { label: "Human Review", value: 3 },
+        { label: "Context Loss", value: 3 },
+        { label: "Unsupported Answer Risk", value: 3 }
+      ],
       arrowA: "emit",
       arrowB: "recheck",
       arrowC: "aggregate",
-      code: `emit("policy_intake")
-on("specialist_result")
-on("review_required")
-emit("final_verdict")`
+      evalCode: `validate_event_payloads()
+requeue_if_clause_score < threshold
+aggregate_only_supported_findings()`
     },
     "app-workflow": {
-      topology: "App-native workflow",
-      state: "Workflow state in app runtime",
-      tools: "Workflow step tools",
-      review: "Guardrail branch",
+      cards: [
+        { label: "Execution", value: "App-native workflow that keeps orchestration close to product code" },
+        { label: "Performance", value: "Strong product-team ergonomics with moderate workflow overhead" },
+        { label: "Evals", value: "Good fit for inline guardrail branches and UI-facing assertions" },
+        { label: "Context Risk", value: "Medium because app state helps, but workflow branches can hide missing evidence" },
+        { label: "Challenge", value: "You must design governance discipline yourself rather than inherit it" },
+        { label: "Tools", value: "Workflow steps make it easy to attach retrieval and scoring tools" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 3 },
+        { label: "Observability", value: 4 },
+        { label: "Replayability", value: 4 },
+        { label: "Human Review", value: 4 },
+        { label: "Context Loss", value: 3 },
+        { label: "Unsupported Answer Risk", value: 3 }
+      ],
       arrowA: "step",
       arrowB: "branch",
       arrowC: "resume",
-      code: `workflow.step("principal")
-.parallel("specialists")
-.branch("review")
-.resume("principal")
-.complete("decision")`
+      evalCode: `if (!hasCitation(answer)) branch("review")
+if (confidence < 0.7) branch("human_check")`
     },
     "typed-review": {
-      topology: "Typed orchestration pipeline",
-      state: "Validated models and outputs",
-      tools: "Schema-validated tools",
-      review: "Typed contradiction checks",
+      cards: [
+        { label: "Execution", value: "Typed orchestration pipeline with validated inputs and outputs" },
+        { label: "Performance", value: "Moderate runtime cost, offset by lower downstream cleanup and retries" },
+        { label: "Evals", value: "Schema validation and typed reviewer checks are the default strength" },
+        { label: "Context Risk", value: "Low to medium because structured outputs preserve key answer fields" },
+        { label: "Challenge", value: "You still have to design the multi-agent topology around the typed core" },
+        { label: "Tools", value: "Typed tools and result models suit policy answers with citations and confidence" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 3 },
+        { label: "Observability", value: 4 },
+        { label: "Replayability", value: 4 },
+        { label: "Human Review", value: 4 },
+        { label: "Context Loss", value: 2 },
+        { label: "Unsupported Answer Risk", value: 1 }
+      ],
       arrowA: "validate",
       arrowB: "rebut",
       arrowC: "compose",
-      code: `case = PolicyCase.model_validate(input)
-findings = specialists.run(case)
-review = reviewer.check(findings)
-decision = compose(case, findings, review)`
+      evalCode: `Decision.model_validate(answer)
+assert all_finding_models_have_clause_ids()
+assert reviewer_flags_are_explicit()`
     }
   };
 
   return framework ? profiles[framework.pattern] : {
-    topology: "Reference skeleton",
-    state: "Shared decision stages",
-    tools: "Shared demo tools",
-    review: "Explicit reviewer stage",
+    cards: [
+      { label: "Execution", value: "One principal agent plus specialists, reviewer, and final output" },
+      { label: "Policy", value: "Shared GitHub privacy statement and one selected question" },
+      { label: "Evals", value: "Cited clauses, conditional answers, and reviewer objections" },
+      { label: "Context Risk", value: "Baseline reference only; each framework changes how context moves" }
+    ],
+    scorecard: [
+      { label: "Latency", value: 3 },
+      { label: "Observability", value: 3 },
+      { label: "Replayability", value: 3 },
+      { label: "Human Review", value: 4 },
+      { label: "Context Loss", value: 3 },
+      { label: "Unsupported Answer Risk", value: 3 }
+    ],
     arrowA: "route",
     arrowB: "review",
     arrowC: "decide",
-    code: `principal -> specialists -> reviewer -> decision`
+    evalCode: `answer must cite policy clauses
+reviewer can reject unsupported claims
+final output includes confidence`
   };
 }
 
@@ -1303,49 +1550,90 @@ function renderFrameworkTechStrip(framework) {
   const profile = frameworkTechProfile(framework);
   return `
     <div class="tech-strip">
-      <article>
-        <span>Topology</span>
-        <strong>${profile.topology}</strong>
-      </article>
-      <article>
-        <span>State</span>
-        <strong>${profile.state}</strong>
-      </article>
-      <article>
-        <span>Tools</span>
-        <strong>${profile.tools}</strong>
-      </article>
-      <article>
-        <span>Review</span>
-        <strong>${profile.review}</strong>
-      </article>
+      ${profile.cards
+        .map(
+          (item) => `
+            <article>
+              <span>${item.label}</span>
+              <strong>${item.value}</strong>
+            </article>
+          `
+        )
+        .join("")}
     </div>
+  `;
+}
+
+function scorePillMarkup(score) {
+  return new Array(5)
+    .fill(0)
+    .map((_, index) => `<span class="score-dot ${index < score ? "active" : ""}"></span>`)
+    .join("");
+}
+
+function renderFrameworkScorecard(framework) {
+  const profile = frameworkTechProfile(framework);
+  return `
+    <section class="framework-scorecard">
+      <div class="framework-scorecard-head">
+        <h4>Framework Scoreboard</h4>
+        <span>1 low · 5 high</span>
+      </div>
+      <div class="framework-score-grid">
+        ${profile.scorecard
+          .map(
+            (item) => `
+              <article class="framework-score-row">
+                <strong>${item.label}</strong>
+                <div class="score-dot-row" aria-label="${item.label} score ${item.value} out of 5">
+                  ${scorePillMarkup(item.value)}
+                </div>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
   `;
 }
 
 function renderCodeHint(framework, stageId) {
   const profile = frameworkTechProfile(framework);
   const stageCode = stageImplementationCode(framework, stageId);
+  const question = getQuestion();
+  const clauseList = question.relevantClauses.map((clauseId) => policyPack.clauses[clauseId].title).join(", ");
+  const codeSourceLabel = framework ? framework.name : "Reference skeleton";
+  const codeSourceHref = framework ? framework.source : policyPack.source;
   return `
     <section class="code-hint">
       <div class="code-hint-grid">
         <div class="code-panel">
           <div class="code-hint-head">
             <strong>Current step code</strong>
-            <span>${stageId}</span>
+            <a href="${codeSourceHref}" target="_blank" rel="noreferrer">${codeSourceLabel} docs</a>
           </div>
-          <pre><code>${stageCode}</code></pre>
+          <pre><code>question = "${question.prompt}"
+relevant_clauses = [${question.relevantClauses.map((clauseId) => `"${clauseId}"`).join(", ")}]
+
+${stageCode}</code></pre>
         </div>
         <div class="code-panel">
           <div class="code-hint-head">
-            <strong>Flow pattern</strong>
-            <span>${profile.topology}</span>
+            <strong>Eval + controls</strong>
+            <span>${clauseList}</span>
           </div>
-          <pre><code>${profile.code}</code></pre>
+          <pre><code>${profile.evalCode}</code></pre>
         </div>
       </div>
     </section>
   `;
+}
+
+function evidenceClauseForLink(linkId) {
+  const question = getQuestion();
+  const [, toId] = linkEndpoints[linkId];
+  const clauseId = question.specialistClauses[toId] || question.relevantClauses[0];
+  return policyPack.clauses[clauseId];
 }
 
 function renderMessageList(framework, stageId) {
@@ -1355,10 +1643,12 @@ function renderMessageList(framework, stageId) {
       ${messages
         .map(([linkId, message]) => {
           const [fromId, toId] = linkEndpoints[linkId];
+          const clause = evidenceClauseForLink(linkId);
           return `
             <article class="message-row">
               <strong>${graphNodes[fromId].label} → ${graphNodes[toId].label}</strong>
               <span>${message}</span>
+              <small>Evidence: ${clause.title}</small>
             </article>
           `;
         })
@@ -1540,23 +1830,48 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 
 function renderSkeleton() {
   const stage = getStage();
+  const question = getQuestion();
   skeletonBoard.innerHTML = `
     ${renderStepTrail()}
     ${renderFrameworkTechStrip(null)}
     <div class="lane-role-box lane-role-box-top">
       <strong>${stage.label}</strong>
-      <p>${stage.captionTechnical}</p>
+      <p>${stage.captionTechnical} Current question: ${question.label}</p>
     </div>
     ${renderBoard({
       framework: null,
       color: "#7d6f62",
       activeAgents: new Set(stage.activeAgents),
       activeTools: new Set(stage.activeTools),
-      messages: ["Reference structure only: principal delegates, specialists evaluate, reviewer challenges, output concludes."],
+      messages: ["Reference structure only: every framework answers the same public-policy question, but with different state, eval, and context behavior."],
       stageId: stage.id,
       neutral: true
     })}
     ${renderCodeHint(null, stage.id)}
+  `;
+}
+
+function renderFrameworkAnalysis(framework) {
+  const question = getQuestion();
+  return `
+    <div class="lane-bottom lane-analysis-grid">
+      <article>
+        <h4>Strengths for this checker</h4>
+        <ul>${framework.pros.map((item) => `<li>${item}</li>`).join("")}</ul>
+      </article>
+      <article>
+        <h4>Framework challenges</h4>
+        <ul>${framework.cons.map((item) => `<li>${item}</li>`).join("")}</ul>
+      </article>
+      <article>
+        <h4>Best eval move</h4>
+        <p>${frameworkTechProfile(framework).cards[2].value}</p>
+      </article>
+      <article>
+        <h4>Where context can drop</h4>
+        <p>${frameworkTechProfile(framework).cards[3].value} For this question: ${question.answerShape}</p>
+      </article>
+    </div>
   `;
 }
 
@@ -1603,18 +1918,11 @@ function laneMarkup(frameworkId, laneIndex) {
 
       ${renderMessageList(framework, stage.id)}
 
+      ${renderFrameworkScorecard(framework)}
+
       ${renderCodeHint(framework, stage.id)}
 
-      <div class="lane-bottom">
-        <article>
-          <h4>Pros</h4>
-          <ul>${framework.pros.map((item) => `<li>${item}</li>`).join("")}</ul>
-        </article>
-        <article>
-          <h4>Cons</h4>
-          <ul>${framework.cons.map((item) => `<li>${item}</li>`).join("")}</ul>
-        </article>
-      </div>
+      ${renderFrameworkAnalysis(framework)}
     </article>
   `;
 }
@@ -1649,6 +1957,7 @@ function toggleAutoplay() {
 
 function render() {
   renderCatalog();
+  renderPolicyCase();
   renderAudienceChips();
   renderStageChips();
   renderSummary();
@@ -1660,6 +1969,7 @@ function initApp() {
   frameworkCatalogCards = document.getElementById("framework-catalog-cards");
   protocolCatalogCards = document.getElementById("protocol-catalog-cards");
   adjacentCatalogCards = document.getElementById("adjacent-catalog-cards");
+  policyCasePanel = document.getElementById("policy-case-panel");
   audienceChipRow = document.getElementById("audience-chip-row");
   stageChipRow = document.getElementById("stage-chip-row");
   playDemoBtn = document.getElementById("play-demo-btn");
@@ -1676,6 +1986,7 @@ function initApp() {
     ["framework-catalog-cards", frameworkCatalogCards],
     ["protocol-catalog-cards", protocolCatalogCards],
     ["adjacent-catalog-cards", adjacentCatalogCards],
+    ["policy-case-panel", policyCasePanel],
     ["audience-chip-row", audienceChipRow],
     ["stage-chip-row", stageChipRow],
     ["play-demo-btn", playDemoBtn],

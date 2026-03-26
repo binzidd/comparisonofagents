@@ -1,13 +1,13 @@
 # Agent-to-Agent Framework Comparison Lab
 
-This is a Vercel-ready static app that compares how agent frameworks handle one shared policy-evaluation flow.
+This is a Vercel-ready static app that compares how agent frameworks handle one shared public-policy checking flow.
 
 ## What it shows
 
-- A principal agent evaluating a customer data retention policy
-- Specialist agents for compliance, security, legal, and finance
-- A challenge agent that forces rebuttals before final approval
-- Side-by-side animated framework comparisons
+- A shared public policy corpus based on the GitHub General Privacy Statement
+- Selectable policy questions with expected answers and evidence clauses
+- Specialist agents for compliance, security, legal, and data operations
+- Side-by-side framework comparisons with eval, performance, and context-loss considerations
 - Business and technical explanation modes
 
 ## Local development
