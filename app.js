@@ -470,6 +470,17 @@ const graphLabelOffsets = {
   "finance-principal": { dx: 10, dy: -2 }
 };
 
+const TIME_REASONS = {
+  "graph-branches": "Specialists run as parallel graph branches — stage time equals the slowest single specialist, not the sum of all four. That keeps per-stage times low even with 4 concurrent domain checks.",
+  "sequential-handoffs": "Each specialist is a separate agent handoff: 4 specialists = 4 serial LLM round-trips. The review and challenge stages stack those latencies, which is why you see high per-stage times (e.g. 17–35 s). It is the architectural trade-off of the handoff model.",
+  "conversation-mesh": "Specialists engage in conversational turns. Multi-turn exchanges on contested claims add latency beyond a single LLM call per specialist — each back-and-forth round adds an API call.",
+  "manager-review": "The manager routes tasks sequentially; stage time scales with the number of specialists called and any re-routing decisions the manager makes.",
+  "enterprise-gated": "Approval gate checkpoints add deliberate synchronous pauses — each gate waits for the previous stage to fully complete and be approved before the next begins.",
+  "event-pipeline": "Events are dispatched to specialist handlers that each await their LLM response before emitting the next event. High stage times reflect chained awaits across multiple sequential specialist calls.",
+  "typed-review": "Typed schema validation adds a check step per handoff, but overall latency is dominated by sequential specialist LLM calls accumulating per stage.",
+  "app-workflow": "Workflow steps execute one at a time; stage time reflects LLM latency for each step in the defined sequence."
+};
+
 const METRIC_DEFINITIONS = {
   "Latency": "How fast the framework completes a full multi-agent pipeline run end to end.",
   "Observability": "How visible agent decisions, state transitions, and errors are during a live run.",
@@ -481,7 +492,7 @@ const METRIC_DEFINITIONS = {
   "Parallelism": "Native support for running multiple agents concurrently rather than sequentially.",
   "Testability": "Ease of writing deterministic unit tests, mocking LLM calls, and isolating agent behavior.",
   "Type Safety": "Degree of structured output validation, schema enforcement, and typed agent interfaces.",
-  "Time Cost": "Measured wall-clock time for the verdict stage of this real SDK pipeline run.",
+  "Time Cost": "Measured wall-clock time for the verdict stage of this real SDK pipeline run. Per-stage times vary — hover the ℹ icon on any stage's time display to see why.",
   "Token Cost": "Total tokens consumed at the verdict stage across all agent calls."
 };
 
@@ -1378,12 +1389,14 @@ function traceScoreRows(framework) {
   if (!verdictTrace?.metrics) {
     return [];
   }
+  const timeReason = framework?.pattern ? (TIME_REASONS[framework.pattern] || "") : "";
 
   return [
     {
       label: "Time Cost",
       value: scoreFromTimeMs(verdictTrace.metrics.time_ms),
-      detail: formatMs(verdictTrace.metrics.time_ms)
+      detail: formatMs(verdictTrace.metrics.time_ms),
+      reason: timeReason
     },
     {
       label: "Token Cost",
