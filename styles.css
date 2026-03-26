@@ -297,7 +297,7 @@ p {
 }
 
 .policy-answer-strip {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .policy-answer-strip article,
@@ -327,6 +327,15 @@ p {
 
 .policy-clause-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.policy-answer-strip.compact article,
+.policy-clause-grid.compact .policy-clause-card {
+  padding: 14px;
+}
+
+.policy-clause-grid.compact {
+  grid-template-columns: 1fr;
 }
 
 .toolbar-group {
@@ -674,6 +683,10 @@ select {
   border-top: 1px solid rgba(126, 155, 196, 0.14);
 }
 
+.state-payload {
+  border-top: 1px solid rgba(126, 155, 196, 0.14);
+}
+
 .code-hint-head {
   display: flex;
   justify-content: space-between;
@@ -936,6 +949,10 @@ select {
   background: rgba(11, 20, 33, 0.86);
   display: grid;
   gap: 14px;
+}
+
+.section-tail {
+  margin-top: 24px;
 }
 
 .framework-scorecard-head {

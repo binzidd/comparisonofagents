@@ -684,7 +684,6 @@ let compareIds = ["langgraph", "openai-agents"];
 let selectedQuestionId = "retention";
 
 let frameworkCatalogCards;
-let adjacentCatalogCards;
 let policyCasePanel;
 let stageChipRow;
 let stepDemoBtn;
@@ -695,6 +694,7 @@ let skeletonBoard;
 let scenarioHeadline;
 let scenarioSupport;
 let comparisonLanes;
+let scoreRationale;
 
 function getStage() {
   return stages[currentStage];
@@ -722,7 +722,6 @@ function cardMarkup(item) {
 
 function renderCatalog() {
   frameworkCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "framework").map(cardMarkup).join("");
-  adjacentCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "adjacent").map(cardMarkup).join("");
 }
 
 function renderPolicyCase() {
@@ -754,18 +753,22 @@ function renderPolicyCase() {
       </label>
     </div>
 
-    <div class="policy-answer-strip">
+    <div class="policy-answer-strip compact">
+      <article>
+        <span>Question</span>
+        <strong>${question.prompt}</strong>
+      </article>
       <article>
         <span>Expected answer</span>
         <strong>${question.expectedAnswer}</strong>
       </article>
       <article>
-        <span>What the framework should preserve</span>
-        <strong>${question.answerShape}</strong>
+        <span>Key clauses</span>
+        <strong>${relevantClauses.map((clause) => clause.title).join(" · ")}</strong>
       </article>
     </div>
 
-    <div class="policy-clause-grid">
+    <div class="policy-clause-grid compact">
       ${relevantClauses
         .map(
           (clause) => `
@@ -1380,6 +1383,7 @@ class PolicyState(dict):
     reviewer_notes: list[str]
     answer: str
 
+# [review]
 def compliance_node(state):
     state["findings"]["compliance"] = retrieve_clause(state["question"], "retention")
     return state
@@ -1396,6 +1400,7 @@ def reviewer_node(state):
     state["reviewer_notes"] = check_for_unsupported_claims(state["findings"])
     return state
 
+# [synthesis]
 def principal_node(state):
     state["answer"] = compose_answer(
         question=state["question"],
@@ -1410,12 +1415,18 @@ graph.add_node("compliance", compliance_node)
 graph.add_node("security", security_node)
 graph.add_node("legal", legal_node)
 graph.add_node("reviewer", reviewer_node)
+
+# [intake]
 graph.add_edge("principal", "compliance")
 graph.add_edge("principal", "security")
 graph.add_edge("principal", "legal")
+
+# [challenge]
 graph.add_edge("compliance", "reviewer")
 graph.add_edge("security", "reviewer")
 graph.add_edge("legal", "reviewer")
+
+# [verdict]
 graph.add_edge("reviewer", "principal")
 graph.add_edge("principal", END)
 
@@ -1430,11 +1441,13 @@ print(result["answer"])`,
 
 from agents import Agent, Runner
 
+# [intake]
 policy_case = {
     "question": "${question.prompt}",
     "clauses": [${clauseString}],
 }
 
+# [review]
 compliance = Agent(
     name="Compliance",
     instructions="Extract retention and rights language. Return citations.",
@@ -1458,18 +1471,21 @@ reviewer = Agent(
     instructions="Reject answers that lack clause support or overclaim policy rights.",
 )
 
+# [synthesis]
 principal = Agent(
     name="Principal",
     instructions="Own the final policy answer and include confidence plus citations. Use compose_answer once findings are returned.",
     handoffs=[compliance, security, legal, reviewer],
 )
 
+# [verdict]
 result = Runner.run_sync(principal, input=policy_case)
 print(result.final_output)`,
     "conversation-mesh": `${helpers}
 
 from autogen import AssistantAgent, GroupChat, GroupChatManager
 
+# [intake]
 shared_case = {
     "question": "${question.prompt}",
     "required_clauses": [${clauseString}],
@@ -1485,21 +1501,27 @@ legal = build_agent("Legal", "Preserve conditions, exceptions, and precise wordi
 data_ops = build_agent("DataOps", "Reason about retention operations and lifecycle edge cases.")
 reviewer = build_agent("Reviewer", "Interrupt when claims are unsupported or vague.")
 
+# [review]
 chat = GroupChat(
     agents=[principal, compliance, security, legal, data_ops, reviewer],
     messages=[{"role": "user", "content": str(shared_case)}],
     max_round=8,
 )
 
+# [challenge]
 manager = GroupChatManager(groupchat=chat)
+# [synthesis]
 principal.initiate_chat(manager, message="Produce a final cited answer with caveats.")
+# [verdict]
 print(chat.messages[-1]["content"])`,
     "manager-review": `${helpers}
 
 from crewai import Agent, Task, Crew, Process
 
+# [intake]
 question = "${question.prompt}"
 
+# [review]
 principal = Agent(role="Principal", goal="Ship the final policy answer with confidence and citations.")
 compliance = Agent(role="Compliance", goal="Check privacy and retention obligations.")
 security = Agent(role="Security", goal="Check security and access exceptions.")
@@ -1507,6 +1529,7 @@ legal = Agent(role="Legal", goal="Preserve exact policy conditions.")
 data_ops = Agent(role="Data Ops", goal="Review retention lifecycle implications.")
 reviewer = Agent(role="Reviewer", goal="Block unsupported answers.")
 
+# [challenge]
 tasks = [
     Task(description=f"Answer {question} from retention and rights clauses.", agent=compliance),
     Task(description="Find repository-access or security exceptions.", agent=security),
@@ -1515,18 +1538,21 @@ tasks = [
     Task(description="Reject unsupported or overconfident claims.", agent=reviewer),
 ]
 
+# [synthesis]
 crew = Crew(
     agents=[principal, compliance, security, legal, data_ops, reviewer],
     tasks=tasks,
     process=Process.sequential,
 )
 
+# [verdict]
 result = crew.kickoff()
 print(result)`,
     "enterprise-gated": `${helpers}
 
 from semantic_kernel.agents import ChatCompletionAgent
 
+# [intake]
 policy_case = {
     "question": "${question.prompt}",
     "clauses": [${clauseString}],
@@ -1538,33 +1564,39 @@ security = ChatCompletionAgent(service=kernel, name="Security")
 legal = ChatCompletionAgent(service=kernel, name="Legal")
 reviewer = ChatCompletionAgent(service=kernel, name="Reviewer")
 
+# [review]
 findings = {
     "compliance": compliance.get_response(policy_case),
     "security": security.get_response(policy_case),
     "legal": legal.get_response(policy_case),
 }
 
+# [challenge]
 review_gate = reviewer.get_response({
     "question": policy_case["question"],
     "findings": findings,
     "rule": "Reject unsupported claims and missing caveats.",
 })
 
+# [synthesis]
 final_answer = principal.get_response({
     "question": policy_case["question"],
     "findings": findings,
     "review_gate": review_gate,
 })
+# [verdict]
 print(final_answer)`,
     "event-pipeline": `${helpers}
 
 from llama_index.core.workflow import StartEvent, StopEvent, Workflow, step
 
 class PolicyWorkflow(Workflow):
+    # [intake]
     @step
     async def intake(self, event: StartEvent):
         return {"question": "${question.prompt}", "clauses": [${clauseString}]}
 
+    # [review]
     @step
     async def specialist_review(self, event):
         findings = [
@@ -1574,15 +1606,18 @@ class PolicyWorkflow(Workflow):
         ]
         return {"question": event["question"], "findings": findings}
 
+    # [challenge]
     @step
     async def challenge(self, event):
         event["reviewer_notes"] = check_for_unsupported_claims(event["findings"])
         return event
 
+    # [verdict]
     @step
     async def verdict(self, event):
         return StopEvent(result=compose_answer(event["question"], event["findings"], event["reviewer_notes"]))
 
+# [synthesis]
 workflow = PolicyWorkflow(timeout=120)
 result = workflow.run()
 print(result)`,
@@ -1597,6 +1632,7 @@ class PolicyCase:
     clauses: list[str]
     user_id: str
 
+# [intake]
 def start_mastra_policy_checker(case: PolicyCase) -> dict:
     response = requests.post(
         "http://localhost:4111/api/workflows/policy-checker/start",
@@ -1612,6 +1648,7 @@ def start_mastra_policy_checker(case: PolicyCase) -> dict:
     response.raise_for_status()
     return response.json()
 
+# [review]
 def get_mastra_run(run_id: str) -> dict:
     response = requests.get(
         f"http://localhost:4111/api/workflows/runs/{run_id}",
@@ -1620,13 +1657,16 @@ def get_mastra_run(run_id: str) -> dict:
     response.raise_for_status()
     return response.json()
 
+# [challenge]
 case = PolicyCase(
     question="${question.prompt}",
     clauses=[${clauseString}],
     user_id="policy-reviewer-42",
 )
 
+# [synthesis]
 run = start_mastra_policy_checker(case)
+# [verdict]
 result = get_mastra_run(run["runId"])
 print(result)`,
     "typed-review": `${helpers}
@@ -1634,6 +1674,7 @@ print(result)`,
 from pydantic import BaseModel
 from pydantic_ai import Agent
 
+# [intake]
 class PolicyCase(BaseModel):
     question: str
     clauses: list[str]
@@ -1653,6 +1694,7 @@ principal = Agent("openai:gpt-4.1", result_type=Decision)
 specialist = Agent("openai:gpt-4.1", result_type=Finding)
 reviewer = Agent("openai:gpt-4.1", result_type=list[str])
 
+# [review]
 case = PolicyCase(
     question="${question.prompt}",
     clauses=[${clauseString}],
@@ -1664,102 +1706,39 @@ findings = [
     specialist.run_sync(f"Legal review: {case.model_dump_json()}").output,
 ]
 
+# [challenge]
 reviewer_notes = reviewer.run_sync(f"Challenge these findings: {findings}").output
+# [synthesis]
 decision = principal.run_sync(
     f"Return a final answer with citations and confidence. Case={case} Findings={findings} Notes={reviewer_notes}"
 ).output
+# [verdict]
 print(decision)`
   };
 
   if (!framework) {
     return `${helpers}
 
+# [intake]
 policy_case = {
   "question": "${question.prompt}",
   "clauses": [${clauseString}]
 }
 
+# [review]
 findings = [
     retrieve_clause(policy_case["question"], "retention"),
     retrieve_clause(policy_case["question"], "rights"),
 ]
+# [challenge]
 reviewer_notes = check_for_unsupported_claims(findings)
+# [synthesis]
 decision = compose_answer(policy_case["question"], findings, reviewer_notes)
+# [verdict]
 print(decision)`;
   }
 
   return examples[framework.pattern];
-}
-
-function implementationHighlightLines(framework, stageId) {
-  const rangesByPattern = {
-    reference: {
-      intake: [[29, 32]],
-      review: [[34, 37]],
-      challenge: [[38, 39]],
-      synthesis: [[40, 40]],
-      verdict: [[41, 41]]
-    },
-    "graph-branches": {
-      intake: [[31, 35], [44, 48]],
-      review: [[14, 24]],
-      challenge: [[26, 28]],
-      synthesis: [[30, 35]],
-      verdict: [[44, 50]]
-    },
-    "sequential-handoffs": {
-      intake: [[27, 30]],
-      review: [[7, 19]],
-      challenge: [[21, 24]],
-      synthesis: [[26, 30]],
-      verdict: [[32, 33]]
-    },
-    "conversation-mesh": {
-      intake: [[11, 18]],
-      review: [[20, 28]],
-      challenge: [[17, 18], [29, 30]],
-      synthesis: [[29, 30]],
-      verdict: [[30, 30]]
-    },
-    "manager-review": {
-      intake: [[7, 13]],
-      review: [[15, 20]],
-      challenge: [[20, 20]],
-      synthesis: [[22, 27]],
-      verdict: [[29, 30]]
-    },
-    "enterprise-gated": {
-      intake: [[7, 13]],
-      review: [[15, 19]],
-      challenge: [[21, 25]],
-      synthesis: [[27, 31]],
-      verdict: [[31, 31]]
-    },
-    "event-pipeline": {
-      intake: [[4, 7]],
-      review: [[9, 15]],
-      challenge: [[17, 19]],
-      synthesis: [[21, 22]],
-      verdict: [[21, 25]]
-    },
-    "app-workflow": {
-      intake: [[23, 30]],
-      review: [[23, 30]],
-      challenge: [[32, 32]],
-      synthesis: [[33, 33]],
-      verdict: [[34, 34]]
-    },
-    "typed-review": {
-      intake: [[17, 21]],
-      review: [[23, 27]],
-      challenge: [[29, 29]],
-      synthesis: [[30, 32]],
-      verdict: [[32, 33]]
-    }
-  };
-
-  const key = framework ? framework.pattern : "reference";
-  return rangesByPattern[key][stageId] || [];
 }
 
 function escapeHtml(value) {
@@ -1769,22 +1748,93 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;");
 }
 
-function renderHighlightedCode(code, activeRanges) {
-  const activeLines = new Set();
-  activeRanges.forEach(([start, end]) => {
-    for (let line = start; line <= end; line += 1) {
-      activeLines.add(line);
+function renderHighlightedCode(code, stageId) {
+  const lines = code.split("\n");
+  const markers = [];
+  lines.forEach((line, index) => {
+    const match = line.match(/# \[(intake|review|challenge|synthesis|verdict)\]/i);
+    if (match) {
+      markers.push({ stage: match[1].toLowerCase(), index });
     }
   });
 
-  return code
-    .split("\n")
+  const activeLines = new Set();
+  for (let i = 0; i < markers.length; i += 1) {
+    const marker = markers[i];
+    const nextMarkerIndex = i < markers.length - 1 ? markers[i + 1].index : lines.length;
+    if (marker.stage === stageId) {
+      for (let line = marker.index; line < nextMarkerIndex; line += 1) {
+        activeLines.add(line + 1);
+      }
+    }
+  }
+
+  return lines
     .map((line, index) => {
       const lineNumber = index + 1;
       const activeClass = activeLines.has(lineNumber) ? " active" : "";
       return `<span class="code-line${activeClass}"><span class="code-line-no">${lineNumber}</span><span class="code-line-text">${escapeHtml(line) || "&nbsp;"}</span></span>`;
     })
     .join("");
+}
+
+function currentStatePayload(framework, stageId) {
+  const question = getQuestion();
+  const base = {
+    question: question.prompt,
+    clauses: question.relevantClauses,
+    stage: stageId
+  };
+
+  const byStage = {
+    intake: {
+      ...base,
+      requested_by: "principal",
+      loaded_tools: ["policy_text", "question_bank"]
+    },
+    review: {
+      ...base,
+      findings: {
+        compliance: "retention clause pulled",
+        security: "repository-access exception checked",
+        legal: "rights wording extracted",
+        data_ops: "retention lifecycle reviewed"
+      }
+    },
+    challenge: {
+      ...base,
+      reviewer_input: ["unsupported-claim-check", "missing-caveat-check"],
+      contested_points: ["overclaim risk", "missing condition risk"]
+    },
+    synthesis: {
+      ...base,
+      merged_findings: ["retention", "rights", "exceptions"],
+      reviewer_notes: ["preserve conditions", "cite clauses directly"]
+    },
+    verdict: {
+      ...base,
+      answer: question.expectedAnswer,
+      citations: question.relevantClauses,
+      confidence: 0.82
+    }
+  };
+
+  if (!framework) {
+    return byStage[stageId];
+  }
+
+  const wrappers = {
+    "graph-branches": { state_container: "shared_graph_state" },
+    "sequential-handoffs": { state_container: "run_context" },
+    "conversation-mesh": { state_container: "chat_transcript" },
+    "manager-review": { state_container: "task_outputs" },
+    "enterprise-gated": { state_container: "governed_case" },
+    "event-pipeline": { state_container: "event_payload" },
+    "app-workflow": { state_container: "workflow_context" },
+    "typed-review": { state_container: "typed_models" }
+  };
+
+  return { ...wrappers[framework.pattern], ...byStage[stageId] };
 }
 
 function graphMessageMap(framework, stageId) {
@@ -2056,6 +2106,19 @@ function renderFrameworkScorecard(framework) {
   `;
 }
 
+function renderStatePayload(framework, stageId) {
+  const payload = currentStatePayload(framework, stageId);
+  return `
+    <section class="state-payload">
+      <div class="code-hint-head">
+        <strong>State passed at this step</strong>
+        <span>${stageId}</span>
+      </div>
+      <pre><code>${JSON.stringify(payload, null, 2)}</code></pre>
+    </section>
+  `;
+}
+
 function renderCodeHint(framework, stageId) {
   const profile = frameworkTechProfile(framework);
   const question = getQuestion();
@@ -2063,7 +2126,7 @@ function renderCodeHint(framework, stageId) {
   const codeSourceLabel = framework ? framework.name : "Reference skeleton";
   const codeSourceHref = framework ? framework.source : policyPack.source;
   const implementationCode = frameworkExampleCode(framework, question);
-  const highlightedImplementation = renderHighlightedCode(implementationCode, implementationHighlightLines(framework, stageId));
+  const highlightedImplementation = renderHighlightedCode(implementationCode, stageId);
   return `
     <section class="code-hint">
       <div class="code-panel">
@@ -2073,6 +2136,7 @@ function renderCodeHint(framework, stageId) {
         </div>
         <pre><code>${profile.evalCode}</code></pre>
       </div>
+      ${renderStatePayload(framework, stageId)}
       <div class="code-panel code-panel-wide">
         <div class="code-hint-head">
           <strong>Framework implementation for this policy checker</strong>
@@ -2316,6 +2380,45 @@ function renderFrameworkAnalysis(framework) {
   `;
 }
 
+function renderScoreRationale() {
+  const frameworks = compareIds.map((id) => getFramework(id));
+  scoreRationale.innerHTML = `
+    <div class="section-heading">
+      <p class="eyebrow">Score Rationale</p>
+      <h3>Why low or risky scores are low</h3>
+    </div>
+    <div class="lane-bottom lane-analysis-grid">
+      ${frameworks
+        .map((framework) => {
+          const profile = frameworkTechProfile(framework);
+          const flagged = profile.scorecard.filter((item) => {
+            const state = scoreState(item.label, item.value);
+            return state.tone !== "safe";
+          });
+          return `
+            <article>
+              <h4>${framework.name}</h4>
+              <ul>
+                ${flagged
+                  .map((item) => {
+                    const reason =
+                      item.label === "Latency"
+                        ? profile.cards[1].value
+                        : item.label === "Observability" || item.label === "Replayability" || item.label === "Human Review"
+                          ? profile.cards[2].value
+                          : profile.cards[3].value;
+                    return `<li><strong>${item.label}:</strong> ${reason}</li>`;
+                  })
+                  .join("")}
+              </ul>
+            </article>
+          `;
+        })
+        .join("")}
+    </div>
+  `;
+}
+
 function laneMarkup(frameworkId, laneIndex) {
   const framework = getFramework(frameworkId);
   const stage = getStage();
@@ -2390,11 +2493,11 @@ function render() {
   renderSummary();
   renderSkeleton();
   renderComparison();
+  renderScoreRationale();
 }
 
 function initApp() {
   frameworkCatalogCards = document.getElementById("framework-catalog-cards");
-  adjacentCatalogCards = document.getElementById("adjacent-catalog-cards");
   policyCasePanel = document.getElementById("policy-case-panel");
   stageChipRow = document.getElementById("stage-chip-row");
   stepDemoBtn = document.getElementById("step-demo-btn");
@@ -2405,10 +2508,10 @@ function initApp() {
   scenarioHeadline = document.getElementById("scenario-headline");
   scenarioSupport = document.getElementById("scenario-support");
   comparisonLanes = document.getElementById("comparison-lanes");
+  scoreRationale = document.getElementById("score-rationale");
 
   const requiredElements = [
     ["framework-catalog-cards", frameworkCatalogCards],
-    ["adjacent-catalog-cards", adjacentCatalogCards],
     ["policy-case-panel", policyCasePanel],
     ["stage-chip-row", stageChipRow],
     ["step-demo-btn", stepDemoBtn],
@@ -2418,7 +2521,8 @@ function initApp() {
     ["skeleton-board", skeletonBoard],
     ["scenario-headline", scenarioHeadline],
     ["scenario-support", scenarioSupport],
-    ["comparison-lanes", comparisonLanes]
+    ["comparison-lanes", comparisonLanes],
+    ["score-rationale", scoreRationale]
   ];
 
   const missingIds = requiredElements.filter(([, element]) => !element).map(([id]) => id);

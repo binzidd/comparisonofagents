@@ -17,7 +17,6 @@ const html = fs.readFileSync(htmlPath, "utf8");
 
 const requiredIds = [
   "framework-catalog-cards",
-  "adjacent-catalog-cards",
   "stage-chip-row",
   "step-demo-btn",
   "framework-summary",
@@ -26,7 +25,8 @@ const requiredIds = [
   "scenario-headline",
   "scenario-support",
   "app-status",
-  "comparison-lanes"
+  "comparison-lanes",
+  "score-rationale"
 ];
 
 const missingIds = requiredIds.filter((id) => !html.includes(`id="${id}"`));
