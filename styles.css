@@ -1,12 +1,12 @@
 :root {
-  --surface: rgba(12, 18, 29, 0.88);
-  --surface-strong: #111a27;
+  --surface: rgba(24, 38, 60, 0.82);
+  --surface-strong: #1c2e47;
   --text: #edf3ff;
-  --muted: #b5c6df;
-  --line: rgba(126, 155, 196, 0.16);
+  --muted: #c0d2eb;
+  --line: rgba(140, 170, 215, 0.22);
   --primary: #4b8dff;
   --secondary: #7fb1ff;
-  --shadow: 0 22px 70px rgba(2, 8, 18, 0.5);
+  --shadow: 0 18px 56px rgba(4, 12, 28, 0.38);
   --radius-xl: 28px;
   --radius-lg: 22px;
   --radius-md: 16px;
@@ -24,9 +24,9 @@ body {
   font-family: "IBM Plex Sans", sans-serif;
   color: var(--text);
   background:
-    radial-gradient(circle at top left, rgba(75, 141, 255, 0.18), transparent 28%),
-    radial-gradient(circle at 85% 14%, rgba(24, 205, 197, 0.1), transparent 22%),
-    linear-gradient(180deg, #07111d 0%, #0b1624 54%, #08111a 100%);
+    radial-gradient(circle at top left, rgba(75, 141, 255, 0.14), transparent 30%),
+    radial-gradient(circle at 85% 14%, rgba(24, 205, 197, 0.08), transparent 24%),
+    linear-gradient(180deg, #111f35 0%, #152540 54%, #111e32 100%);
 }
 
 a {
@@ -191,7 +191,7 @@ p {
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: 16px;
-  background: rgba(17, 26, 39, 0.7);
+  background: rgba(26, 42, 66, 0.7);
 }
 
 .signal-label {
@@ -319,7 +319,7 @@ p {
   border: 1px solid rgba(126, 155, 196, 0.2);
   border-radius: 999px;
   padding: 10px 14px;
-  background: rgba(17, 26, 39, 0.78);
+  background: rgba(26, 42, 66, 0.78);
   color: var(--text);
   font: inherit;
   cursor: pointer;
@@ -455,7 +455,7 @@ p {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 16px;
-  background: rgba(17, 26, 39, 0.72);
+  background: rgba(26, 42, 66, 0.72);
 }
 
 .policy-answer-strip span,
@@ -505,7 +505,7 @@ p {
 }
 
 .chip {
-  background: rgba(17, 26, 39, 0.7);
+  background: rgba(26, 42, 66, 0.7);
   border-color: var(--line);
   color: var(--text);
   cursor: pointer;
@@ -571,7 +571,7 @@ select {
 }
 
 .secondary-btn {
-  background: rgba(17, 26, 39, 0.72);
+  background: rgba(26, 42, 66, 0.72);
   color: var(--text);
   padding: 14px 22px;
   border-color: var(--line);
@@ -681,7 +681,7 @@ select {
 .skel-node {
   border: 1px solid rgba(var(--skel-rgb), 0.26);
   border-radius: 14px;
-  background: rgba(17, 26, 39, 0.82);
+  background: rgba(26, 42, 66, 0.82);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -749,7 +749,7 @@ select {
   padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid var(--line);
-  background: rgba(17, 26, 39, 0.65);
+  background: rgba(26, 42, 66, 0.65);
   color: var(--muted);
 }
 
@@ -838,7 +838,7 @@ select {
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 12px 16px;
-  background: rgba(17, 26, 39, 0.7);
+  background: rgba(26, 42, 66, 0.7);
   display: grid;
   gap: 10px;
 }
@@ -949,7 +949,7 @@ select {
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 12px;
-  background: rgba(17, 26, 39, 0.72);
+  background: rgba(26, 42, 66, 0.72);
 }
 
 .tech-strip span {
@@ -1037,7 +1037,7 @@ select {
 .graph-tooltip {
   position: fixed;
   z-index: 999;
-  background: rgba(17, 26, 39, 0.96);
+  background: rgba(26, 42, 66, 0.96);
   border: 1px solid rgba(75, 141, 255, 0.28);
   border-radius: 10px;
   padding: 7px 13px;
@@ -1051,7 +1051,7 @@ select {
 .graph-tooltip[hidden] { display: none; }
 
 button.step-item {
-  background: rgba(17, 26, 39, 0.65);
+  background: rgba(26, 42, 66, 0.65);
   font: inherit;
   cursor: pointer;
 }
@@ -1072,7 +1072,7 @@ button.step-item:hover {
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 12px 14px;
-  background: rgba(17, 26, 39, 0.72);
+  background: rgba(26, 42, 66, 0.72);
 }
 
 .message-row strong {
@@ -1155,7 +1155,7 @@ button.step-item:hover {
   border: 1px solid rgba(126, 155, 196, 0.16);
   border-radius: 999px;
   padding: 8px 12px;
-  background: rgba(17, 26, 39, 0.78);
+  background: rgba(26, 42, 66, 0.78);
   color: #eef4ff;
   font-size: 0.84rem;
   font-weight: 600;
@@ -1234,7 +1234,7 @@ button.step-item:hover {
 .skeleton-mini article {
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: rgba(17, 26, 39, 0.72);
+  background: rgba(26, 42, 66, 0.72);
   padding: 10px 14px;
 }
 
@@ -1392,7 +1392,7 @@ button.step-item:hover {
   border-radius: 999px;
   padding: 8px 12px;
   border: 1px solid rgba(126, 155, 196, 0.14);
-  background: rgba(17, 26, 39, 0.72);
+  background: rgba(26, 42, 66, 0.72);
   color: var(--muted);
   font-size: 0.84rem;
 }
@@ -1466,7 +1466,7 @@ button.step-item:hover {
   border: 1px solid rgba(126, 155, 196, 0.12);
   border-radius: 10px;
   padding: 7px 12px;
-  background: rgba(17, 26, 39, 0.7);
+  background: rgba(26, 42, 66, 0.7);
   cursor: default;
 }
 

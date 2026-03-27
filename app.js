@@ -287,7 +287,7 @@ const stages = [
     id: "challenge",
     label: "Challenge",
     persona: "Reviewer Agent",
-    caption: "The Reviewer Agent — a dedicated adversarial persona — tests every specialist finding for unsupported claims, missing caveats, and contradictions.",
+    caption: "The Reviewer Agent (a dedicated adversarial persona) tests every specialist finding for unsupported claims, missing caveats, and contradictions.",
     activeAgents: ["compliance", "security", "legal", "finance", "reviewer"],
     activeTools: ["evidence_matrix", "claim_checker"]
   },
@@ -476,11 +476,11 @@ const graphLabelOffsets = {
 };
 
 const TIME_REASONS = {
-  "graph-branches": "Specialists run as parallel graph branches — stage time equals the slowest single specialist, not the sum of all four. That keeps per-stage times low even with 4 concurrent domain checks.",
+  "graph-branches": "Specialists run as parallel graph branches; stage time equals the slowest single specialist, not the sum of all four. That keeps per-stage times low even with 4 concurrent domain checks.",
   "sequential-handoffs": "Each specialist is a separate agent handoff: 4 specialists = 4 serial LLM round-trips. The review and challenge stages stack those latencies, which is why you see high per-stage times (e.g. 17–35 s). It is the architectural trade-off of the handoff model.",
-  "conversation-mesh": "Specialists engage in conversational turns. Multi-turn exchanges on contested claims add latency beyond a single LLM call per specialist — each back-and-forth round adds an API call.",
+  "conversation-mesh": "Specialists engage in conversational turns. Multi-turn exchanges on contested claims add latency beyond a single LLM call per specialist; each back-and-forth round adds an API call.",
   "manager-review": "The manager routes tasks sequentially; stage time scales with the number of specialists called and any re-routing decisions the manager makes.",
-  "enterprise-gated": "Approval gate checkpoints add deliberate synchronous pauses — each gate waits for the previous stage to fully complete and be approved before the next begins.",
+  "enterprise-gated": "Approval gate checkpoints add deliberate synchronous pauses; each gate waits for the previous stage to fully complete and be approved before the next begins.",
   "event-pipeline": "Events are dispatched to specialist handlers that each await their LLM response before emitting the next event. High stage times reflect chained awaits across multiple sequential specialist calls.",
   "typed-review": "Typed schema validation adds a check step per handoff, but overall latency is dominated by sequential specialist LLM calls accumulating per stage.",
   "app-workflow": "Workflow steps execute one at a time; stage time reflects LLM latency for each step in the defined sequence."
@@ -497,7 +497,7 @@ const METRIC_DEFINITIONS = {
   "Parallelism": "Native support for running multiple agents concurrently rather than sequentially.",
   "Testability": "Ease of writing deterministic unit tests, mocking LLM calls, and isolating agent behavior.",
   "Type Safety": "Degree of structured output validation, schema enforcement, and typed agent interfaces.",
-  "Time Cost": "Measured wall-clock time for the verdict stage of this real SDK pipeline run. Per-stage times vary — hover the ℹ icon on any stage's time display to see why.",
+  "Time Cost": "Measured wall-clock time for the verdict stage of this real SDK pipeline run. Per-stage times vary; hover the info icon on any stage's time display to see why.",
   "Token Cost": "Total tokens consumed at the verdict stage across all agent calls."
 };
 
@@ -1081,7 +1081,7 @@ function flowHighlights(pattern, stageId) {
 function frameworkTechProfile(framework) {
   const profiles = {
     "graph-branches": {
-      intro: "LangGraph's graph-first design delivers best-in-class checkpointing, observability, and true parallel fan-out — the go-to when auditability and reviewer gates are non-negotiable.",
+      intro: "LangGraph's graph-first design delivers best-in-class checkpointing, observability, and true parallel fan-out. The go-to when auditability and reviewer gates are non-negotiable.",
       cards: [
         { label: "Execution", value: "Supervisor graph with explicit branch and merge nodes" },
         { label: "Performance", value: "Higher setup cost, but review can run in parallel branches" },
@@ -1095,7 +1095,7 @@ function frameworkTechProfile(framework) {
         { label: "Observability", value: 5, reason: "LangSmith tracing gives node-level diffs, step timing, and token counts per branch." },
         { label: "Replayability", value: 5, reason: "Checkpoint-and-resume is a core primitive; any node can be rolled back and re-run from state." },
         { label: "Human Review", value: 5, reason: "interrupt_before breakpoints pause execution at any named node for human approval." },
-        { label: "Context Loss", value: 2, reason: "A single shared state dict holds all findings — nothing drops on branch crossings." },
+        { label: "Context Loss", value: 2, reason: "A single shared state dict holds all findings; nothing drops on branch crossings." },
         { label: "Unsupported Answer Risk", value: 2, reason: "Conditional edges gate the answer path on reviewer approval and clause coverage checks." },
         { label: "Error Recovery", value: 5, reason: "Checkpoints mean partial failures resume from the last stable state without re-running early nodes." },
         { label: "Parallelism", value: 5, reason: "Fan-out branches are the primary execution pattern; specialists run truly in parallel." },
@@ -1140,7 +1140,7 @@ assert no_required_clause_dropped(ctx)
 reviewer.must_reject_if_support_missing()`
     },
     "conversation-mesh": {
-      intro: "AG2 enables dynamic multi-agent debates where specialists challenge each other directly — highly flexible for exploratory analysis, but requires firm stopping rules to prevent conversation sprawl.",
+      intro: "AG2 enables dynamic multi-agent debates where specialists challenge each other directly. Highly flexible for exploratory analysis, but requires firm stopping rules to prevent conversation sprawl.",
       cards: [
         { label: "Execution", value: "Conversation mesh with direct specialist challenge" },
         { label: "Performance", value: "Great for exploration, but turn-taking can be token and latency heavy" },
@@ -1154,7 +1154,7 @@ reviewer.must_reject_if_support_missing()`
         { label: "Observability", value: 2, reason: "Conversation transcript is accessible but there is no structured step-level tracing or state diff." },
         { label: "Replayability", value: 2, reason: "No built-in checkpoint; replaying requires seeding the full prior message history manually." },
         { label: "Human Review", value: 4, reason: "Human proxy agents can be injected to pause and provide input at any conversation turn." },
-        { label: "Context Loss", value: 5, reason: "Long threads bury early policy context under later debate turns — a structural risk of the mesh pattern." },
+        { label: "Context Loss", value: 5, reason: "Long threads bury early policy context under later debate turns, a structural risk of the mesh pattern." },
         { label: "Unsupported Answer Risk", value: 4, reason: "Non-deterministic debate can produce confident but poorly cited conclusions." },
         { label: "Error Recovery", value: 3, reason: "Basic API retry on transient failures but no structured rollback or turn-level checkpoint." },
         { label: "Parallelism", value: 3, reason: "Group chat turns are sequential internally but multiple independent chats can run in parallel." },
@@ -1228,7 +1228,7 @@ force_reviewer_to_request_clause_ids()`
 require_exception_path_for_ambiguous_answers()`
     },
     "event-pipeline": {
-      intro: "LlamaIndex Workflows models specialist coordination as an event-driven pipeline — strong for retrieval-heavy evidence gathering, though sequential event handlers stack latency per stage.",
+      intro: "LlamaIndex Workflows models specialist coordination as an event-driven pipeline. Strong for retrieval-heavy evidence gathering, though sequential event handlers stack latency per stage.",
       cards: [
         { label: "Execution", value: "Event-driven evidence pipeline with aggregation steps" },
         { label: "Performance", value: "Scales well when evidence extraction is eventful and decoupled" },
@@ -1285,7 +1285,7 @@ aggregate_only_supported_findings()`
 if (confidence < 0.7) branch("human_check")`
     },
     "typed-review": {
-      intro: "PydanticAI enforces schema-validated typed outputs at every specialist handoff — the strongest choice when data integrity and structured interfaces matter more than dynamic topology.",
+      intro: "PydanticAI enforces schema-validated typed outputs at every specialist handoff. The strongest choice when data integrity and structured interfaces matter more than dynamic topology.",
       cards: [
         { label: "Execution", value: "Typed orchestration pipeline with validated inputs and outputs" },
         { label: "Performance", value: "Moderate runtime cost, offset by lower downstream cleanup and retries" },
@@ -2350,7 +2350,7 @@ function renderCodeHint(framework, stageId) {
   const isRealRun = traceStage?.execution_mode === "real-sdk-calls";
   const frameworkNote = framework
     ? isRealRun
-      ? `${framework.name} — metrics from a real ${traceStage.runtime} SDK run (gpt-4o-mini). Code example shows the framework API; provider model strings are not the orchestration framework.`
+      ? `${framework.name}: metrics from a real ${traceStage.runtime} SDK run (gpt-4o-mini). Code example shows the framework API; provider model strings are not the orchestration framework.`
       : `${framework.name} example and ${traceStage?.runtime || framework.pattern} harness view. Provider strings in code examples are not the same thing as the orchestration framework.`
     : "Reference-only implementation view.";
   return `
@@ -2585,8 +2585,8 @@ function renderSkeleton() {
   skeletonBoard.innerHTML = `
     <div class="skel-rationale">
       <p class="skel-rationale-why">Why this architecture?</p>
-      <p class="skel-rationale-body">Policy questions span legal, compliance, security, and data domains simultaneously. A single generalist agent risks domain blind-spots and ungrounded answers. This four-stage pattern enforces separation of concerns while converging on one auditable verdict — regardless of whether agents run sequentially, in parallel, or as a mesh.</p>
-      <p class="skel-conformance">All 6 frameworks implement the same four roles. Their topology (fan-out, chain, mesh) is their design differentiator — the architecture is the constant.</p>
+      <p class="skel-rationale-body">Policy questions span legal, compliance, security, and data domains simultaneously. A single generalist agent risks domain blind-spots and ungrounded answers. This four-stage pattern enforces separation of concerns while converging on one auditable verdict, regardless of whether agents run sequentially, in parallel, or as a mesh.</p>
+      <p class="skel-conformance">All 6 frameworks implement the same four roles. Their topology (fan-out, chain, mesh) is their design differentiator; the architecture is the constant.</p>
     </div>
     <div class="skel-flow">
       <div class="skel-node" style="--skel-rgb:${stageTheme.intake}">
@@ -2614,7 +2614,7 @@ function renderSkeleton() {
         <div class="skel-node-bar"></div>
         <span class="skel-node-role">Output</span>
         <strong class="skel-node-action">One verdict</strong>
-        <p class="skel-node-desc">Synthesises a single policy answer from all reviewed findings — every framework must converge here.</p>
+        <p class="skel-node-desc">Synthesises a single policy answer from all reviewed findings; every framework must converge here.</p>
       </div>
     </div>
   `;
@@ -2808,7 +2808,7 @@ function handleNodeHover(e) {
   const isActive = nodeG.classList.contains("active");
   const desc = nodeG.dataset.nodeDesc || nodeG.dataset.nodeId;
   graphTooltip.textContent = isActive
-    ? `${nodeG.dataset.nodeId} — active in ${stage.label}`
+    ? `${nodeG.dataset.nodeId}: active in ${stage.label}`
     : desc;
   graphTooltip.removeAttribute("hidden");
 }
@@ -2834,7 +2834,7 @@ function handleMetricHover(e) {
   metricTooltip.innerHTML = `
     <div class="metric-tooltip-label">${label}</div>
     ${def ? `<div class="metric-tooltip-def">${def}</div>` : ""}
-    ${reason ? `<div class="metric-tooltip-reason">Score ${score}/5 — ${reason}</div>` : ""}
+    ${reason ? `<div class="metric-tooltip-reason">Score ${score}/5: ${reason}</div>` : ""}
   `;
   metricTooltip.removeAttribute("hidden");
 }
@@ -2907,7 +2907,7 @@ async function toggleFooterLike() {
         renderFooterLike(data.total);
       }
     } catch (_err) {
-      // Keep the optimistic state — server unavailable
+      // Keep the optimistic state; server unavailable
     }
   } else {
     // Unlike: local-only (CSV is append-only)
