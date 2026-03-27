@@ -1159,10 +1159,59 @@ select {
   font-weight: 600;
 }
 
+.node-initial {
+  fill: var(--muted);
+  font-size: 4.5px;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.graph-node.role-principal .node-initial { fill: rgba(86, 132, 255, 0.85); }
+.graph-node.role-specialist .node-initial { fill: rgba(68, 181, 129, 0.85); }
+.graph-node.role-reviewer .node-initial { fill: rgba(255, 168, 76, 0.85); }
+.graph-node.role-decision .node-initial { fill: rgba(255, 96, 134, 0.85); }
+.graph-node.active .node-initial { fill: rgba(var(--stage-rgb), 1); }
+
 .graph-node.active circle {
   fill: rgba(var(--stage-rgb), 0.14);
   stroke: rgba(var(--stage-rgb), 0.84);
   stroke-width: 1.6;
+}
+
+/* Role-based persistent node colors */
+.graph-node.role-principal circle {
+  stroke: rgba(86, 132, 255, 0.55);
+  fill: rgba(86, 132, 255, 0.07);
+}
+.graph-node.role-specialist circle {
+  stroke: rgba(68, 181, 129, 0.55);
+  fill: rgba(68, 181, 129, 0.07);
+}
+.graph-node.role-reviewer circle {
+  stroke: rgba(255, 168, 76, 0.55);
+  fill: rgba(255, 168, 76, 0.07);
+}
+.graph-node.role-decision circle {
+  stroke: rgba(255, 96, 134, 0.55);
+  fill: rgba(255, 96, 134, 0.07);
+}
+
+.graph-node.active.role-principal circle,
+.graph-node.active.role-specialist circle,
+.graph-node.active.role-reviewer circle,
+.graph-node.active.role-decision circle {
+  fill: rgba(var(--stage-rgb), 0.18);
+  stroke: rgba(var(--stage-rgb), 0.88);
+  stroke-width: 1.6;
+}
+
+.graph-pattern-label {
+  fill: var(--muted);
+  font-size: 4px;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-weight: 400;
+  opacity: 0.65;
 }
 
 .graph-node:hover circle {

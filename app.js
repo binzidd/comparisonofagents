@@ -340,6 +340,17 @@ const stageTheme = {
   verdict: "255, 96, 134"
 };
 
+const PATTERN_LABELS = {
+  "graph-branches": "Parallel Fan-out",
+  "sequential-handoffs": "Sequential Chain",
+  "conversation-mesh": "Mesh Network",
+  "manager-review": "Manager Review",
+  "enterprise-gated": "Enterprise Gated",
+  "event-pipeline": "Event Pipeline",
+  "app-workflow": "App Workflow",
+  "typed-review": "Typed Review"
+};
+
 const linkIds = [
   "principal-compliance",
   "principal-security",
@@ -2450,10 +2461,13 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
          data-node-id="${nodeId}"
          data-node-desc="${NODE_DESCRIPTIONS[nodeId] || nodeId}">
         <circle cx="${node.x}" cy="${node.y}" r="7" />
+        <text class="node-initial" x="${node.x}" y="${node.y}" text-anchor="middle" dominant-baseline="middle">${node.label[0]}</text>
         <text x="${node.labelX}" y="${node.labelY}" text-anchor="middle">${node.label}</text>
       </g>
     `)
     .join("");
+
+  const patternLabel = framework ? (PATTERN_LABELS[framework.pattern] || framework.pattern) : "";
 
   return `
     <div class="graph-map ${neutral ? "neutral" : ""}" style="--framework-color:${color}">
@@ -2466,6 +2480,7 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
             <path d="M0,0 L3,1.5 L0,3 z" fill="currentColor"></path>
           </marker>
         </defs>
+        ${patternLabel ? `<text class="graph-pattern-label" x="50" y="5" text-anchor="middle">${patternLabel}</text>` : ""}
         ${lineMarkup}
         ${nodeMarkup}
       </svg>
