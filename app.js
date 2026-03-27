@@ -2739,15 +2739,21 @@ function laneMarkup(frameworkId, laneIndex) {
           <p class="eyebrow">Demo ${laneIndex + 1}</p>
           <h3>${framework.name}</h3>
         </div>
-        <select class="lane-select" data-lane="${laneIndex}">
-          ${demoFrameworks
-            .map(
-              (option) => `
-                <option value="${option.id}" ${option.id === framework.id ? "selected" : ""}>${option.name}</option>
-              `
-            )
-            .join("")}
-        </select>
+        <div class="lane-top-actions">
+          <a class="kit-download-btn" href="/public/starter-kits/${framework.id}.zip" download title="Download starter kit">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/></svg>
+            Starter Kit
+          </a>
+          <select class="lane-select" data-lane="${laneIndex}">
+            ${demoFrameworks
+              .map(
+                (option) => `
+                  <option value="${option.id}" ${option.id === framework.id ? "selected" : ""}>${option.name}</option>
+                `
+              )
+              .join("")}
+          </select>
+        </div>
       </div>
 
       <p class="lane-intro">${profile.intro}</p>
@@ -2930,6 +2936,27 @@ async function loadTraces() {
   }
 }
 
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  const icon = document.getElementById("theme-toggle-icon");
+  if (icon) icon.textContent = theme === "light" ? "☀" : "☾";
+}
+
+function initTheme() {
+  const saved = localStorage.getItem("theme") || "dark";
+  applyTheme(saved);
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      localStorage.setItem("theme", next);
+      applyTheme(next);
+    });
+  }
+}
+
 async function initApp() {
   frameworkCatalogCards = document.getElementById("framework-catalog-cards");
   policyCasePanel = document.getElementById("policy-case-panel");
@@ -2984,6 +3011,7 @@ async function initApp() {
   comparisonLanes.addEventListener("mouseover", handleMetricHover);
   comparisonLanes.addEventListener("mouseout", handleMetricOut);
   comparisonLanes.addEventListener("mousemove", handleMetricMove);
+  initTheme();
   renderFooterLike();
   fetch("/api/like")
     .then((r) => r.json())
