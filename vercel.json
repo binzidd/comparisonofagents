@@ -1,9 +1,23 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/like.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/((?!api/).*)",
       "headers": [
         {
           "key": "Cache-Control",

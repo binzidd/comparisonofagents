@@ -82,6 +82,45 @@ a {
   padding: 26px 34px 24px;
 }
 
+.hero-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.hero-top-row .eyebrow {
+  margin: 0;
+}
+
+.hero-github-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+  border: 1px solid rgba(126, 155, 196, 0.28);
+  border-radius: 20px;
+  padding: 5px 12px 5px 10px;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.hero-github-link:hover {
+  color: var(--text);
+  border-color: rgba(75, 141, 255, 0.5);
+  background: rgba(75, 141, 255, 0.07);
+}
+
+.hero-intro {
+  margin-top: 16px;
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
 .eyebrow {
   margin: 0 0 10px;
   text-transform: uppercase;
@@ -101,9 +140,11 @@ h4 {
 }
 
 h1 {
-  font-size: clamp(3rem, 5.8vw, 5.1rem);
-  max-width: 18ch;
-  line-height: 0.94;
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+  font-weight: 600;
+  max-width: 22ch;
+  line-height: 1.12;
   text-wrap: balance;
 }
 

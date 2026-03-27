@@ -2873,13 +2873,14 @@ function render() {
   renderScoreRationale();
 }
 
-function renderFooterLike() {
+function renderFooterLike(serverTotal) {
   if (!footerLikeBtn || !footerLikeCount) {
     return;
   }
 
   const state = likeStore.read();
-  footerLikeCount.textContent = String(state.count);
+  const displayTotal = serverTotal !== undefined ? serverTotal : state.count;
+  footerLikeCount.textContent = String(displayTotal);
   footerLikeBtn.classList.toggle("liked", state.liked);
   footerLikeBtn.setAttribute("aria-pressed", state.liked ? "true" : "false");
   const icon = footerLikeBtn.querySelector(".like-icon");
@@ -2888,13 +2889,32 @@ function renderFooterLike() {
   }
 }
 
-function toggleFooterLike() {
+async function toggleFooterLike() {
   const state = likeStore.read();
-  likeStore.write({
-    count: Math.max(0, state.count + (state.liked ? -1 : 1)),
-    liked: !state.liked
-  });
-  renderFooterLike();
+  const nowLiked = !state.liked;
+
+  if (nowLiked) {
+    // Optimistic update, then confirm with server
+    const optimisticCount = state.count + 1;
+    likeStore.write({ count: optimisticCount, liked: true });
+    renderFooterLike(optimisticCount);
+
+    try {
+      const res = await fetch("/api/like", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        likeStore.write({ count: data.total, liked: true });
+        renderFooterLike(data.total);
+      }
+    } catch (_err) {
+      // Keep the optimistic state — server unavailable
+    }
+  } else {
+    // Unlike: local-only (CSV is append-only)
+    const newCount = Math.max(0, state.count - 1);
+    likeStore.write({ count: newCount, liked: false });
+    renderFooterLike(newCount);
+  }
 }
 
 async function loadTraces() {
@@ -2965,6 +2985,14 @@ async function initApp() {
   comparisonLanes.addEventListener("mouseout", handleMetricOut);
   comparisonLanes.addEventListener("mousemove", handleMetricMove);
   renderFooterLike();
+  fetch("/api/like")
+    .then((r) => r.json())
+    .then((data) => {
+      const state = likeStore.read();
+      likeStore.write({ liked: state.liked, count: data.total });
+      renderFooterLike(data.total);
+    })
+    .catch(() => {});
   render();
 }
 
