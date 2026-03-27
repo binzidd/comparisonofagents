@@ -29,6 +29,10 @@
   --select-bg: rgba(26, 42, 66, 0.9);
   --tooltip-bg: #0f1e33;
   --theme-icon: "☾";
+  --toolbar-bg: rgba(7, 17, 29, 0.94);
+  --graph-bg: rgba(11, 20, 33, 0.86);
+  --node-fill: rgba(24, 34, 51, 0.95);
+  --node-stroke: rgba(149, 166, 193, 0.45);
 }
 
 /* ── Light theme ── */
@@ -55,6 +59,10 @@
   --select-bg: rgba(255, 255, 255, 0.95);
   --tooltip-bg: #f0f6ff;
   --theme-icon: "☀";
+  --toolbar-bg: rgba(255, 255, 255, 0.92);
+  --graph-bg: rgba(230, 240, 255, 0.88);
+  --node-fill: rgba(255, 255, 255, 0.92);
+  --node-stroke: rgba(80, 120, 180, 0.4);
 }
 
 * {
@@ -470,7 +478,7 @@ p {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(7, 17, 29, 0.94);
+  background: var(--toolbar-bg);
   backdrop-filter: blur(18px);
   border-radius: 16px;
   border: 1px solid var(--line);
@@ -1077,7 +1085,7 @@ select {
 .graph-map {
   border: 1px solid var(--line);
   border-radius: 18px;
-  background: rgba(11, 20, 33, 0.86);
+  background: var(--graph-bg);
   padding: 28px;
   min-height: 560px;
 }
@@ -1085,14 +1093,14 @@ select {
 .graph-map svg {
   width: 100%;
   height: auto;
-  color: rgba(40, 112, 255, 0.72);
+  color: rgba(var(--stage-rgb), 0.72);
   max-height: 700px;
 }
 
 .graph-edge {
-  stroke: rgba(128, 134, 144, 0.32);
+  stroke: var(--node-stroke);
   stroke-width: 0.62;
-  color: rgba(128, 134, 144, 0.32);
+  color: var(--node-stroke);
 }
 
 .graph-edge.active {
@@ -1116,8 +1124,8 @@ select {
 }
 
 .graph-node circle {
-  fill: rgba(24, 34, 51, 0.95);
-  stroke: rgba(149, 166, 193, 0.45);
+  fill: var(--node-fill);
+  stroke: var(--node-stroke);
   stroke-width: 1.1;
 }
 
@@ -1370,10 +1378,10 @@ button.step-item:hover {
 }
 
 .flow-section {
-  border: 1px solid rgba(126, 155, 196, 0.12);
+  border: 1px solid var(--line);
   border-radius: 22px;
   padding: 14px;
-  background: rgba(14, 22, 35, 0.54);
+  background: var(--bg-card);
 }
 
 .flow-section.active {
@@ -1441,10 +1449,10 @@ button.step-item:hover {
 .flow-agent {
   position: relative;
   border-radius: 20px;
-  border: 1px solid rgba(126, 155, 196, 0.14);
-  background: rgba(16, 25, 38, 0.96);
+  border: 1px solid var(--line);
+  background: var(--bg-card-str);
   padding: 16px;
-  box-shadow: 0 12px 24px rgba(2, 8, 18, 0.25);
+  box-shadow: var(--shadow);
   transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
   min-height: 96px;
 }
@@ -1536,7 +1544,7 @@ button.step-item:hover {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 18px;
-  background: rgba(11, 20, 33, 0.86);
+  background: var(--graph-bg);
   display: grid;
   gap: 14px;
 }
@@ -1672,7 +1680,7 @@ button.step-item:hover {
 
 .framework-score-row.caution {
   border-color: rgba(255, 191, 87, 0.26);
-  background: rgba(44, 34, 18, 0.42);
+  background: rgba(255, 191, 87, 0.07);
 }
 
 .framework-score-row.caution .score-status {
@@ -1681,7 +1689,7 @@ button.step-item:hover {
 
 .framework-score-row.danger {
   border-color: rgba(255, 111, 111, 0.34);
-  background: rgba(48, 20, 24, 0.48);
+  background: rgba(255, 111, 111, 0.07);
 }
 
 .framework-score-row.danger .score-status {
