@@ -1031,6 +1031,27 @@ function getAgentRole(agentId) {
   return "decision";
 }
 
+function getNodeShape(role, x, y) {
+  const r = 7;
+  switch (role) {
+    case "principal":
+      return `<polygon class="node-shape" points="${x},${y-r} ${x+r},${y} ${x},${y+r} ${x-r},${y}" />`;
+    case "reviewer": {
+      const s = 5.5;
+      return `<rect class="node-shape" x="${x-s}" y="${y-s}" width="${s*2}" height="${s*2}" rx="1.5" />`;
+    }
+    case "decision": {
+      const pts = Array.from({length: 6}, (_, i) => {
+        const a = (Math.PI / 3) * i - Math.PI / 2;
+        return `${(x + r * Math.cos(a)).toFixed(1)},${(y + r * Math.sin(a)).toFixed(1)}`;
+      }).join(" ");
+      return `<polygon class="node-shape" points="${pts}" />`;
+    }
+    default:
+      return `<circle class="node-shape" cx="${x}" cy="${y}" r="${r}" />`;
+  }
+}
+
 function getStageOrder(stageId) {
   const orderByStage = {
     intake: {
@@ -2456,15 +2477,17 @@ function renderGraphMap({ framework, activeAgents, stageId, color, neutral = fal
     .join("");
 
   const nodeMarkup = Object.entries(graphNodes)
-    .map(([nodeId, node]) => `
-      <g class="graph-node ${activeAgentSet.has(nodeId) ? "active" : ""} role-${getAgentRole(nodeId)}"
+    .map(([nodeId, node]) => {
+      const role = getAgentRole(nodeId);
+      return `
+      <g class="graph-node ${activeAgentSet.has(nodeId) ? "active" : ""} role-${role}"
          data-node-id="${nodeId}"
          data-node-desc="${NODE_DESCRIPTIONS[nodeId] || nodeId}">
-        <circle cx="${node.x}" cy="${node.y}" r="7" />
-        <text class="node-initial" x="${node.x}" y="${node.y}" text-anchor="middle" dominant-baseline="middle">${node.label[0]}</text>
+        ${getNodeShape(role, node.x, node.y)}
         <text x="${node.labelX}" y="${node.labelY}" text-anchor="middle">${node.label}</text>
       </g>
-    `)
+    `;
+    })
     .join("");
 
   const patternLabel = framework ? (PATTERN_LABELS[framework.pattern] || framework.pattern) : "";
