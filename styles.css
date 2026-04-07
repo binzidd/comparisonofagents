@@ -1494,6 +1494,43 @@ button.step-item:hover {
   gap: 10px;
 }
 
+.state-signature-rail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.state-signature-step {
+  border: 1px solid rgba(var(--stage-rgb), 0.22);
+  border-radius: 18px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(var(--stage-rgb), 0.08), rgba(var(--stage-rgb), 0.03)),
+    var(--bg-card-str);
+}
+
+.state-signature-step span {
+  display: block;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.state-signature-step strong {
+  display: block;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.state-signature-arrow {
+  color: rgba(var(--stage-rgb), 0.9);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
 .execution-message-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1918,8 +1955,14 @@ button.step-item:hover {
 
   .signature-grid,
   .execution-grid,
-  .execution-message-list {
+  .execution-message-list,
+  .state-signature-rail {
     grid-template-columns: 1fr;
+  }
+
+  .state-signature-arrow {
+    justify-self: center;
+    transform: rotate(90deg);
   }
 }
 

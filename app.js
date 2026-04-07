@@ -362,6 +362,21 @@ const STATE_CONTAINER_LABELS = {
   typed_models: "Typed models"
 };
 
+const SCORECARD_ORDER = [
+  "Time Cost",
+  "Token Cost",
+  "Latency",
+  "Parallelism",
+  "Observability",
+  "Replayability",
+  "Human Review",
+  "Context Loss",
+  "Unsupported Answer Risk",
+  "Error Recovery",
+  "Testability",
+  "Type Safety"
+];
+
 const linkIds = [
   "principal-compliance",
   "principal-security",
@@ -2408,6 +2423,17 @@ function traceMessageSummary(traceStage, highlights) {
   return highlights?.messages?.join(" / ") || "Execution signal unavailable";
 }
 
+function buildOrderedScoreRows(framework) {
+  const profile = frameworkTechProfile(framework);
+  const byLabel = new Map(
+    [...traceScoreRows(framework), ...profile.scorecard].map((item) => [item.label, item])
+  );
+
+  return SCORECARD_ORDER
+    .map((label) => byLabel.get(label))
+    .filter(Boolean);
+}
+
 function renderExecutionSignatureCard(framework) {
   const intakeTrace = getTraceStage(framework.id, "intake");
   const challengeTrace = getTraceStage(framework.id, "challenge");
@@ -2450,6 +2476,7 @@ function renderExecutionSnapshot(framework, stageId) {
   const traceStage = getTraceStage(framework.id, stageId);
   const highlights = flowHighlights(framework.pattern, stageId);
   const traceMessages = traceStage?.messages || [];
+  const stageArtifactLabel = stageId === "verdict" ? "Verdict payload" : stageId === "challenge" ? "Review interruption" : "Stage artifact";
   const messageMarkup = traceMessages.length
     ? traceMessages
       .map((item) => {
@@ -2496,6 +2523,22 @@ function renderExecutionSnapshot(framework, stageId) {
           <strong>${traceArtifactSummary(traceStage, stageId)}</strong>
         </article>
       </div>
+      <div class="state-signature-rail" aria-label="Execution signature flow">
+        <article class="state-signature-step">
+          <span>Carrier</span>
+          <strong>${traceStateCarrier(traceStage)}</strong>
+        </article>
+        <div class="state-signature-arrow" aria-hidden="true">→</div>
+        <article class="state-signature-step">
+          <span>Control</span>
+          <strong>${traceControlSignal(traceStage)}</strong>
+        </article>
+        <div class="state-signature-arrow" aria-hidden="true">→</div>
+        <article class="state-signature-step">
+          <span>${stageArtifactLabel}</span>
+          <strong>${traceArtifactSummary(traceStage, stageId)}</strong>
+        </article>
+      </div>
       <div class="execution-transcript">
         <span class="execution-transcript-label">What the run emits here</span>
         <div class="execution-message-list">
@@ -2507,8 +2550,7 @@ function renderExecutionSnapshot(framework, stageId) {
 }
 
 function renderFrameworkScorecard(framework) {
-  const profile = frameworkTechProfile(framework);
-  const rows = [...traceScoreRows(framework), ...profile.scorecard].sort((a, b) => a.value - b.value);
+  const rows = buildOrderedScoreRows(framework);
   return `
     <section class="framework-scorecard">
       <div class="framework-scorecard-head">
