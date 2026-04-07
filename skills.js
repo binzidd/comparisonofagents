@@ -457,31 +457,43 @@ function renderStageBoard() {
 function starterPackForFramework(framework) {
   const byId = {
     langgraph: {
-      files: [
+      actualFiles: [
         ["agents.py", "Graph nodes and orchestration"],
-        ["app.py", "Runtime entrypoint"],
+        ["app.py", "Streamlit entrypoint"],
+        ["README.md", "Setup and usage"],
+        ["requirements.txt", "Python dependencies"]
+      ],
+      suggestedFiles: [
         ["skill_contract.py", "Claude skill boundary"],
         ["review_checklist.md", "Reusable rebuttal rules"],
-        [".env.example", "Config template"]
+        [".env.example", "Optional config template"]
       ],
       quickstart: ["Model the state object first", "Wrap retrieval and reviewer logic behind one Claude skill call", "Keep branch nodes thin and packet-oriented"],
       repoKit: "/starter-kits/zips/langgraph.zip"
     },
     "openai-agents": {
-      files: [
+      actualFiles: [
         ["agents.py", "Specialist agents"],
-        ["app.py", "Runner entrypoint"],
+        ["app.py", "Streamlit entrypoint"],
+        ["README.md", "Setup and usage"],
+        ["requirements.txt", "Python dependencies"]
+      ],
+      suggestedFiles: [
         ["handoff_packets.py", "Shared packet schema"],
         ["skill_contract.py", "Claude skill boundary"],
-        [".env.example", "Config template"]
+        [".env.example", "Optional config template"]
       ],
       quickstart: ["Define one shared evidence packet", "Let each specialist handoff call the same Claude skill", "Validate the final return packet before verdict"],
       repoKit: "/starter-kits/zips/openai-agents.zip"
     },
     ag2: {
-      files: [
+      actualFiles: [
         ["agents.py", "Debate roles"],
-        ["app.py", "Chat runtime entrypoint"],
+        ["app.py", "Streamlit entrypoint"],
+        ["README.md", "Setup and usage"],
+        ["requirements.txt", "Python dependencies"]
+      ],
+      suggestedFiles: [
         ["debate_rules.py", "Turn and stop rules"],
         ["skill_contract.py", "Claude skill boundary"],
         ["review_protocol.md", "Challenge protocol"]
@@ -490,56 +502,75 @@ function starterPackForFramework(framework) {
       repoKit: "/starter-kits/zips/ag2.zip"
     },
     crewai: {
-      files: [
+      actualFiles: [
+        ["Not in repo yet", "No shipped CrewAI starter kit in this repository"]
+      ],
+      suggestedFiles: [
         ["crew.py", "Crew assembly"],
         ["tasks.py", "Role-scoped tasks"],
         ["skill_contract.py", "Claude skill boundary"],
         ["manager_review.md", "Manager review rubric"],
-        [".env.example", "Config template"]
+        [".env.example", "Optional config template"]
       ],
       quickstart: ["Attach the Claude skill to task templates", "Keep the manager prompt focused on routing and approval", "Make every worker emit the same evidence packet"],
       repoKit: null
     },
     "semantic-kernel": {
-      files: [
+      actualFiles: [
+        ["Not in repo yet", "No shipped Semantic Kernel starter kit in this repository"]
+      ],
+      suggestedFiles: [
         ["kernel.py", "Kernel entrypoint"],
         ["plugins/policy_skill.py", "Reusable policy plugin"],
         ["skill_contract.py", "Claude skill boundary"],
         ["governance_filters.py", "Approval and audit hooks"],
-        [".env.example", "Config template"]
+        [".env.example", "Optional config template"]
       ],
       quickstart: ["Put policy grounding in one reusable plugin boundary", "Let approvals stay in the framework layer", "Keep audit fields in the final packet"],
       repoKit: null
     },
     llamaindex: {
-      files: [
-        ["workflow.py", "Workflow definition"],
-        ["events.py", "Event payloads"],
+      actualFiles: [
+        ["agents.py", "Workflow and specialist logic"],
+        ["app.py", "Streamlit entrypoint"],
+        ["README.md", "Setup and usage"],
+        ["requirements.txt", "Python dependencies"]
+      ],
+      suggestedFiles: [
+        ["events.py", "Optional explicit event payload module"],
         ["skill_contract.py", "Claude skill boundary"],
-        ["aggregation.py", "Verdict assembly"],
-        [".env.example", "Config template"]
+        ["aggregation.py", "Verdict assembly helper"],
+        [".env.example", "Optional config template"]
       ],
       quickstart: ["Normalize event payloads early", "Call the Claude skill from specialist handlers", "Aggregate only validated evidence packets"],
       repoKit: "/starter-kits/zips/llamaindex.zip"
     },
     mastra: {
-      files: [
+      actualFiles: [
+        ["Not in repo yet", "No shipped Mastra starter kit directory in this repository"]
+      ],
+      suggestedFiles: [
         ["workflow.ts", "Workflow definition"],
         ["agents.ts", "Agent setup"],
         ["skill-contract.ts", "Claude skill boundary"],
         ["guardrails.ts", "Review branch logic"],
-        [".env.example", "Config template"]
+        [".env.example", "Optional config template"]
       ],
       quickstart: ["Keep the workflow step product-facing", "Hide repeated policy logic behind the skill contract", "Resume from guardrail branches with the same packet shape"],
       repoKit: null
     },
     pydanticai: {
-      files: [
+      actualFiles: [
         ["agents.py", "Typed agents"],
-        ["models.py", "Evidence and verdict models"],
+        ["app.py", "Streamlit entrypoint"],
+        ["README.md", "Setup and usage"],
+        ["requirements.txt", "Python dependencies"]
+      ],
+      suggestedFiles: [
+        ["models.py", "Optional extracted evidence and verdict models"],
         ["skill_contract.py", "Claude skill boundary"],
-        ["validators.py", "Runtime validation"],
-        [".env.example", "Config template"]
+        ["validators.py", "Runtime validation helpers"],
+        [".env.example", "Optional config template"]
       ],
       quickstart: ["Define the evidence packet in Pydantic first", "Use the Claude skill for reusable extraction behavior", "Let model validation guard the final verdict"],
       repoKit: "/starter-kits/zips/pydanticai.zip"
@@ -602,7 +633,7 @@ function agentCorePlanForFramework(framework) {
 function renderStarterPack() {
   const framework = getFramework();
   const pack = starterPackForFramework(framework);
-  starterPackSupport.textContent = `This starter pack is tailored to ${framework.name}. The framework still owns orchestration; the Claude skill contract owns the reusable policy-grounding capability.`;
+  starterPackSupport.textContent = `This section now separates what actually ships in this repository from the extra files you would likely add for Claude skill integration in ${framework.name}.`;
 
   starterPackGrid.innerHTML = `
     <article class="starter-pack-card" style="--framework-color:${framework.color}">
@@ -614,7 +645,7 @@ function renderStarterPack() {
         ${pack.repoKit ? `<a class="kit-download-btn" href="${pack.repoKit}" download>Starter Kit</a>` : `<span class="capability-pattern">Blueprint</span>`}
       </div>
       <div class="starter-file-list starter-file-list-compact">
-        ${pack.files.map(([file, desc]) => `
+        ${pack.actualFiles.map(([file, desc]) => `
           <article class="starter-file-row">
             <strong>${file}</strong>
             <span>${desc}</span>
@@ -625,9 +656,17 @@ function renderStarterPack() {
     <article class="starter-pack-card">
       <div class="capability-card-head">
         <div>
-          <p class="eyebrow">Tailoring Notes</p>
-          <h3>How this pack should be used</h3>
+          <p class="eyebrow">Suggested Skill Additions</p>
+          <h3>Files to add for Claude skill integration</h3>
         </div>
+      </div>
+      <div class="starter-file-list starter-file-list-compact">
+        ${pack.suggestedFiles.map(([file, desc]) => `
+          <article class="starter-file-row">
+            <strong>${file}</strong>
+            <span>${desc}</span>
+          </article>
+        `).join("")}
       </div>
       <div class="starter-guidance-list">
         ${pack.quickstart.map((item) => `<article><strong>${item}</strong></article>`).join("")}
