@@ -53,7 +53,11 @@ const requiredSkillsIds = [
   "skills-framework-row",
   "skills-summary-grid",
   "skills-comparison-grid",
-  "skills-stage-board"
+  "skills-stage-board",
+  "starter-pack-support",
+  "starter-pack-grid",
+  "agentcore-support",
+  "agentcore-board"
 ];
 
 const missingSkillsIds = requiredSkillsIds.filter((id) => !skillsHtml.includes(`id="${id}"`));

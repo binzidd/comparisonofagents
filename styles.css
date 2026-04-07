@@ -523,7 +523,9 @@ p {
 
 .skills-summary-grid,
 .skills-comparison-grid,
-.skills-stage-board {
+.skills-stage-board,
+.starter-pack-grid,
+.agentcore-board {
   display: grid;
   gap: 16px;
 }
@@ -533,9 +535,16 @@ p {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.starter-pack-grid,
+.agentcore-board {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .skills-summary-card,
 .skill-stage-row,
-.skill-exec-card {
+.skill-exec-card,
+.starter-pack-card,
+.agentcore-card {
   border: 1px solid var(--line);
   border-radius: 22px;
   background: var(--bg-card);
@@ -637,6 +646,81 @@ p {
 .skill-stage-column strong {
   color: var(--text);
   line-height: 1.45;
+}
+
+.starter-pack-card,
+.agentcore-card {
+  padding: 20px;
+  display: grid;
+  gap: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--framework-color, #4b8dff) 16%, transparent), transparent 30%),
+    var(--bg-card);
+}
+
+.starter-file-list,
+.agentcore-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.starter-file-chip {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: var(--bg-card-str);
+  color: var(--text);
+  font-size: 0.84rem;
+}
+
+.starter-guidance-list {
+  display: grid;
+  gap: 10px;
+}
+
+.starter-guidance-list article {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: var(--bg-card-str);
+}
+
+.starter-guidance-list span {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(75, 141, 255, 0.14);
+  color: var(--text);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.starter-guidance-list strong {
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.agentcore-code {
+  margin: 0;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--code-bg);
+  color: var(--code-text);
+  overflow-x: auto;
+}
+
+.agentcore-links a {
+  color: var(--accent-link);
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
 }
 
 .capability-board {
@@ -2202,7 +2286,9 @@ button.step-item:hover {
   .framework-score-grid,
   .capability-board,
   .skills-summary-grid,
-  .skills-comparison-grid {
+  .skills-comparison-grid,
+  .starter-pack-grid,
+  .agentcore-board {
     grid-template-columns: 1fr;
   }
 

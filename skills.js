@@ -3,6 +3,7 @@ const frameworks = [
     id: "langgraph",
     name: "LangGraph",
     color: "#1f5f5b",
+    runtime: "python",
     pattern: "Parallel Fan-out",
     executionModel: "Supervisor graph with explicit branch and merge nodes",
     withoutSkill: {
@@ -37,6 +38,7 @@ const frameworks = [
     id: "openai-agents",
     name: "OpenAI Agents SDK",
     color: "#6b4bc2",
+    runtime: "python",
     pattern: "Sequential Chain",
     executionModel: "Linear baton-pass handoffs inside one run context",
     withoutSkill: {
@@ -71,6 +73,7 @@ const frameworks = [
     id: "ag2",
     name: "AG2",
     color: "#cf8f2e",
+    runtime: "python",
     pattern: "Mesh Network",
     executionModel: "Conversation mesh with direct specialist challenge",
     withoutSkill: {
@@ -105,6 +108,7 @@ const frameworks = [
     id: "crewai",
     name: "CrewAI",
     color: "#445fbb",
+    runtime: "python",
     pattern: "Manager Review",
     executionModel: "Manager assigns specialist tasks, then resumes after review",
     withoutSkill: {
@@ -139,6 +143,7 @@ const frameworks = [
     id: "semantic-kernel",
     name: "Semantic Kernel",
     color: "#9b4c3d",
+    runtime: "python",
     pattern: "Enterprise Gated",
     executionModel: "Governed workflow with platform-level checkpoints and controls",
     withoutSkill: {
@@ -173,6 +178,7 @@ const frameworks = [
     id: "llamaindex",
     name: "LlamaIndex",
     color: "#3f6b2a",
+    runtime: "python",
     pattern: "Event Pipeline",
     executionModel: "Event-driven evidence pipeline with aggregation steps",
     withoutSkill: {
@@ -207,6 +213,7 @@ const frameworks = [
     id: "mastra",
     name: "Mastra",
     color: "#0f6d90",
+    runtime: "typescript",
     pattern: "App Workflow",
     executionModel: "App-native workflow that keeps orchestration close to product code",
     withoutSkill: {
@@ -241,6 +248,7 @@ const frameworks = [
     id: "pydanticai",
     name: "PydanticAI",
     color: "#b34747",
+    runtime: "python",
     pattern: "Typed Review",
     executionModel: "Typed orchestration pipeline with validated inputs and outputs",
     withoutSkill: {
@@ -300,6 +308,10 @@ let skillsFrameworkRow;
 let skillsSummaryGrid;
 let skillsComparisonGrid;
 let skillsStageBoard;
+let starterPackSupport;
+let starterPackGrid;
+let agentcoreSupport;
+let agentcoreBoard;
 let footerLikeBtn;
 let footerLikeCount;
 
@@ -442,6 +454,166 @@ function renderStageBoard() {
     .join("");
 }
 
+function starterPackForFramework(framework) {
+  const byId = {
+    langgraph: {
+      files: ["agents.py", "app.py", "skill_contract.py", "review_checklist.md", ".env.example"],
+      quickstart: ["Model the state object first", "Wrap retrieval and reviewer logic behind one Claude skill call", "Keep branch nodes thin and packet-oriented"],
+      repoKit: "/starter-kits/zips/langgraph.zip"
+    },
+    "openai-agents": {
+      files: ["agents.py", "app.py", "handoff_packets.py", "skill_contract.py", ".env.example"],
+      quickstart: ["Define one shared evidence packet", "Let each specialist handoff call the same Claude skill", "Validate the final return packet before verdict"],
+      repoKit: "/starter-kits/zips/openai-agents.zip"
+    },
+    ag2: {
+      files: ["agents.py", "app.py", "debate_rules.py", "skill_contract.py", "review_protocol.md"],
+      quickstart: ["Keep the group chat small", "Use the Claude skill as the evidence-grounding layer", "Terminate debate on missing-support conditions"],
+      repoKit: "/starter-kits/zips/ag2.zip"
+    },
+    crewai: {
+      files: ["crew.py", "tasks.py", "skill_contract.py", "manager_review.md", ".env.example"],
+      quickstart: ["Attach the Claude skill to task templates", "Keep the manager prompt focused on routing and approval", "Make every worker emit the same evidence packet"],
+      repoKit: null
+    },
+    "semantic-kernel": {
+      files: ["kernel.py", "plugins/policy_skill.py", "skill_contract.py", "governance_filters.py", ".env.example"],
+      quickstart: ["Put policy grounding in one reusable plugin boundary", "Let approvals stay in the framework layer", "Keep audit fields in the final packet"],
+      repoKit: null
+    },
+    llamaindex: {
+      files: ["workflow.py", "events.py", "skill_contract.py", "aggregation.py", ".env.example"],
+      quickstart: ["Normalize event payloads early", "Call the Claude skill from specialist handlers", "Aggregate only validated evidence packets"],
+      repoKit: "/starter-kits/zips/llamaindex.zip"
+    },
+    mastra: {
+      files: ["workflow.ts", "agents.ts", "skill-contract.ts", "guardrails.ts", ".env.example"],
+      quickstart: ["Keep the workflow step product-facing", "Hide repeated policy logic behind the skill contract", "Resume from guardrail branches with the same packet shape"],
+      repoKit: null
+    },
+    pydanticai: {
+      files: ["agents.py", "models.py", "skill_contract.py", "validators.py", ".env.example"],
+      quickstart: ["Define the evidence packet in Pydantic first", "Use the Claude skill for reusable extraction behavior", "Let model validation guard the final verdict"],
+      repoKit: "/starter-kits/zips/pydanticai.zip"
+    }
+  };
+
+  return byId[framework.id];
+}
+
+function agentCorePlanForFramework(framework) {
+  const directCode = framework.runtime === "python";
+  const deployMode = directCode ? "Direct code deployment to AgentCore Runtime" : "Container-oriented AgentCore Runtime deployment";
+  const why = directCode
+    ? "AWS AgentCore's starter-toolkit path is most straightforward for the Python-based frameworks in this repo."
+    : "Mastra is TypeScript-first, so a container or custom runtime package is the safer fit. This is an implementation inference based on AWS's current Python-first starter-toolkit flow.";
+  const steps = directCode
+    ? [
+        "Install the AgentCore starter toolkit and configure AWS credentials.",
+        "Point AgentCore at the framework entrypoint that already wraps the Claude skill contract.",
+        "Run locally with `agentcore dev` and verify `/invocations` responds with the normalized packet.",
+        "Deploy with the current AgentCore CLI flow. AWS quickstart docs show `agentcore deploy`, while the starter-toolkit tutorial still documents `agentcore launch`."
+      ]
+    : [
+        "Package the framework-plus-skill runtime as a container or custom runtime artifact.",
+        "Keep the Claude skill contract inside the app layer and expose one invocation endpoint to AgentCore Runtime.",
+        "Test the container locally before handing it to AgentCore Runtime.",
+        "Deploy through AgentCore Runtime using the runtime artifact path rather than the Python starter-kit shortcut."
+      ];
+
+  const commands = directCode
+    ? [
+        "pip install bedrock-agentcore-starter-toolkit",
+        "agentcore configure -e app.py",
+        "agentcore dev",
+        "agentcore deploy"
+      ]
+    : [
+        "docker build -t framework-skill-agent .",
+        "docker run -p 8080:8080 framework-skill-agent",
+        "agentcore configure",
+        "agentcore deploy"
+      ];
+
+  return {
+    deployMode,
+    why,
+    steps,
+    commands,
+    docs: [
+      { label: "AgentCore interfaces", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/develop-agents.html" },
+      { label: "Direct code deployment", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-get-started-code-deploy.html" },
+      { label: "Observability", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/observability.html" }
+    ]
+  };
+}
+
+function renderStarterPack() {
+  const framework = getFramework();
+  const pack = starterPackForFramework(framework);
+  starterPackSupport.textContent = `This starter pack is tailored to ${framework.name}. The framework still owns orchestration; the Claude skill contract owns the reusable policy-grounding capability.`;
+
+  starterPackGrid.innerHTML = `
+    <article class="starter-pack-card" style="--framework-color:${framework.color}">
+      <div class="capability-card-head">
+        <div>
+          <p class="eyebrow">Starter Files</p>
+          <h3>${framework.name} + Claude skill starter pack</h3>
+        </div>
+        ${pack.repoKit ? `<a class="kit-download-btn" href="${pack.repoKit}" download>Starter Kit</a>` : `<span class="capability-pattern">Blueprint</span>`}
+      </div>
+      <div class="starter-file-list">
+        ${pack.files.map((file) => `<span class="starter-file-chip">${file}</span>`).join("")}
+      </div>
+    </article>
+    <article class="starter-pack-card">
+      <div class="capability-card-head">
+        <div>
+          <p class="eyebrow">Tailoring Notes</p>
+          <h3>How this pack should be used</h3>
+        </div>
+      </div>
+      <div class="starter-guidance-list">
+        ${pack.quickstart.map((item) => `<article><strong>${item}</strong></article>`).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderAgentCore() {
+  const framework = getFramework();
+  const plan = agentCorePlanForFramework(framework);
+  agentcoreSupport.textContent = "Based on the current official Amazon Bedrock AgentCore docs, AgentCore Runtime is framework-agnostic, but the easiest documented path is the starter-toolkit flow for Python agents. The TypeScript recommendation here is an implementation inference.";
+
+  agentcoreBoard.innerHTML = `
+    <article class="agentcore-card" style="--framework-color:${framework.color}">
+      <div class="capability-card-head">
+        <div>
+          <p class="eyebrow">Deployment Mode</p>
+          <h3>${plan.deployMode}</h3>
+        </div>
+        <span class="capability-pattern">AWS AgentCore</span>
+      </div>
+      <p>${plan.why}</p>
+      <div class="starter-guidance-list">
+        ${plan.steps.map((item, index) => `<article><span>${index + 1}</span><strong>${item}</strong></article>`).join("")}
+      </div>
+    </article>
+    <article class="agentcore-card">
+      <div class="capability-card-head">
+        <div>
+          <p class="eyebrow">CLI Flow</p>
+          <h3>Suggested commands</h3>
+        </div>
+      </div>
+      <pre class="agentcore-code"><code>${plan.commands.join("\n")}</code></pre>
+      <div class="agentcore-links">
+        ${plan.docs.map((doc) => `<a href="${doc.href}" target="_blank" rel="noreferrer">${doc.label}</a>`).join("")}
+      </div>
+    </article>
+  `;
+}
+
 function renderFooterLike(serverTotal) {
   if (!footerLikeBtn || !footerLikeCount) return;
   const state = likeStore.read();
@@ -502,6 +674,8 @@ function render() {
   renderSummary();
   renderComparison();
   renderStageBoard();
+  renderStarterPack();
+  renderAgentCore();
 }
 
 function initApp() {
@@ -511,6 +685,10 @@ function initApp() {
   skillsSummaryGrid = document.getElementById("skills-summary-grid");
   skillsComparisonGrid = document.getElementById("skills-comparison-grid");
   skillsStageBoard = document.getElementById("skills-stage-board");
+  starterPackSupport = document.getElementById("starter-pack-support");
+  starterPackGrid = document.getElementById("starter-pack-grid");
+  agentcoreSupport = document.getElementById("agentcore-support");
+  agentcoreBoard = document.getElementById("agentcore-board");
   footerLikeBtn = document.getElementById("footer-like-btn");
   footerLikeCount = document.getElementById("footer-like-count");
 
@@ -521,6 +699,10 @@ function initApp() {
     skillsSummaryGrid,
     skillsComparisonGrid,
     skillsStageBoard,
+    starterPackSupport,
+    starterPackGrid,
+    agentcoreSupport,
+    agentcoreBoard,
     footerLikeBtn,
     footerLikeCount
   ];
