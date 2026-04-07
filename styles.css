@@ -666,6 +666,32 @@ p {
   gap: 10px;
 }
 
+.starter-file-list-compact {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.starter-file-row {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: var(--bg-card-str);
+  display: grid;
+  gap: 4px;
+}
+
+.starter-file-row strong {
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.starter-file-row span {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.4;
+}
+
 .starter-file-chip {
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -721,6 +747,32 @@ p {
   color: var(--accent-link);
   text-decoration: underline;
   text-underline-offset: 0.16em;
+}
+
+.agentcore-callout-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.agentcore-callout {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: var(--bg-card-str);
+}
+
+.agentcore-callout span {
+  display: block;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.agentcore-callout strong {
+  color: var(--text);
+  line-height: 1.45;
 }
 
 .capability-board {

@@ -457,42 +457,90 @@ function renderStageBoard() {
 function starterPackForFramework(framework) {
   const byId = {
     langgraph: {
-      files: ["agents.py", "app.py", "skill_contract.py", "review_checklist.md", ".env.example"],
+      files: [
+        ["agents.py", "Graph nodes and orchestration"],
+        ["app.py", "Runtime entrypoint"],
+        ["skill_contract.py", "Claude skill boundary"],
+        ["review_checklist.md", "Reusable rebuttal rules"],
+        [".env.example", "Config template"]
+      ],
       quickstart: ["Model the state object first", "Wrap retrieval and reviewer logic behind one Claude skill call", "Keep branch nodes thin and packet-oriented"],
       repoKit: "/starter-kits/zips/langgraph.zip"
     },
     "openai-agents": {
-      files: ["agents.py", "app.py", "handoff_packets.py", "skill_contract.py", ".env.example"],
+      files: [
+        ["agents.py", "Specialist agents"],
+        ["app.py", "Runner entrypoint"],
+        ["handoff_packets.py", "Shared packet schema"],
+        ["skill_contract.py", "Claude skill boundary"],
+        [".env.example", "Config template"]
+      ],
       quickstart: ["Define one shared evidence packet", "Let each specialist handoff call the same Claude skill", "Validate the final return packet before verdict"],
       repoKit: "/starter-kits/zips/openai-agents.zip"
     },
     ag2: {
-      files: ["agents.py", "app.py", "debate_rules.py", "skill_contract.py", "review_protocol.md"],
+      files: [
+        ["agents.py", "Debate roles"],
+        ["app.py", "Chat runtime entrypoint"],
+        ["debate_rules.py", "Turn and stop rules"],
+        ["skill_contract.py", "Claude skill boundary"],
+        ["review_protocol.md", "Challenge protocol"]
+      ],
       quickstart: ["Keep the group chat small", "Use the Claude skill as the evidence-grounding layer", "Terminate debate on missing-support conditions"],
       repoKit: "/starter-kits/zips/ag2.zip"
     },
     crewai: {
-      files: ["crew.py", "tasks.py", "skill_contract.py", "manager_review.md", ".env.example"],
+      files: [
+        ["crew.py", "Crew assembly"],
+        ["tasks.py", "Role-scoped tasks"],
+        ["skill_contract.py", "Claude skill boundary"],
+        ["manager_review.md", "Manager review rubric"],
+        [".env.example", "Config template"]
+      ],
       quickstart: ["Attach the Claude skill to task templates", "Keep the manager prompt focused on routing and approval", "Make every worker emit the same evidence packet"],
       repoKit: null
     },
     "semantic-kernel": {
-      files: ["kernel.py", "plugins/policy_skill.py", "skill_contract.py", "governance_filters.py", ".env.example"],
+      files: [
+        ["kernel.py", "Kernel entrypoint"],
+        ["plugins/policy_skill.py", "Reusable policy plugin"],
+        ["skill_contract.py", "Claude skill boundary"],
+        ["governance_filters.py", "Approval and audit hooks"],
+        [".env.example", "Config template"]
+      ],
       quickstart: ["Put policy grounding in one reusable plugin boundary", "Let approvals stay in the framework layer", "Keep audit fields in the final packet"],
       repoKit: null
     },
     llamaindex: {
-      files: ["workflow.py", "events.py", "skill_contract.py", "aggregation.py", ".env.example"],
+      files: [
+        ["workflow.py", "Workflow definition"],
+        ["events.py", "Event payloads"],
+        ["skill_contract.py", "Claude skill boundary"],
+        ["aggregation.py", "Verdict assembly"],
+        [".env.example", "Config template"]
+      ],
       quickstart: ["Normalize event payloads early", "Call the Claude skill from specialist handlers", "Aggregate only validated evidence packets"],
       repoKit: "/starter-kits/zips/llamaindex.zip"
     },
     mastra: {
-      files: ["workflow.ts", "agents.ts", "skill-contract.ts", "guardrails.ts", ".env.example"],
+      files: [
+        ["workflow.ts", "Workflow definition"],
+        ["agents.ts", "Agent setup"],
+        ["skill-contract.ts", "Claude skill boundary"],
+        ["guardrails.ts", "Review branch logic"],
+        [".env.example", "Config template"]
+      ],
       quickstart: ["Keep the workflow step product-facing", "Hide repeated policy logic behind the skill contract", "Resume from guardrail branches with the same packet shape"],
       repoKit: null
     },
     pydanticai: {
-      files: ["agents.py", "models.py", "skill_contract.py", "validators.py", ".env.example"],
+      files: [
+        ["agents.py", "Typed agents"],
+        ["models.py", "Evidence and verdict models"],
+        ["skill_contract.py", "Claude skill boundary"],
+        ["validators.py", "Runtime validation"],
+        [".env.example", "Config template"]
+      ],
       quickstart: ["Define the evidence packet in Pydantic first", "Use the Claude skill for reusable extraction behavior", "Let model validation guard the final verdict"],
       repoKit: "/starter-kits/zips/pydanticai.zip"
     }
@@ -538,12 +586,15 @@ function agentCorePlanForFramework(framework) {
   return {
     deployMode,
     why,
+    toolSurface: "If the Claude skill needs file ops, browsing, or code execution, AgentCore Runtime alone is not the whole story. You likely need AgentCore built-in tools such as Code Interpreter or Browser, each created as its own tool resource and invoked through sessions.",
+    sandboxNote: "Code Interpreter is a separate isolated tool surface with its own network mode choices: Sandbox, Public, or VPC. That is different from simply deploying the framework runtime.",
     steps,
     commands,
     docs: [
       { label: "AgentCore interfaces", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/develop-agents.html" },
       { label: "Direct code deployment", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/runtime-get-started-code-deploy.html" },
-      { label: "Observability", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/observability.html" }
+      { label: "Built-in tools", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/built-in-tools.html" },
+      { label: "Code Interpreter resource management", href: "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/code-interpreter-resource-management.html" }
     ]
   };
 }
@@ -562,8 +613,13 @@ function renderStarterPack() {
         </div>
         ${pack.repoKit ? `<a class="kit-download-btn" href="${pack.repoKit}" download>Starter Kit</a>` : `<span class="capability-pattern">Blueprint</span>`}
       </div>
-      <div class="starter-file-list">
-        ${pack.files.map((file) => `<span class="starter-file-chip">${file}</span>`).join("")}
+      <div class="starter-file-list starter-file-list-compact">
+        ${pack.files.map(([file, desc]) => `
+          <article class="starter-file-row">
+            <strong>${file}</strong>
+            <span>${desc}</span>
+          </article>
+        `).join("")}
       </div>
     </article>
     <article class="starter-pack-card">
@@ -595,6 +651,20 @@ function renderAgentCore() {
         <span class="capability-pattern">AWS AgentCore</span>
       </div>
       <p>${plan.why}</p>
+      <div class="agentcore-callout-grid">
+        <article class="agentcore-callout">
+          <span>Runtime layer</span>
+          <strong>${plan.deployMode}</strong>
+        </article>
+        <article class="agentcore-callout">
+          <span>Tool surface</span>
+          <strong>${plan.toolSurface}</strong>
+        </article>
+        <article class="agentcore-callout">
+          <span>Sandbox note</span>
+          <strong>${plan.sandboxNote}</strong>
+        </article>
+      </div>
       <div class="starter-guidance-list">
         ${plan.steps.map((item, index) => `<article><span>${index + 1}</span><strong>${item}</strong></article>`).join("")}
       </div>
