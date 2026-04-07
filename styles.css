@@ -1069,11 +1069,19 @@ select {
   color: var(--text);
 }
 
-.lane-role-technical {
+.lane-role-primary {
+  margin: 0;
+  font-size: 1.16rem;
+  line-height: 1.45;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.lane-role-support {
   font-size: 0.8rem;
   color: var(--muted);
   margin: 6px 0 0;
-  opacity: 0.75;
+  opacity: 0.78;
 }
 
 .tech-strip {

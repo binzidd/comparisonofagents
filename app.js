@@ -3001,8 +3001,8 @@ function laneMarkup(frameworkId, laneIndex) {
           <span class="lane-stage-eyebrow">${stage.label}</span>
           <strong>${stage.persona}</strong>
         </div>
-        <p>${stage.caption}</p>
-        <p class="lane-role-technical">${highlights.technical}</p>
+        <p class="lane-role-primary">${highlights.technical}</p>
+        <p class="lane-role-support">${stage.caption}</p>
       </div>
 
       ${renderExecutionSnapshot(framework, stage.id)}
