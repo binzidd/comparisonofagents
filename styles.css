@@ -126,6 +126,7 @@ a {
 .signal-grid,
 .catalog-stack,
 .catalog-grid,
+.capability-board,
 .lab-toolbar,
 .toolbar-actions,
 .comparison-lanes,
@@ -480,6 +481,113 @@ p {
 
 .catalog-card h4 {
   font-size: 1.1rem;
+}
+
+.capability-board {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.capability-card,
+.noise-row {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--bg-card);
+}
+
+.capability-card {
+  padding: 20px;
+  display: grid;
+  gap: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--framework-color) 18%, transparent), transparent 30%),
+    var(--bg-card);
+}
+
+.capability-card-head,
+.noise-budget-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.capability-pattern {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: var(--bg-card-str);
+  color: var(--muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.capability-grid,
+.noise-budget-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.capability-grid article {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: var(--bg-card-str);
+}
+
+.capability-grid span,
+.noise-row span {
+  display: block;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.capability-grid strong,
+.noise-budget-head strong {
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.noise-budget {
+  display: grid;
+  gap: 10px;
+}
+
+.noise-budget-head span {
+  font-size: 0.76rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.noise-row {
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.noise-dot-row {
+  display: flex;
+  gap: 4px;
+}
+
+.noise-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(126, 155, 196, 0.16);
+  border: 1px solid rgba(126, 155, 196, 0.22);
+}
+
+.noise-dot.active {
+  background: rgba(75, 141, 255, 0.86);
+  border-color: rgba(75, 141, 255, 0.9);
+  box-shadow: 0 0 0 3px rgba(75, 141, 255, 0.1);
 }
 
 .catalog-tagline {
@@ -1935,7 +2043,8 @@ button.step-item:hover {
 
   .policy-answer-strip,
   .lane-analysis-grid,
-  .framework-score-grid {
+  .framework-score-grid,
+  .capability-board {
     grid-template-columns: 1fr;
   }
 

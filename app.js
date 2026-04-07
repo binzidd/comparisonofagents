@@ -362,6 +362,14 @@ const STATE_CONTAINER_LABELS = {
   typed_models: "Typed models"
 };
 
+const CAPABILITY_NOISE_LABELS = [
+  ["promptGlue", "Prompt Glue"],
+  ["toolWiring", "Tool Wiring"],
+  ["statePlumbing", "State Plumbing"],
+  ["validation", "Validation"],
+  ["reusablePackaging", "Reusable Packaging"]
+];
+
 const SCORECARD_ORDER = [
   "Time Cost",
   "Token Cost",
@@ -855,6 +863,8 @@ let skeletonCaption;
 let skeletonBoard;
 let scenarioHeadline;
 let scenarioSupport;
+let capabilitySupport;
+let capabilityBoard;
 let comparisonLanes;
 let scoreRationale;
 let traceStore = null;
@@ -948,6 +958,136 @@ function cardMarkup(item) {
 
 function renderCatalog() {
   frameworkCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "framework").map(cardMarkup).join("");
+}
+
+function frameworkCapabilityProfile(framework) {
+  const byPattern = {
+    "graph-branches": {
+      capabilityUnit: "Graph node or reusable stateful subgraph",
+      reuseStory: "Reuse comes from lifting nodes and reviewer branches into a shared graph template.",
+      whereNoiseDrops: "Checkpointing, routing, and review gates are bundled once the graph is defined.",
+      pythonStillWins: "Raw Python still wins when each step is bespoke and the flow is too fluid to justify graph maintenance.",
+      noiseBudget: { promptGlue: 3, toolWiring: 3, statePlumbing: 4, validation: 2, reusablePackaging: 4 }
+    },
+    "sequential-handoffs": {
+      capabilityUnit: "Specialist agent plus handoff contract",
+      reuseStory: "Reuse comes from specialist agents that can be handed the same task shape repeatedly.",
+      whereNoiseDrops: "Agent prompts, tools, and handoff boundaries can be bundled instead of rewritten in each app flow.",
+      pythonStillWins: "Raw Python wins when you only need a few deterministic calls and do not want handoff ceremony.",
+      noiseBudget: { promptGlue: 3, toolWiring: 4, statePlumbing: 2, validation: 3, reusablePackaging: 4 }
+    },
+    "conversation-mesh": {
+      capabilityUnit: "Specialist persona and reusable conversation pattern",
+      reuseStory: "Reuse comes from reusing debate roles and stopping rules across tasks.",
+      whereNoiseDrops: "Bundled debate prompts reduce the need to manually re-orchestrate every adversarial exchange.",
+      pythonStillWins: "Raw Python wins when you need a strict deterministic pipeline instead of open-ended team discussion.",
+      noiseBudget: { promptGlue: 4, toolWiring: 2, statePlumbing: 1, validation: 1, reusablePackaging: 3 }
+    },
+    "manager-review": {
+      capabilityUnit: "Task bundle with manager-owned checkpoint",
+      reuseStory: "Reuse comes from repeating the same role-scoped tasks and manager prompts across business cases.",
+      whereNoiseDrops: "Task ownership and review checkpoints are packaged into the crew instead of hand-coded each time.",
+      pythonStillWins: "Raw Python wins when the manager layer adds more ceremony than the task itself needs.",
+      noiseBudget: { promptGlue: 3, toolWiring: 3, statePlumbing: 2, validation: 2, reusablePackaging: 4 }
+    },
+    "enterprise-gated": {
+      capabilityUnit: "Governed plugin step with approval policy",
+      reuseStory: "Reuse comes from policy-enforced plugins and shared enterprise review rules.",
+      whereNoiseDrops: "Audit hooks, approvals, and platform controls are bundled once at the runtime layer.",
+      pythonStillWins: "Raw Python wins when governance overhead outweighs the actual complexity of the task.",
+      noiseBudget: { promptGlue: 2, toolWiring: 4, statePlumbing: 3, validation: 4, reusablePackaging: 4 }
+    },
+    "event-pipeline": {
+      capabilityUnit: "Event step and serializable payload contract",
+      reuseStory: "Reuse comes from specialist handlers that subscribe to the same event shapes across pipelines.",
+      whereNoiseDrops: "Event contracts and aggregation steps bundle recurring evidence-processing logic.",
+      pythonStillWins: "Raw Python wins when the event model is more scaffolding than the underlying job requires.",
+      noiseBudget: { promptGlue: 2, toolWiring: 3, statePlumbing: 3, validation: 2, reusablePackaging: 4 }
+    },
+    "app-workflow": {
+      capabilityUnit: "Workflow step packaged close to product code",
+      reuseStory: "Reuse comes from shipping the same guarded workflow step into multiple app experiences.",
+      whereNoiseDrops: "Guardrails, retries, and UI-facing orchestration are bundled with the workflow instead of spread through the app.",
+      pythonStillWins: "Raw Python wins when there is no need to expose the flow to a product runtime or external triggers.",
+      noiseBudget: { promptGlue: 2, toolWiring: 3, statePlumbing: 3, validation: 3, reusablePackaging: 4 }
+    },
+    "typed-review": {
+      capabilityUnit: "Typed result model and validated tool contract",
+      reuseStory: "Reuse comes from carrying the same validated output models into every new task.",
+      whereNoiseDrops: "Schema checks replace repeated defensive Python and reduce clean-up logic downstream.",
+      pythonStillWins: "Raw Python wins when the task output is exploratory enough that strict schemas get in the way.",
+      noiseBudget: { promptGlue: 2, toolWiring: 3, statePlumbing: 2, validation: 5, reusablePackaging: 4 }
+    }
+  };
+
+  return byPattern[framework.pattern];
+}
+
+function noiseDots(score) {
+  return new Array(5)
+    .fill(0)
+    .map((_, index) => `<span class="noise-dot ${index < score ? "active" : ""}"></span>`)
+    .join("");
+}
+
+function renderCapabilitySection() {
+  capabilitySupport.textContent = "Frameworks mostly differentiate execution and control flow. Reusable skills and other packaged capabilities reduce repeated prompt glue, tool wiring, validation, and state plumbing. The point is not that skills replace Python, but that they remove code you would otherwise keep rewriting.";
+
+  capabilityBoard.innerHTML = demoFrameworks
+    .map((framework) => {
+      const profile = frameworkCapabilityProfile(framework);
+      const tech = frameworkTechProfile(framework);
+      return `
+        <article class="capability-card" style="--framework-color:${framework.color}">
+          <div class="capability-card-head">
+            <div>
+              <p class="eyebrow">Capability Packaging</p>
+              <h3>${framework.name}</h3>
+            </div>
+            <span class="capability-pattern">${PATTERN_LABELS[framework.pattern] || framework.pattern}</span>
+          </div>
+
+          <div class="capability-grid">
+            <article>
+              <span>Execution Model</span>
+              <strong>${tech.cards[0].value}</strong>
+            </article>
+            <article>
+              <span>Capability Unit</span>
+              <strong>${profile.capabilityUnit}</strong>
+            </article>
+            <article>
+              <span>Reuse Story</span>
+              <strong>${profile.reuseStory}</strong>
+            </article>
+            <article>
+              <span>Where Noise Drops</span>
+              <strong>${profile.whereNoiseDrops}</strong>
+            </article>
+            <article>
+              <span>When Raw Python Still Wins</span>
+              <strong>${profile.pythonStillWins}</strong>
+            </article>
+          </div>
+
+          <div class="noise-budget">
+            <div class="noise-budget-head">
+              <strong>Bundled capability reduces repeated glue here</strong>
+              <span>1 low · 5 high</span>
+            </div>
+            <div class="noise-budget-grid">
+              ${CAPABILITY_NOISE_LABELS.map(([key, label]) => `
+                <article class="noise-row">
+                  <span>${label}</span>
+                  <div class="noise-dot-row">${noiseDots(profile.noiseBudget[key])}</div>
+                </article>
+              `).join("")}
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderPolicyCase() {
@@ -3098,6 +3238,7 @@ function previousStage() {
 
 function render() {
   renderCatalog();
+  renderCapabilitySection();
   renderPolicyCase();
   renderStageChips();
   renderSummary();
@@ -3196,6 +3337,8 @@ async function initApp() {
   skeletonBoard = document.getElementById("skeleton-board");
   scenarioHeadline = document.getElementById("scenario-headline");
   scenarioSupport = document.getElementById("scenario-support");
+  capabilitySupport = document.getElementById("capability-support");
+  capabilityBoard = document.getElementById("capability-board");
   comparisonLanes = document.getElementById("comparison-lanes");
   scoreRationale = document.getElementById("score-rationale");
   footerLikeBtn = document.getElementById("footer-like-btn");
@@ -3215,6 +3358,8 @@ async function initApp() {
     ["skeleton-board", skeletonBoard],
     ["scenario-headline", scenarioHeadline],
     ["scenario-support", scenarioSupport],
+    ["capability-support", capabilitySupport],
+    ["capability-board", capabilityBoard],
     ["comparison-lanes", comparisonLanes],
     ["score-rationale", scoreRationale],
     ["footer-like-btn", footerLikeBtn],
