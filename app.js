@@ -351,6 +351,17 @@ const PATTERN_LABELS = {
   "typed-review": "Typed Review"
 };
 
+const STATE_CONTAINER_LABELS = {
+  shared_graph_state: "Shared graph state",
+  run_context: "Run context",
+  chat_transcript: "Chat transcript",
+  task_outputs: "Task bundle",
+  governed_case: "Governed case packet",
+  event_payload: "Event payload",
+  workflow_context: "Workflow context",
+  typed_models: "Typed models"
+};
+
 const linkIds = [
   "principal-compliance",
   "principal-security",
@@ -998,7 +1009,7 @@ function renderSummary() {
   scenarioSupport.textContent = `Click through one stage at a time to compare orchestration, eval, and risk handling for the same question: ${question.label}`;
   frameworkSummary.innerHTML = "";
   appStatus.textContent = "";
-  skeletonCaption.textContent = "Click through one stage at a time to see how each framework handles this shared structure.";
+  skeletonCaption.textContent = "Compare the selected frameworks by state carrier, reviewer stop signal, and emitted verdict artifact.";
 }
 
 function renderSkeletonMini() {
@@ -2328,6 +2339,173 @@ function scorePillMarkup(score) {
     .join("");
 }
 
+function formatSignalLabel(value) {
+  return String(value || "")
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function traceStateCarrier(traceStage) {
+  const stateContainer = traceStage?.state?.state_container;
+  return STATE_CONTAINER_LABELS[stateContainer] || formatSignalLabel(stateContainer || "runtime packet");
+}
+
+function traceControlSignal(traceStage) {
+  if (!traceStage) {
+    return "No live trace signal";
+  }
+  const output = traceStage.output || {};
+  return formatSignalLabel(
+    output.reviewer_action
+      || output.status
+      || output.review_shape
+      || output.merge_style
+      || traceStage.runtime
+  );
+}
+
+function traceArtifactSummary(traceStage, stageId) {
+  if (!traceStage) {
+    return "Reference-only stage";
+  }
+  const state = traceStage.state || {};
+  const output = traceStage.output || {};
+
+  if (stageId === "intake") {
+    const loadedCount = Object.keys(state.loaded || {}).filter((key) => state.loaded[key]).length;
+    return `${loadedCount || 0} inputs primed for specialist work`;
+  }
+
+  if (stageId === "review") {
+    return `${Object.keys(state.findings || {}).length || 0} specialist findings added to ${traceStateCarrier(traceStage).toLowerCase()}`;
+  }
+
+  if (stageId === "challenge") {
+    const noteCount = (output.notes || state.reviewer_notes || []).length;
+    const questionCount = (state.open_questions || []).length;
+    return `${noteCount} reviewer notes, ${questionCount} open questions`;
+  }
+
+  if (stageId === "synthesis") {
+    return `${formatSignalLabel(output.merge_style || traceStage.runtime)} merge creates the draft answer`;
+  }
+
+  if (stageId === "verdict") {
+    const citations = output.citations?.length || state.citations?.length || 0;
+    const confidence = output.confidence ?? state.confidence;
+    return `${citations} citations attached${confidence !== undefined ? ` · ${Math.round(confidence * 100)}% confidence` : ""}`;
+  }
+
+  return "Stage artifact ready";
+}
+
+function traceMessageSummary(traceStage, highlights) {
+  const messages = traceStage?.messages?.map((item) => item.message).filter(Boolean) || [];
+  if (messages.length) {
+    return messages.slice(0, 2).join(" / ");
+  }
+  return highlights?.messages?.join(" / ") || "Execution signal unavailable";
+}
+
+function renderExecutionSignatureCard(framework) {
+  const intakeTrace = getTraceStage(framework.id, "intake");
+  const challengeTrace = getTraceStage(framework.id, "challenge");
+  const verdictTrace = getTraceStage(framework.id, "verdict");
+  const profile = frameworkTechProfile(framework);
+
+  return `
+    <article class="signature-card" style="--framework-color:${framework.color}">
+      <div class="signature-card-head">
+        <div>
+          <span class="signature-kicker">${PATTERN_LABELS[framework.pattern] || framework.pattern}</span>
+          <h4>${framework.name}</h4>
+        </div>
+        <span class="signature-runtime">${intakeTrace?.runtime || framework.pattern}</span>
+      </div>
+      <div class="signature-grid">
+        <article>
+          <span>Coordination</span>
+          <strong>${profile.cards[0].value}</strong>
+        </article>
+        <article>
+          <span>State Carrier</span>
+          <strong>${traceStateCarrier(intakeTrace)}</strong>
+        </article>
+        <article>
+          <span>Review Pressure</span>
+          <strong>${traceControlSignal(challengeTrace)}</strong>
+        </article>
+        <article>
+          <span>Verdict Artifact</span>
+          <strong>${traceArtifactSummary(verdictTrace, "verdict")}</strong>
+        </article>
+      </div>
+    </article>
+  `;
+}
+
+function renderExecutionSnapshot(framework, stageId) {
+  const stage = getStage();
+  const traceStage = getTraceStage(framework.id, stageId);
+  const highlights = flowHighlights(framework.pattern, stageId);
+  const traceMessages = traceStage?.messages || [];
+  const messageMarkup = traceMessages.length
+    ? traceMessages
+      .map((item) => {
+        const clause = evidenceClauseForLink(item.link_id);
+        return `
+          <article class="execution-message">
+            <strong>${item.message}</strong>
+            <span>${clause ? clause.title : "Shared policy evidence"}</span>
+          </article>
+        `;
+      })
+      .join("")
+    : `
+      <article class="execution-message">
+        <strong>${traceMessageSummary(traceStage, highlights)}</strong>
+        <span>${highlights.business}</span>
+      </article>
+    `;
+
+  return `
+    <section class="execution-panel">
+      <div class="execution-panel-head">
+        <div>
+          <span class="execution-kicker">Stage signature</span>
+          <h4>${stage.label} in ${framework.name}</h4>
+        </div>
+        <span class="execution-runtime">${traceStage?.runtime || framework.pattern}</span>
+      </div>
+      <div class="execution-grid">
+        <article>
+          <span>How work moves</span>
+          <strong>${highlights.business}</strong>
+        </article>
+        <article>
+          <span>State carrier</span>
+          <strong>${traceStateCarrier(traceStage)}</strong>
+        </article>
+        <article>
+          <span>Control signal</span>
+          <strong>${traceControlSignal(traceStage)}</strong>
+        </article>
+        <article>
+          <span>Runtime artifact</span>
+          <strong>${traceArtifactSummary(traceStage, stageId)}</strong>
+        </article>
+      </div>
+      <div class="execution-transcript">
+        <span class="execution-transcript-label">What the run emits here</span>
+        <div class="execution-message-list">
+          ${messageMarkup}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
 function renderFrameworkScorecard(framework) {
   const profile = frameworkTechProfile(framework);
   const rows = [...traceScoreRows(framework), ...profile.scorecard].sort((a, b) => a.value - b.value);
@@ -2620,40 +2798,16 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 }
 
 function renderSkeleton() {
+  const selectedFrameworks = compareIds.map((id) => getFramework(id)).filter(Boolean);
+  skeletonCaption.textContent = "Each framework runs the same principal-specialist-reviewer loop, but the real differentiator is what gets passed between steps, how review interrupts the flow, and what artifact the runtime emits.";
   skeletonBoard.innerHTML = `
-    <div class="skel-rationale">
-      <p class="skel-rationale-why">Why this architecture?</p>
-      <p class="skel-rationale-body">Policy questions span legal, compliance, security, and data domains simultaneously. A single generalist agent risks domain blind-spots and ungrounded answers. This four-stage pattern enforces separation of concerns while converging on one auditable verdict, regardless of whether agents run sequentially, in parallel, or as a mesh.</p>
-      <p class="skel-conformance">All 6 frameworks implement the same four roles. Their topology (fan-out, chain, mesh) is their design differentiator; the architecture is the constant.</p>
+    <div class="skel-rationale signature-rationale">
+      <p class="skel-rationale-why">What actually differentiates the runs?</p>
+      <p class="skel-rationale-body">Not the shape of the routing diagram. What matters is the execution signature: shared state versus handoffs versus transcripts versus typed payloads, the exact reviewer stop signal, and the artifact each runtime leaves behind for debugging and audits.</p>
+      <p class="skel-conformance">These cards compare the selected frameworks by execution semantics, using the current question's real trace data rather than a generic topology sketch.</p>
     </div>
-    <div class="skel-flow">
-      <div class="skel-node" style="--skel-rgb:${stageTheme.intake}">
-        <div class="skel-node-bar"></div>
-        <span class="skel-node-role">Principal</span>
-        <strong class="skel-node-action">Routes &amp; delegates</strong>
-        <p class="skel-node-desc">Reads the policy corpus and question, then dispatches to the right domain specialists.</p>
-      </div>
-      <div class="skel-arrow" aria-hidden="true">→</div>
-      <div class="skel-node" style="--skel-rgb:${stageTheme.review}">
-        <div class="skel-node-bar"></div>
-        <span class="skel-node-role">Specialists</span>
-        <strong class="skel-node-action">Domain experts</strong>
-        <p class="skel-node-desc">Compliance, legal, security, and data ops each check their domain independently.</p>
-      </div>
-      <div class="skel-arrow" aria-hidden="true">→</div>
-      <div class="skel-node" style="--skel-rgb:${stageTheme.challenge}">
-        <div class="skel-node-bar"></div>
-        <span class="skel-node-role">Reviewer</span>
-        <strong class="skel-node-action">Challenges claims</strong>
-        <p class="skel-node-desc">Adversarially tests every finding for unsupported claims, missing caveats, or contradictions.</p>
-      </div>
-      <div class="skel-arrow" aria-hidden="true">→</div>
-      <div class="skel-node" style="--skel-rgb:${stageTheme.verdict}">
-        <div class="skel-node-bar"></div>
-        <span class="skel-node-role">Output</span>
-        <strong class="skel-node-action">One verdict</strong>
-        <p class="skel-node-desc">Synthesises a single policy answer from all reviewed findings; every framework must converge here.</p>
-      </div>
+    <div class="signature-board">
+      ${selectedFrameworks.map((framework) => renderExecutionSignatureCard(framework)).join("")}
     </div>
   `;
 }
@@ -2809,14 +2963,7 @@ function laneMarkup(frameworkId, laneIndex) {
         <p class="lane-role-technical">${highlights.technical}</p>
       </div>
 
-      ${renderGraphMap({
-        framework,
-        activeAgents: stage.activeAgents,
-        stageId: stage.id,
-        color: framework.color
-      })}
-
-      ${renderMessageList(framework, stage.id)}
+      ${renderExecutionSnapshot(framework, stage.id)}
 
       ${renderFrameworkScorecard(framework)}
 

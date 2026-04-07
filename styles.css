@@ -1390,6 +1390,116 @@ button.step-item:hover {
   min-height: 0;
 }
 
+.signature-rationale {
+  margin-bottom: 18px;
+}
+
+.signature-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.signature-card,
+.execution-panel {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--bg-card);
+  padding: 18px;
+}
+
+.signature-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--framework-color) 18%, transparent), transparent 34%),
+    var(--bg-card);
+}
+
+.signature-card-head,
+.execution-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.signature-kicker,
+.execution-kicker,
+.execution-transcript-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+  font-weight: 700;
+}
+
+.signature-runtime,
+.execution-runtime {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  background: var(--bg-card-str);
+  white-space: nowrap;
+}
+
+.signature-grid,
+.execution-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.signature-grid article,
+.execution-grid article,
+.execution-message {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: var(--bg-card-str);
+}
+
+.signature-grid span,
+.execution-grid span,
+.execution-message span {
+  display: block;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.signature-grid strong,
+.execution-grid strong,
+.execution-message strong {
+  display: block;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.execution-panel {
+  display: grid;
+  gap: 14px;
+  background:
+    radial-gradient(circle at top left, rgba(var(--stage-rgb), 0.08), transparent 34%),
+    var(--bg-card);
+}
+
+.execution-transcript {
+  display: grid;
+  gap: 10px;
+}
+
+.execution-message-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
 .skeleton-mini {
   display: grid;
   gap: 10px;
@@ -1573,6 +1683,10 @@ button.step-item:hover {
 
 .message-bubble {
   font-size: 0.96rem;
+}
+
+.execution-message strong {
+  font-size: 0.94rem;
 }
 
 .lane-bottom {
@@ -1799,6 +1913,12 @@ button.step-item:hover {
   }
 
   .message-list {
+    grid-template-columns: 1fr;
+  }
+
+  .signature-grid,
+  .execution-grid,
+  .execution-message-list {
     grid-template-columns: 1fr;
   }
 }
