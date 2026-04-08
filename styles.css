@@ -859,6 +859,52 @@ p {
   line-height: 1.45;
 }
 
+.skill-stage-artifact {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 8px;
+}
+
+.skill-stage-artifact-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.skill-stage-artifact-head strong {
+  font-size: 0.9rem;
+}
+
+.skill-stage-artifact code {
+  display: block;
+  padding: 9px 11px;
+  border-radius: 12px;
+  background: var(--code-bg);
+  color: var(--code-text);
+  font-size: 0.78rem;
+  overflow-x: auto;
+}
+
+.skill-stage-snippet {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--code-bg);
+  color: var(--code-text);
+  border: 1px solid rgba(126, 155, 196, 0.18);
+  overflow-x: auto;
+}
+
+.skill-stage-snippet code {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+}
+
 .starter-pack-card,
 .agentcore-card {
   padding: 20px;

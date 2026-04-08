@@ -21,6 +21,49 @@ const metricDefinitions = {
   }
 };
 
+const stageSkillArtifacts = {
+  Intake: {
+    skillName: "github_policy_intake",
+    file: ".claude/skills/github_policy_intake/SKILL.md",
+    snippet: [
+      "# GitHub Policy Intake",
+      "- Load the user's GitHub privacy question.",
+      "- Focus on clauses about sharing, retention, deletion, and user rights.",
+      "- Return a case brief with question, scope, and target clauses."
+    ]
+  },
+  Review: {
+    skillName: "github_clause_extractor",
+    file: ".claude/skills/github_clause_extractor/SKILL.md",
+    snippet: [
+      "# GitHub Clause Extractor",
+      "- For each finding, return `clause_quote`, `clause_id`, and `takeaway`.",
+      "- Mark whether the clause supports, weakens, or limits the draft answer.",
+      "- Reject free-form summaries without a cited GitHub clause."
+    ]
+  },
+  Challenge: {
+    skillName: "github_claim_reviewer",
+    file: ".claude/skills/github_claim_reviewer/SKILL.md",
+    snippet: [
+      "# GitHub Claim Reviewer",
+      "- Challenge claims that lack a GitHub clause.",
+      "- Add caveats when the policy language is conditional or narrow.",
+      "- Send the answer back if retention or deletion behavior is overstated."
+    ]
+  },
+  Verdict: {
+    skillName: "github_verdict_guard",
+    file: ".claude/skills/github_verdict_guard/SKILL.md",
+    snippet: [
+      "# GitHub Verdict Guard",
+      "- Final answer must include verdict, clause ids, and caveats.",
+      "- Add a confidence line based on evidence strength.",
+      "- Do not ship an answer with uncited policy assertions."
+    ]
+  }
+};
+
 const frameworks = [
   {
     id: "langgraph",
@@ -485,6 +528,9 @@ function renderStageBoard() {
   const framework = getFramework();
   skillsStageBoard.innerHTML = framework.stages
     .map((item) => `
+      ${(() => {
+        const artifact = stageSkillArtifacts[item.stage];
+        return `
       <article class="skill-stage-row">
         <div class="skill-stage-title">
           <span class="lane-stage-eyebrow">${item.stage}</span>
@@ -496,8 +542,17 @@ function renderStageBoard() {
         <div class="skill-stage-column skill-stage-column-accent">
           <span>Claude skill now packages</span>
           <strong>${item.skill}</strong>
+          <div class="skill-stage-artifact">
+            <div class="skill-stage-artifact-head">
+              <span>Example skill</span>
+              <strong>${artifact.skillName}</strong>
+            </div>
+            <code>${artifact.file}</code>
+            <pre class="skill-stage-snippet"><code>${artifact.snippet.join("\n")}</code></pre>
+          </div>
         </div>
       </article>
+    `; })()}
     `)
     .join("");
 }
