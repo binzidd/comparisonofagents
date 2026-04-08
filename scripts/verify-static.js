@@ -82,7 +82,8 @@ const requiredDecisionIds = [
   "matrix-support",
   "criteria-matrix",
   "framework-metadata-row",
-  "metadata-board"
+  "decision-rationale-board",
+  "decision-tooltip"
 ];
 
 const missingDecisionIds = requiredDecisionIds.filter((id) => !decisionHtml.includes(`id="${id}"`));

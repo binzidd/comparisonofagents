@@ -581,6 +581,16 @@ p {
   gap: 10px;
 }
 
+.decision-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.decision-link-btn {
+  text-decoration: none;
+}
+
 .criteria-matrix-wrap {
   overflow-x: auto;
   border: 1px solid var(--line);
@@ -634,6 +644,45 @@ p {
 
 .metadata-risk {
   color: var(--muted);
+}
+
+.decision-breakdown-list {
+  display: grid;
+  gap: 10px;
+}
+
+.decision-breakdown-row,
+.decision-context-block {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: var(--bg-card-str);
+}
+
+.decision-breakdown-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px 12px;
+  align-items: start;
+}
+
+.decision-breakdown-row strong,
+.decision-context-block strong {
+  color: var(--text);
+}
+
+.decision-breakdown-row span,
+.decision-context-block span {
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.decision-breakdown-row p,
+.decision-context-block p {
+  grid-column: 1 / -1;
+  margin: 0;
 }
 
 .framework-skill-chip.active {

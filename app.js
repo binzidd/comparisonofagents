@@ -861,6 +861,19 @@ let traceStore = null;
 let footerLikeBtn;
 let footerLikeCount;
 
+function applyLaunchParams() {
+  const params = new URLSearchParams(window.location.search);
+  const requestedFramework = params.get("framework");
+  if (!requestedFramework) {
+    return;
+  }
+
+  const framework = demoFrameworks.find((item) => item.id === requestedFramework);
+  if (framework) {
+    compareIds[0] = framework.id;
+  }
+}
+
 const likeStore = {
   storageKey: "comparison_lab_like_state",
   read() {
@@ -3229,6 +3242,7 @@ async function initApp() {
   }
 
   await loadTraces();
+  applyLaunchParams();
   prevStageBtn.addEventListener("click", previousStage);
   stepDemoBtn.addEventListener("click", nextStage);
   footerLikeBtn.addEventListener("click", toggleFooterLike);

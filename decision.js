@@ -37,6 +37,14 @@ const priorityOptions = [
   { id: "product", label: "Product Fit" }
 ];
 
+const criterionDefinitions = {
+  "Developer Experience": "How quickly a team can understand, build, debug, and maintain workflows in this framework.",
+  "Agent Capabilities": "How strong the framework is at orchestration patterns like branching, review loops, tool use, and multi-agent coordination.",
+  "Context & Memory": "How well the framework preserves state, supports checkpoints or durable memory, and avoids dropping important context.",
+  "Deployment & Hosting": "How practical the framework is to host, scale, and fit into common production environments.",
+  "Security & Compliance": "How well the framework supports governance, controls, auditable behavior, and enterprise-oriented safety requirements."
+};
+
 let selectedRuntime = "python";
 let selectedComplexity = "moderate";
 let selectedPriority = "reliability";
@@ -51,7 +59,8 @@ let decisionResults;
 let matrixSupport;
 let criteriaMatrix;
 let frameworkMetadataRow;
-let metadataBoard;
+let decisionRationaleBoard;
+let decisionTooltip;
 let footerLikeBtn;
 let footerLikeCount;
 
@@ -104,6 +113,63 @@ function scoreFramework(framework) {
 
 function orderedFrameworks() {
   return [...frameworks()].sort((a, b) => scoreFramework(b) - scoreFramework(a));
+}
+
+function criterionRank(criterion, frameworkId) {
+  const framework = frameworks().find((item) => item.id === frameworkId);
+  const higher = frameworks().filter((item) => item.criteria_scores[criterion] > framework.criteria_scores[criterion]).length;
+  return higher + 1;
+}
+
+function topCriteria(framework) {
+  return metadata.criteria
+    .map((criterion) => ({ criterion, score: framework.criteria_scores[criterion] }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 2);
+}
+
+function lowCriteria(framework) {
+  return metadata.criteria
+    .map((criterion) => ({ criterion, score: framework.criteria_scores[criterion] }))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 2);
+}
+
+function scoreBreakdown(framework) {
+  const runtimeMatch = selectedRuntime === "any" || framework.runtime === selectedRuntime;
+  const complexityMatch = framework.best_for.includes(selectedComplexity);
+  const priorityMatch = framework.best_for.includes(selectedPriority);
+  const bonusMap = {
+    speed: "Developer Experience",
+    reliability: "Context & Memory",
+    enterprise: "Security & Compliance",
+    product: "Deployment & Hosting"
+  };
+  const bonusCriterion = bonusMap[selectedPriority];
+  const bonus = framework.criteria_scores[bonusCriterion] >= 4;
+
+  return [
+    {
+      label: "Runtime match",
+      value: runtimeMatch ? "+2" : "+0",
+      detail: runtimeMatch ? `${framework.runtime} matches the selected runtime.` : `${framework.runtime} does not match the selected runtime.`
+    },
+    {
+      label: "Complexity fit",
+      value: complexityMatch ? "+2" : "+0",
+      detail: complexityMatch ? `${framework.name} is tagged for ${selectedComplexity} orchestration.` : `${framework.name} is not a primary fit for ${selectedComplexity} orchestration.`
+    },
+    {
+      label: "Priority fit",
+      value: priorityMatch ? "+2" : "+0",
+      detail: priorityMatch ? `${framework.name} is explicitly tagged for ${selectedPriority}.` : `${framework.name} is not one of the strongest fits for ${selectedPriority}.`
+    },
+    {
+      label: `${bonusCriterion} bonus`,
+      value: bonus ? "+1" : "+0",
+      detail: bonus ? `${framework.name} scores 4 or 5 on ${bonusCriterion}.` : `${framework.name} does not get the extra bonus on ${bonusCriterion}.`
+    }
+  ];
 }
 
 function metricDots(score) {
@@ -164,7 +230,23 @@ function renderRecommendations() {
           <span class="summary-pill">Match score: ${scoreFramework(framework)}</span>
           <span class="summary-pill">Best for: ${framework.best_for.join(", ")}</span>
         </div>
-        <button class="secondary-btn compact" type="button" data-framework-pick="${framework.id}">Inspect metadata</button>
+        <div class="decision-result-pills">
+          ${topCriteria(framework).map((item) => `<span class="summary-pill">Strength: ${item.criterion}</span>`).join("")}
+          ${lowCriteria(framework).map((item) => `<span class="summary-pill">Watch: ${item.criterion}</span>`).join("")}
+        </div>
+        <div class="decision-result-actions">
+          <button
+            class="secondary-btn compact"
+            type="button"
+            data-framework-pick="${framework.id}"
+            data-tooltip-title="${framework.name} · Recommendation"
+            data-tooltip-def="This card combines runtime match, orchestration fit, priority fit, and one bonus criterion tied to your selected priority."
+            data-tooltip-reason="Why it scored ${scoreFramework(framework)}: ${scoreBreakdown(framework).map((item) => `${item.label} ${item.value}`).join(', ')}."
+            data-tooltip-rank="Currently ranked ${index + 1} of ${frameworks().length} for this specific decision setup."
+            data-tooltip-strengths="${topCriteria(framework).map((item) => item.criterion).join(', ')}"
+            data-tooltip-weaknesses="${lowCriteria(framework).map((item) => item.criterion).join(', ')}">Why this fit?</button>
+          <a class="secondary-btn compact decision-link-btn" href="./index.html?framework=${framework.id}">Open in Framework Lab</a>
+        </div>
       </article>
     `)
     .join("");
@@ -173,7 +255,8 @@ function renderRecommendations() {
     button.addEventListener("click", () => {
       selectedFrameworkId = button.dataset.frameworkPick;
       renderMetadataControls();
-      renderMetadataBoard();
+      renderDecisionRationale();
+      decisionRationaleBoard.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }
@@ -194,7 +277,15 @@ function renderCriteriaMatrix() {
           <td><button class="matrix-framework-btn" type="button" data-matrix-framework="${framework.id}">${framework.name}</button></td>
           ${criteria.map((criterion) => `
             <td>
-              <div class="matrix-score-cell">
+              <div
+                class="matrix-score-cell"
+                data-tooltip-title="${framework.name} · ${criterion}"
+                data-tooltip-def="${criterionDefinitions[criterion]}"
+                data-tooltip-reason="${framework.criteria_notes[criterion]}"
+                data-tooltip-rank="Ranked ${criterionRank(criterion, framework.id)} of ${frameworks().length} in the current framework pool."
+                data-tooltip-strengths="${topCriteria(framework).map((item) => item.criterion).join(', ')}"
+                data-tooltip-weaknesses="${lowCriteria(framework).map((item) => item.criterion).join(', ')}"
+                tabindex="0">
                 <div class="noise-dot-row">${metricDots(framework.criteria_scores[criterion])}</div>
               </div>
             </td>
@@ -208,7 +299,8 @@ function renderCriteriaMatrix() {
     button.addEventListener("click", () => {
       selectedFrameworkId = button.dataset.matrixFramework;
       renderMetadataControls();
-      renderMetadataBoard();
+      renderDecisionRationale();
+      decisionRationaleBoard.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
 }
@@ -229,7 +321,7 @@ function renderMetadataControls() {
     button.addEventListener("click", () => {
       selectedFrameworkId = button.dataset.frameworkId;
       renderMetadataControls();
-      renderMetadataBoard();
+      renderDecisionRationale();
     });
   });
 }
@@ -238,39 +330,61 @@ function listMarkup(items) {
   return items.map((item) => `<span class="starter-file-chip">${item}</span>`).join("");
 }
 
-function renderMetadataBoard() {
+function renderDecisionRationale() {
   const framework = getFramework();
-  metadataBoard.innerHTML = `
+  const breakdown = scoreBreakdown(framework);
+  decisionRationaleBoard.innerHTML = `
     <article class="metadata-card" style="--framework-color:${framework.color}">
       <div class="capability-card-head">
         <div>
-          <p class="eyebrow">Context & Memory</p>
-          <h3>${framework.memory.model}</h3>
+          <p class="eyebrow">Why This Decision</p>
+          <h3>${framework.name} scores ${scoreFramework(framework)} for the current inputs</h3>
         </div>
       </div>
-      <p>${framework.criteria_notes["Context & Memory"]}</p>
-      <div class="metadata-chip-group">${listMarkup(framework.memory.strengths)}</div>
-      <p class="metadata-risk">Watchouts: ${framework.memory.risks.join(", ")}</p>
+      <div class="decision-breakdown-list">
+        ${breakdown.map((item) => `
+          <article class="decision-breakdown-row">
+            <strong>${item.label}</strong>
+            <span>${item.value}</span>
+            <p>${item.detail}</p>
+          </article>
+        `).join("")}
+      </div>
     </article>
     <article class="metadata-card" style="--framework-color:${framework.color}">
       <div class="capability-card-head">
         <div>
-          <p class="eyebrow">Deployment & Hosting</p>
-          <h3>${framework.deployment.fit}</h3>
+          <p class="eyebrow">Relative To The Pool</p>
+          <h3>Strengths and weaknesses against this framework set</h3>
         </div>
       </div>
-      <p>${framework.deployment.hosting}</p>
-      <p class="metadata-risk">Tradeoff: ${framework.deployment.tradeoff}</p>
+      <div class="metadata-chip-group">${listMarkup(topCriteria(framework).map((item) => `${item.criterion} (${item.score}/5)`))}</div>
+      <p>${framework.name}'s strongest areas in this comparison pool are ${topCriteria(framework).map((item) => item.criterion).join(" and ")}.</p>
+      <div class="metadata-chip-group">${listMarkup(lowCriteria(framework).map((item) => `${item.criterion} (${item.score}/5)`))}</div>
+      <p class="metadata-risk">Main watchouts in this pool: ${lowCriteria(framework).map((item) => item.criterion).join(" and ")}.</p>
     </article>
     <article class="metadata-card" style="--framework-color:${framework.color}">
       <div class="capability-card-head">
         <div>
-          <p class="eyebrow">Security & Compliance</p>
-          <h3>${framework.security.fit}</h3>
+          <p class="eyebrow">Context Behind The Scores</p>
+          <h3>Memory, deployment, and security at a glance</h3>
         </div>
       </div>
-      <div class="metadata-chip-group">${listMarkup(framework.security.controls)}</div>
-      <p class="metadata-risk">Tradeoff: ${framework.security.tradeoff}</p>
+      <div class="decision-context-block">
+        <span>Context & Memory</span>
+        <strong>${framework.memory.model}</strong>
+        <p>${framework.criteria_notes["Context & Memory"]}</p>
+      </div>
+      <div class="decision-context-block">
+        <span>Deployment & Hosting</span>
+        <strong>${framework.deployment.fit}</strong>
+        <p>${framework.deployment.tradeoff}</p>
+      </div>
+      <div class="decision-context-block">
+        <span>Security & Compliance</span>
+        <strong>${framework.security.fit}</strong>
+        <p>${framework.security.tradeoff}</p>
+      </div>
     </article>
   `;
 }
@@ -310,12 +424,40 @@ async function toggleFooterLike() {
   }
 }
 
+function handleDecisionTooltipHover(e) {
+  const target = e.target.closest("[data-tooltip-title]");
+  if (!target) return;
+  decisionTooltip.innerHTML = `
+    <div class="metric-tooltip-label">${target.dataset.tooltipTitle}</div>
+    <div class="metric-tooltip-def">${target.dataset.tooltipDef}</div>
+    <div class="metric-tooltip-reason">${target.dataset.tooltipReason}</div>
+    <div class="metric-tooltip-reason">${target.dataset.tooltipRank}</div>
+    <div class="metric-tooltip-reason">Strengths in pool: ${target.dataset.tooltipStrengths}</div>
+    <div class="metric-tooltip-reason">Weaknesses in pool: ${target.dataset.tooltipWeaknesses}</div>
+  `;
+  decisionTooltip.removeAttribute("hidden");
+}
+
+function handleDecisionTooltipOut(e) {
+  if (!e.relatedTarget?.closest("[data-tooltip-title]")) {
+    decisionTooltip.setAttribute("hidden", "");
+  }
+}
+
+function handleDecisionTooltipMove(e) {
+  const rect = decisionTooltip.getBoundingClientRect();
+  const x = e.clientX + 14;
+  const y = e.clientY - 36;
+  decisionTooltip.style.left = `${Math.min(x, window.innerWidth - rect.width - 16)}px`;
+  decisionTooltip.style.top = `${Math.max(4, y - rect.height)}px`;
+}
+
 function render() {
   renderControls();
   renderRecommendations();
   renderCriteriaMatrix();
   renderMetadataControls();
-  renderMetadataBoard();
+  renderDecisionRationale();
 }
 
 async function initApp() {
@@ -327,7 +469,8 @@ async function initApp() {
   matrixSupport = document.getElementById("matrix-support");
   criteriaMatrix = document.getElementById("criteria-matrix");
   frameworkMetadataRow = document.getElementById("framework-metadata-row");
-  metadataBoard = document.getElementById("metadata-board");
+  decisionRationaleBoard = document.getElementById("decision-rationale-board");
+  decisionTooltip = document.getElementById("decision-tooltip");
   footerLikeBtn = document.getElementById("footer-like-btn");
   footerLikeCount = document.getElementById("footer-like-count");
 
@@ -340,7 +483,8 @@ async function initApp() {
     matrixSupport,
     criteriaMatrix,
     frameworkMetadataRow,
-    metadataBoard,
+    decisionRationaleBoard,
+    decisionTooltip,
     footerLikeBtn,
     footerLikeCount
   ];
@@ -351,6 +495,12 @@ async function initApp() {
 
   await loadMetadata();
   footerLikeBtn.addEventListener("click", toggleFooterLike);
+  decisionResults.addEventListener("mouseover", handleDecisionTooltipHover);
+  decisionResults.addEventListener("mouseout", handleDecisionTooltipOut);
+  decisionResults.addEventListener("mousemove", handleDecisionTooltipMove);
+  criteriaMatrix.addEventListener("mouseover", handleDecisionTooltipHover);
+  criteriaMatrix.addEventListener("mouseout", handleDecisionTooltipOut);
+  criteriaMatrix.addEventListener("mousemove", handleDecisionTooltipMove);
   initTheme();
   renderFooterLike();
   fetch("/api/like")
