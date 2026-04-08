@@ -1,0 +1,307 @@
+{
+  "criteria": [
+    "Developer Experience",
+    "Agent Capabilities",
+    "Context & Memory",
+    "Deployment & Hosting",
+    "Security & Compliance"
+  ],
+  "frameworks": [
+    {
+      "id": "langgraph",
+      "name": "LangGraph",
+      "color": "#1f5f5b",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["advanced", "enterprise", "reliability"],
+      "criteria_scores": {
+        "Developer Experience": 3,
+        "Agent Capabilities": 5,
+        "Context & Memory": 5,
+        "Deployment & Hosting": 4,
+        "Security & Compliance": 4
+      },
+      "criteria_notes": {
+        "Developer Experience": "Strong primitives, but more workflow design overhead than lighter SDKs.",
+        "Agent Capabilities": "Best-in-class branching, checkpoints, review loops, and multi-step control.",
+        "Context & Memory": "Shared state plus checkpoints make long-running workflows easier to reason about.",
+        "Deployment & Hosting": "Flexible Python deployment story, but more infra decisions fall on the team.",
+        "Security & Compliance": "Strong fit for auditable flows, but enterprise controls come from your hosting choices."
+      },
+      "memory": {
+        "model": "Durable shared workflow state with checkpoint-and-resume",
+        "strengths": ["Checkpoint replay", "Shared evidence object", "Human review breakpoints"],
+        "risks": ["Graph sprawl", "State schema drift if not maintained carefully"]
+      },
+      "deployment": {
+        "fit": "Strong for Python backends, background workers, and durable orchestration services.",
+        "hosting": "Works well in containers, long-running services, and queue-backed agent systems.",
+        "tradeoff": "You get control, but you own more runtime and persistence decisions."
+      },
+      "security": {
+        "fit": "Good when you need explicit reviewer gates and auditable state transitions.",
+        "controls": ["Checkpoint review", "Deterministic stage structure", "Easier traceability"],
+        "tradeoff": "Compliance posture depends on the surrounding stack rather than the framework alone."
+      }
+    },
+    {
+      "id": "openai-agents",
+      "name": "OpenAI Agents SDK",
+      "color": "#6b4bc2",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["simple", "product", "speed"],
+      "criteria_scores": {
+        "Developer Experience": 4,
+        "Agent Capabilities": 4,
+        "Context & Memory": 3,
+        "Deployment & Hosting": 4,
+        "Security & Compliance": 3
+      },
+      "criteria_notes": {
+        "Developer Experience": "Fastest path to specialist agents, tools, and traces in one SDK.",
+        "Agent Capabilities": "Great handoffs and tool use, weaker for highly complex orchestration graphs.",
+        "Context & Memory": "Run context works well, but not as durable or explicit as checkpointed workflow state.",
+        "Deployment & Hosting": "Very straightforward for app teams shipping Python services quickly.",
+        "Security & Compliance": "Good defaults and guardrails, but less enterprise-governance depth than heavier systems."
+      },
+      "memory": {
+        "model": "Run-context and handoff-driven state",
+        "strengths": ["Clear handoff boundaries", "Simple context passing", "Good tracing"],
+        "risks": ["Summarization loss across handoffs", "Less durable than checkpointed workflow engines"]
+      },
+      "deployment": {
+        "fit": "Excellent for API apps and product teams that want to ship quickly.",
+        "hosting": "Works cleanly in Python services and common container/serverless setups.",
+        "tradeoff": "Simple to host, but complex orchestration eventually needs additional structure."
+      },
+      "security": {
+        "fit": "Solid for app-level guardrails and bounded specialist flows.",
+        "controls": ["Input/output guardrails", "Trace visibility", "Scoped tool boundaries"],
+        "tradeoff": "Enterprise review and compliance workflows need extra implementation."
+      }
+    },
+    {
+      "id": "ag2",
+      "name": "AG2",
+      "color": "#cf8f2e",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["advanced", "product"],
+      "criteria_scores": {
+        "Developer Experience": 3,
+        "Agent Capabilities": 4,
+        "Context & Memory": 2,
+        "Deployment & Hosting": 3,
+        "Security & Compliance": 2
+      },
+      "criteria_notes": {
+        "Developer Experience": "Flexible but conversation-heavy; easier to drift without strong constraints.",
+        "Agent Capabilities": "Strong for debate, role interaction, and exploratory specialist teams.",
+        "Context & Memory": "Transcript-driven memory is intuitive but easy to bury or distort over time.",
+        "Deployment & Hosting": "Deployable as Python services, but runtime behavior needs tighter production controls.",
+        "Security & Compliance": "Natural for exploration, less natural for strict enterprise governance."
+      },
+      "memory": {
+        "model": "Conversation transcript and role context",
+        "strengths": ["Natural debate", "Flexible role interaction"],
+        "risks": ["Context drift", "Long-thread ambiguity", "Weak replayability"]
+      },
+      "deployment": {
+        "fit": "Works best when experimentation and analyst-style collaboration matter more than strict determinism.",
+        "hosting": "Deployable in Python services, but production hardening matters.",
+        "tradeoff": "Conversation flexibility can become runtime unpredictability."
+      },
+      "security": {
+        "fit": "Lower fit for heavily governed production paths.",
+        "controls": ["Human review can be layered in", "Role isolation by prompt"],
+        "tradeoff": "You need to add stronger stop rules, logging, and policy controls yourself."
+      }
+    },
+    {
+      "id": "crewai",
+      "name": "CrewAI",
+      "color": "#445fbb",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["moderate", "product"],
+      "criteria_scores": {
+        "Developer Experience": 4,
+        "Agent Capabilities": 3,
+        "Context & Memory": 3,
+        "Deployment & Hosting": 4,
+        "Security & Compliance": 3
+      },
+      "criteria_notes": {
+        "Developer Experience": "Readable manager-task structure makes onboarding easier.",
+        "Agent Capabilities": "Good for role-based workflows, weaker for graph-like control and deep memory models.",
+        "Context & Memory": "Task outputs are understandable, but manager synthesis can compress nuance.",
+        "Deployment & Hosting": "Straightforward Python deployment and easy to explain to application teams.",
+        "Security & Compliance": "Reasonable with human checkpoints, but not inherently enterprise-governed."
+      },
+      "memory": {
+        "model": "Task outputs plus manager-owned synthesis",
+        "strengths": ["Readable intermediate outputs", "Checkpoint-style task review"],
+        "risks": ["Manager bottleneck", "Loss of clause-level nuance in summaries"]
+      },
+      "deployment": {
+        "fit": "Strong when teams want business-process framing without deep workflow-engine complexity.",
+        "hosting": "Good Python service fit and practical for app teams.",
+        "tradeoff": "More complex multi-agent state still needs additional design."
+      },
+      "security": {
+        "fit": "Decent for product workflows with human review points.",
+        "controls": ["Role-scoped tasks", "Manager checkpointing"],
+        "tradeoff": "Compliance and governance controls are mostly external to the framework."
+      }
+    },
+    {
+      "id": "semantic-kernel",
+      "name": "Semantic Kernel",
+      "color": "#9b4c3d",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["enterprise", "advanced", "reliability"],
+      "criteria_scores": {
+        "Developer Experience": 3,
+        "Agent Capabilities": 4,
+        "Context & Memory": 4,
+        "Deployment & Hosting": 4,
+        "Security & Compliance": 5
+      },
+      "criteria_notes": {
+        "Developer Experience": "Powerful, but heavier and broader than a focused application team may want.",
+        "Agent Capabilities": "Good governed workflows, plugin-based composition, and enterprise framing.",
+        "Context & Memory": "Shared memory and governed state models are stronger than lighter SDKs.",
+        "Deployment & Hosting": "Good fit for enterprise-controlled hosting environments.",
+        "Security & Compliance": "Best fit in the set for explicit governance, controls, and enterprise expectations."
+      },
+      "memory": {
+        "model": "Governed shared state plus plugin/context memory",
+        "strengths": ["Centralized control", "Policy-aware runtime hooks", "Better governed state handling"],
+        "risks": ["Heavier abstractions", "More platform complexity"]
+      },
+      "deployment": {
+        "fit": "Strong fit for controlled enterprise stacks and platform teams.",
+        "hosting": "Works well in managed enterprise infrastructure and internal platforms.",
+        "tradeoff": "Can feel heavy if the use case is small or fast-moving."
+      },
+      "security": {
+        "fit": "Best enterprise-governance fit among the current comparison set.",
+        "controls": ["Approval hooks", "Plugin controls", "Platform-level observability"],
+        "tradeoff": "Operational weight is the price of stronger governance."
+      }
+    },
+    {
+      "id": "llamaindex",
+      "name": "LlamaIndex",
+      "color": "#3f6b2a",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["moderate", "reliability"],
+      "criteria_scores": {
+        "Developer Experience": 3,
+        "Agent Capabilities": 4,
+        "Context & Memory": 4,
+        "Deployment & Hosting": 4,
+        "Security & Compliance": 3
+      },
+      "criteria_notes": {
+        "Developer Experience": "Good when you think in events and retrieval-heavy pipelines, but not as immediate as simpler SDKs.",
+        "Agent Capabilities": "Strong evidence pipelines, event processing, and structured workflow steps.",
+        "Context & Memory": "Event payloads and workflow state are strong for retrieval-backed systems.",
+        "Deployment & Hosting": "Practical Python hosting story for service-oriented systems.",
+        "Security & Compliance": "Reasonable, but governance needs to come from the surrounding application stack."
+      },
+      "memory": {
+        "model": "Workflow state plus event payloads",
+        "strengths": ["Serializable events", "Replayable workflow steps", "Good retrieval alignment"],
+        "risks": ["Payload fragmentation", "Implicit state loss if payloads get too thin"]
+      },
+      "deployment": {
+        "fit": "Strong for retrieval-heavy agent systems and structured evidence workflows.",
+        "hosting": "Good fit for Python services, async workers, and pipeline-oriented apps.",
+        "tradeoff": "More workflow thinking required than handoff-style SDKs."
+      },
+      "security": {
+        "fit": "Solid app-level fit but not inherently enterprise-governed.",
+        "controls": ["Typed workflow steps", "Replayable event traces"],
+        "tradeoff": "Security posture depends on application implementation and hosting."
+      }
+    },
+    {
+      "id": "mastra",
+      "name": "Mastra",
+      "color": "#0f6d90",
+      "runtime": "typescript",
+      "builder": "code-first",
+      "best_for": ["product", "speed", "moderate"],
+      "criteria_scores": {
+        "Developer Experience": 4,
+        "Agent Capabilities": 4,
+        "Context & Memory": 3,
+        "Deployment & Hosting": 4,
+        "Security & Compliance": 3
+      },
+      "criteria_notes": {
+        "Developer Experience": "Strong TypeScript ergonomics for product teams.",
+        "Agent Capabilities": "Good mix of workflows, agents, and app-facing orchestration.",
+        "Context & Memory": "Useful workflow context, but less explicit/durable than checkpoint-heavy systems.",
+        "Deployment & Hosting": "Very attractive for TypeScript app stacks and product-facing runtimes.",
+        "Security & Compliance": "Fine for product teams, but governance posture depends on implementation."
+      },
+      "memory": {
+        "model": "Workflow context and app-facing state",
+        "strengths": ["Practical product-state alignment", "Good workflow visibility"],
+        "risks": ["Branch-specific omission risk", "Less explicit long-lived memory semantics"]
+      },
+      "deployment": {
+        "fit": "Best TypeScript-native fit in the set for product-oriented teams.",
+        "hosting": "Strong fit for Node/container environments and product backend stacks.",
+        "tradeoff": "Governance discipline is more app-owned than framework-owned."
+      },
+      "security": {
+        "fit": "Good app-team fit, moderate enterprise-governance fit.",
+        "controls": ["Workflow traces", "Guardrail branches"],
+        "tradeoff": "You still need to design stronger policy boundaries yourself."
+      }
+    },
+    {
+      "id": "pydanticai",
+      "name": "PydanticAI",
+      "color": "#b34747",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["reliability", "moderate", "speed"],
+      "criteria_scores": {
+        "Developer Experience": 4,
+        "Agent Capabilities": 3,
+        "Context & Memory": 4,
+        "Deployment & Hosting": 4,
+        "Security & Compliance": 4
+      },
+      "criteria_notes": {
+        "Developer Experience": "Excellent when typed outputs and Python ergonomics matter.",
+        "Agent Capabilities": "Less opinionated on orchestration, stronger on correctness and validation.",
+        "Context & Memory": "Typed models preserve key information well, even without a heavy workflow engine.",
+        "Deployment & Hosting": "Straightforward Python deployment with strong testing ergonomics.",
+        "Security & Compliance": "Better than average thanks to schema validation and explicit output guarantees."
+      },
+      "memory": {
+        "model": "Typed result models plus validated execution state",
+        "strengths": ["Schema-preserved context", "Strong output integrity", "Good replay/testing story"],
+        "risks": ["Less topology guidance", "You still design the broader memory/orchestration model"]
+      },
+      "deployment": {
+        "fit": "Strong for Python teams prioritizing correctness and reliable structured outputs.",
+        "hosting": "Easy service deployment and excellent local/test environments.",
+        "tradeoff": "Less built-in orchestration guidance for large multi-agent systems."
+      },
+      "security": {
+        "fit": "Strong for reliability-first and validation-heavy use cases.",
+        "controls": ["Schema validation", "Typed contracts", "Deterministic testing tools"],
+        "tradeoff": "Enterprise governance still requires additional surrounding infrastructure."
+      }
+    }
+  ]
+}

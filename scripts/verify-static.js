@@ -4,12 +4,15 @@ const path = require("node:path");
 const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
 const skillsHtmlPath = path.join(root, "skills.html");
+const decisionHtmlPath = path.join(root, "decision.html");
 const cssPath = path.join(root, "styles.css");
 const jsPath = path.join(root, "app.js");
 const skillsJsPath = path.join(root, "skills.js");
+const decisionJsPath = path.join(root, "decision.js");
 const tracePath = path.join(root, "traces", "framework_traces.json");
+const metadataPath = path.join(root, "data", "framework_metadata.json");
 
-const requiredFiles = [htmlPath, skillsHtmlPath, cssPath, jsPath, skillsJsPath, tracePath];
+const requiredFiles = [htmlPath, skillsHtmlPath, decisionHtmlPath, cssPath, jsPath, skillsJsPath, decisionJsPath, tracePath, metadataPath];
 requiredFiles.forEach((filePath) => {
   if (!fs.existsSync(filePath)) {
     throw new Error(`Missing required file: ${path.basename(filePath)}`);
@@ -18,6 +21,7 @@ requiredFiles.forEach((filePath) => {
 
 const html = fs.readFileSync(htmlPath, "utf8");
 const skillsHtml = fs.readFileSync(skillsHtmlPath, "utf8");
+const decisionHtml = fs.readFileSync(decisionHtmlPath, "utf8");
 
 const requiredIds = [
   "framework-catalog-cards",
@@ -67,6 +71,27 @@ if (missingSkillsIds.length > 0) {
 
 if (!skillsHtml.includes('<script src="./skills.js" defer></script>')) {
   throw new Error("Expected deferred skills.js script tag was not found.");
+}
+
+const requiredDecisionIds = [
+  "decision-support",
+  "runtime-row",
+  "complexity-row",
+  "priority-row",
+  "decision-results",
+  "matrix-support",
+  "criteria-matrix",
+  "framework-metadata-row",
+  "metadata-board"
+];
+
+const missingDecisionIds = requiredDecisionIds.filter((id) => !decisionHtml.includes(`id="${id}"`));
+if (missingDecisionIds.length > 0) {
+  throw new Error(`Missing required decision HTML ids: ${missingDecisionIds.join(", ")}`);
+}
+
+if (!decisionHtml.includes('<script src="./decision.js" defer></script>')) {
+  throw new Error("Expected deferred decision.js script tag was not found.");
 }
 
 console.log("Static app verification passed.");

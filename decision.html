@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Claude Skills Lab</title>
+    <title>Framework Decision Lab</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -17,7 +17,7 @@
       <header class="hero">
         <div class="hero-copy">
           <div class="hero-top-row">
-            <p class="eyebrow">Claude Skills Lab</p>
+            <p class="eyebrow">Framework Decision Lab</p>
             <div class="hero-top-actions">
               <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle light/dark mode">
                 <span class="theme-toggle-icon" id="theme-toggle-icon">☾</span>
@@ -30,12 +30,12 @@
               </a>
             </div>
           </div>
-          <h1>See what changes when a framework keeps orchestration but Claude skills package the capability.</h1>
-          <p class="hero-intro">This page is intentionally separate from the framework lab. Instead of comparing orchestration shapes, it isolates a different question: what happens when the framework still owns routing and runtime state, while a Claude skill bundles the reusable policy-grounding behavior?</p>
+          <h1>Choose the right framework for your runtime, team, and production constraints.</h1>
+          <p class="hero-intro">This page complements the execution lab. Instead of asking how runs look, it asks which framework is the better fit given your language, orchestration complexity, and priorities around memory, deployment, and security.</p>
           <div class="page-nav" aria-label="Page navigation">
             <a class="page-nav-link" href="./index.html">Framework Lab</a>
-            <a class="page-nav-link active" href="./skills.html">Claude Skills Lab</a>
-            <a class="page-nav-link" href="./decision.html">Decision Lab</a>
+            <a class="page-nav-link" href="./skills.html">Claude Skills Lab</a>
+            <a class="page-nav-link active" href="./decision.html">Decision Lab</a>
           </div>
         </div>
       </header>
@@ -43,55 +43,52 @@
       <main>
         <section class="section">
           <div class="section-heading">
-            <p class="eyebrow">Framework + Skill</p>
-            <h2 id="skills-headline">How a Claude skill changes the execution shape</h2>
-            <p id="skills-support"></p>
+            <p class="eyebrow">Decision Inputs</p>
+            <h2>Start from your real constraints</h2>
+            <p id="decision-support"></p>
           </div>
-
-          <div class="skills-toolbar">
-            <div class="toolbar-group">
-              <span class="control-label">Framework</span>
-              <div class="chip-row" id="skills-framework-row"></div>
-            </div>
+          <div class="decision-controls">
+            <article class="decision-control-card">
+              <span class="control-label">Runtime</span>
+              <div class="chip-row" id="runtime-row"></div>
+            </article>
+            <article class="decision-control-card">
+              <span class="control-label">Orchestration</span>
+              <div class="chip-row" id="complexity-row"></div>
+            </article>
+            <article class="decision-control-card">
+              <span class="control-label">Priority</span>
+              <div class="chip-row" id="priority-row"></div>
+            </article>
           </div>
-        </section>
-
-        <section class="section">
-          <div class="skills-summary-grid" id="skills-summary-grid"></div>
-        </section>
-
-        <section class="section">
-          <div class="section-heading">
-            <p class="eyebrow">Execution Results</p>
-            <h2>Framework alone vs framework with Claude skill</h2>
-          </div>
-          <div class="skills-comparison-grid" id="skills-comparison-grid"></div>
         </section>
 
         <section class="section">
           <div class="section-heading">
-            <p class="eyebrow">Stage Impact</p>
-            <h2>What the framework still owns, and what the skill now packages</h2>
+            <p class="eyebrow">Recommendation</p>
+            <h2>Recommended frameworks for this setup</h2>
           </div>
-          <div class="skills-stage-board" id="skills-stage-board"></div>
+          <div class="decision-results" id="decision-results"></div>
         </section>
 
         <section class="section">
           <div class="section-heading">
-            <p class="eyebrow">Starter Pack</p>
-            <h2>Tailored starter pack for the selected framework</h2>
-            <p id="starter-pack-support"></p>
+            <p class="eyebrow">Criteria Matrix</p>
+            <h2>Compare the same decision criteria across all frameworks</h2>
+            <p id="matrix-support"></p>
           </div>
-          <div class="starter-pack-grid" id="starter-pack-grid"></div>
+          <div class="criteria-matrix-wrap">
+            <table class="criteria-matrix" id="criteria-matrix"></table>
+          </div>
         </section>
 
         <section class="section">
           <div class="section-heading">
-            <p class="eyebrow">AWS AgentCore</p>
-            <h2>How to deploy this framework-plus-skill pattern on Amazon Bedrock AgentCore</h2>
-            <p id="agentcore-support"></p>
+            <p class="eyebrow">Metadata Layer</p>
+            <h2>Memory, deployment, and security notes for the selected framework</h2>
           </div>
-          <div class="agentcore-board" id="agentcore-board"></div>
+          <div class="decision-framework-row" id="framework-metadata-row"></div>
+          <div class="metadata-board" id="metadata-board"></div>
         </section>
       </main>
 
@@ -108,6 +105,6 @@
       </footer>
     </div>
 
-    <script src="./skills.js" defer></script>
+    <script src="./decision.js" defer></script>
   </body>
 </html>

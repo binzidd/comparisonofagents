@@ -515,6 +515,127 @@ p {
   box-shadow: var(--shadow);
 }
 
+.decision-controls,
+.decision-results,
+.metadata-board {
+  display: grid;
+  gap: 16px;
+}
+
+.decision-controls {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.decision-control-card,
+.decision-result-card,
+.metadata-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--bg-card);
+}
+
+.decision-control-card {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+
+.decision-chip.active {
+  background: rgba(75, 141, 255, 0.12);
+  border-color: rgba(75, 141, 255, 0.34);
+  color: var(--text);
+}
+
+.decision-results {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.decision-result-card,
+.metadata-card {
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--framework-color, #4b8dff) 16%, transparent), transparent 30%),
+    var(--bg-card);
+}
+
+.decision-result-card.top-pick {
+  border-color: rgba(75, 141, 255, 0.34);
+  box-shadow: 0 16px 36px rgba(5, 12, 26, 0.16);
+}
+
+.decision-result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.decision-result-pills,
+.metadata-chip-group,
+.decision-framework-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.criteria-matrix-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--bg-card);
+}
+
+.criteria-matrix {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 940px;
+}
+
+.criteria-matrix th,
+.criteria-matrix td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.criteria-matrix th {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  background: var(--bg-card-str);
+}
+
+.criteria-matrix tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.matrix-framework-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.matrix-score-cell {
+  display: flex;
+  align-items: center;
+}
+
+.metadata-board {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.metadata-risk {
+  color: var(--muted);
+}
+
 .framework-skill-chip.active {
   background: color-mix(in srgb, var(--chip-color) 16%, var(--bg-card));
   border-color: color-mix(in srgb, var(--chip-color) 38%, var(--line));
@@ -2340,7 +2461,10 @@ button.step-item:hover {
   .skills-summary-grid,
   .skills-comparison-grid,
   .starter-pack-grid,
-  .agentcore-board {
+  .agentcore-board,
+  .decision-controls,
+  .decision-results,
+  .metadata-board {
     grid-template-columns: 1fr;
   }
 
