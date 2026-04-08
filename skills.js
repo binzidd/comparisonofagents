@@ -1,3 +1,26 @@
+const metricDefinitions = {
+  "Prompt Glue": {
+    definition: "How much repeated prompt text the app has to keep rewriting for the same GitHub policy task.",
+    direction: "lower",
+    scaleLabel: "1 = less repeated prompting, 5 = more repeated prompting"
+  },
+  "Tool Wiring": {
+    definition: "How much bespoke wrapper code or schema plumbing is needed to connect retrieval, review, and verdict steps.",
+    direction: "lower",
+    scaleLabel: "1 = less wiring, 5 = more wiring"
+  },
+  "Output Consistency": {
+    definition: "How reliably the run returns the same evidence packet and final answer shape for the GitHub question.",
+    direction: "higher",
+    scaleLabel: "1 = less consistent, 5 = more consistent"
+  },
+  "Reuse Across Tasks": {
+    definition: "How easily the same policy-grounding capability can be reused on the next GitHub governance or policy question.",
+    direction: "higher",
+    scaleLabel: "1 = harder to reuse, 5 = easier to reuse"
+  }
+};
+
 const frameworks = [
   {
     id: "langgraph",
@@ -28,10 +51,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 3, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Opens the graph run and seeds shared state.", skill: "Loads the reusable policy-ingestion rubric and question template." },
-      { stage: "Review", framework: "Fans out to specialists and gathers findings.", skill: "Normalizes clause extraction, evidence formatting, and citation requirements." },
-      { stage: "Challenge", framework: "Routes into a reviewer edge when needed.", skill: "Packages a fixed rebuttal checklist so reviewer behavior is reusable." },
-      { stage: "Verdict", framework: "Merges branches and emits the final answer.", skill: "Ensures the final packet keeps caveats, citations, and confidence fields." }
+      { stage: "Intake", framework: "Opens the graph run, stores the GitHub privacy question, and seeds the shared state object.", skill: "Preloads the clause checklist for sharing, retention, deletion, and user-rights language so every node starts from the same brief." },
+      { stage: "Review", framework: "Fans out to retrieval and policy-review nodes, then gathers their findings back into graph state.", skill: "Makes each node return the same packet: clause quote, clause id, plain-English takeaway, and whether it supports or weakens the draft answer." },
+      { stage: "Challenge", framework: "Routes into the reviewer edge if the evidence is weak or contradictory.", skill: "Runs the same challenge rubric every time: 'show the GitHub clause', 'flag overclaiming', and 'force a caveat if the text is ambiguous'." },
+      { stage: "Verdict", framework: "Merges the branches and emits the final cited answer.", skill: "Standardizes the final answer shape so it includes the verdict, supporting GitHub clause ids, caveats, and confidence before it leaves the graph." }
     ]
   },
   {
@@ -63,10 +86,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 3, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Creates the run context and decides the first handoff.", skill: "Prepares the shared grounding instructions and evidence schema once." },
-      { stage: "Review", framework: "Hands the case from specialist to specialist.", skill: "Makes each specialist return a normalized evidence packet." },
-      { stage: "Challenge", framework: "Passes through the reviewer handoff.", skill: "Adds the same reusable review rubric and failure criteria every time." },
-      { stage: "Verdict", framework: "Returns the final guarded answer.", skill: "Standardizes what the final answer must contain before it leaves the chain." }
+      { stage: "Intake", framework: "Creates the run context for the GitHub privacy question and selects the first specialist handoff.", skill: "Injects one shared grounding brief covering the exact clauses the chain should look for before any specialist starts." },
+      { stage: "Review", framework: "Hands the case from retrieval specialist to analyst to reviewer inside one chain.", skill: "Makes each specialist return a normalized packet with GitHub quote, citation id, and answer impact instead of free-form notes." },
+      { stage: "Challenge", framework: "Uses the reviewer handoff when the draft answer sounds risky.", skill: "Applies the same review test every run: check missing citations, challenge unsupported claims, and add caveats where GitHub's wording is narrow." },
+      { stage: "Verdict", framework: "Returns the final guarded answer from the last specialist.", skill: "Ensures the handoff chain cannot finish without a cited verdict, caveat line, and confidence score." }
     ]
   },
   {
@@ -98,10 +121,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 3, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Convenes the policy council.", skill: "Injects one reusable framing packet so the debate starts anchored." },
-      { stage: "Review", framework: "Lets specialists debate directly.", skill: "Standardizes how each speaker cites and formats evidence." },
-      { stage: "Challenge", framework: "Reviewer sharpens the discussion.", skill: "Applies the same rebuttal protocol and stop conditions each run." },
-      { stage: "Verdict", framework: "Converges the transcript into one answer.", skill: "Extracts a clean decision packet from the noisy conversation." }
+      { stage: "Intake", framework: "Convenes the policy council around the GitHub privacy question.", skill: "Starts the debate with one shared brief that defines the clauses each speaker is allowed to rely on." },
+      { stage: "Review", framework: "Lets specialists debate directly over what GitHub's policy means.", skill: "Standardizes every turn into quote, citation id, interpretation, and confidence so the debate stays evidence-led." },
+      { stage: "Challenge", framework: "Lets the reviewer sharpen or interrupt the conversation.", skill: "Uses one reusable rebuttal protocol to stop vague claims and ask for the exact GitHub clause behind them." },
+      { stage: "Verdict", framework: "Collapses the transcript into one answer.", skill: "Pulls the useful evidence out of the chat and turns it into one clean verdict packet with citations and caveats." }
     ]
   },
   {
@@ -133,10 +156,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 4, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Manager opens the task bundle.", skill: "Supplies the shared policy rubric once for all downstream tasks." },
-      { stage: "Review", framework: "Workers complete role-scoped tasks.", skill: "Keeps the evidence packet format consistent across workers." },
-      { stage: "Challenge", framework: "Manager or reviewer halts weak outputs.", skill: "Packages the reusable review checklist and missing-support rules." },
-      { stage: "Verdict", framework: "Manager assembles the recommendation.", skill: "Guarantees the final packet retains citations and caveats." }
+      { stage: "Intake", framework: "Manager opens the GitHub privacy case and assigns the first role-scoped tasks.", skill: "Supplies one shared rubric for what counts as acceptable GitHub evidence before workers start." },
+      { stage: "Review", framework: "Workers complete retrieval, analysis, and review tasks.", skill: "Keeps every worker response in the same packet format so the manager can compare findings directly." },
+      { stage: "Challenge", framework: "Manager or reviewer halts weak outputs and requests a retry.", skill: "Adds the same missing-support and overclaim checks to every review cycle." },
+      { stage: "Verdict", framework: "Manager assembles the final recommendation.", skill: "Ensures the shipped answer still contains the GitHub clause ids, caveats, and confidence line." }
     ]
   },
   {
@@ -168,10 +191,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 4, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Creates a governed case record.", skill: "Adds a reusable policy-ingestion routine inside the governed flow." },
-      { stage: "Review", framework: "Runs plugin-backed specialist checks.", skill: "Makes every specialist emit the same evidence fields." },
-      { stage: "Challenge", framework: "Applies the governance gate.", skill: "Supplies one reusable ambiguity and support checklist." },
-      { stage: "Verdict", framework: "Publishes the governed answer.", skill: "Standardizes the answer payload before approval and release." }
+      { stage: "Intake", framework: "Creates a governed case record for the GitHub privacy-policy question.", skill: "Adds one reusable intake routine that defines required clauses and evidence fields before the governed flow continues." },
+      { stage: "Review", framework: "Runs plugin-backed specialist checks under the governed workflow.", skill: "Makes every specialist emit the same GitHub evidence fields so the governance layer can inspect them cleanly." },
+      { stage: "Challenge", framework: "Applies the governance gate before approval.", skill: "Supplies one ambiguity and support checklist so risky claims about GitHub policy are blocked the same way every time." },
+      { stage: "Verdict", framework: "Publishes the governed answer after checks pass.", skill: "Standardizes the approved payload with citation ids, caveats, and confidence before release." }
     ]
   },
   {
@@ -203,10 +226,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 4, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Emits the initial case event.", skill: "Provides a reusable intake packet and retrieval rubric." },
-      { stage: "Review", framework: "Routes evidence through handlers.", skill: "Normalizes clause extraction so events stay comparable." },
-      { stage: "Challenge", framework: "Requests follow-up evidence.", skill: "Packages the same reviewer prompts and missing-proof checks." },
-      { stage: "Verdict", framework: "Aggregates the final payload.", skill: "Keeps the final answer packet stable across workflows." }
+      { stage: "Intake", framework: "Emits the first event for the GitHub privacy-policy question.", skill: "Provides a reusable intake packet listing the clauses and evidence fields every downstream handler should expect." },
+      { stage: "Review", framework: "Routes GitHub evidence through retrieval and analysis handlers.", skill: "Normalizes clause extraction so each event carries the same quote, citation id, and answer impact fields." },
+      { stage: "Challenge", framework: "Requests follow-up evidence when the payload is weak.", skill: "Packages the same missing-proof checks and reviewer prompts into every retry event." },
+      { stage: "Verdict", framework: "Aggregates the final payload into one answer.", skill: "Keeps the final verdict packet stable so it always contains the answer, citations, caveats, and confidence." }
     ]
   },
   {
@@ -238,10 +261,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 4, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Opens the workflow context.", skill: "Packages intake assumptions, retrieval rules, and expected packet fields." },
-      { stage: "Review", framework: "Runs specialist workflow steps.", skill: "Provides one shared evidence-normalization capability." },
-      { stage: "Challenge", framework: "Branches into guardrail review.", skill: "Adds a reusable reviewer policy instead of hardcoding each branch." },
-      { stage: "Verdict", framework: "Resumes and publishes the product-facing answer.", skill: "Makes the final packet reusable across multiple app surfaces." }
+      { stage: "Intake", framework: "Opens the product workflow context for the GitHub privacy question.", skill: "Packages the intake assumptions, retrieval rules, and expected GitHub evidence fields once for all workflow steps." },
+      { stage: "Review", framework: "Runs product-facing specialist steps to fetch and analyze the GitHub clauses.", skill: "Provides one shared evidence-normalization capability so every step returns the same packet." },
+      { stage: "Challenge", framework: "Branches into the guardrail review step when needed.", skill: "Adds the reusable reviewer policy instead of hardcoding GitHub-specific caveat rules in each branch." },
+      { stage: "Verdict", framework: "Resumes and publishes the product-facing answer.", skill: "Makes the final packet reusable across the UI, API, and any other surface that shows the GitHub answer." }
     ]
   },
   {
@@ -273,10 +296,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 4, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Initializes typed case models.", skill: "Adds a reusable grounding routine before the models fan out." },
-      { stage: "Review", framework: "Validates specialist outputs.", skill: "Keeps every evidence object aligned to the same reusable policy capability." },
-      { stage: "Challenge", framework: "Rejects weak or incomplete outputs.", skill: "Bundles the same missing-support and caveat checks each run." },
-      { stage: "Verdict", framework: "Emits a validated answer object.", skill: "Guarantees the reusable answer packet stays portable across typed tasks." }
+      { stage: "Intake", framework: "Initializes typed models for the GitHub privacy case.", skill: "Adds a reusable grounding routine that defines the evidence schema before the typed flow fans out." },
+      { stage: "Review", framework: "Validates specialist outputs against the typed evidence models.", skill: "Keeps every evidence object aligned to the same reusable GitHub policy capability." },
+      { stage: "Challenge", framework: "Rejects weak or incomplete outputs during validation.", skill: "Bundles the same missing-support and caveat checks before the typed verdict model can pass." },
+      { stage: "Verdict", framework: "Emits a validated answer object.", skill: "Guarantees the final answer object still carries the GitHub citations, caveats, and confidence fields needed by downstream tasks." }
     ]
   }
 ];
@@ -319,11 +342,30 @@ function getFramework(id = selectedFrameworkId) {
   return frameworks.find((item) => item.id === id) || frameworks[0];
 }
 
-function pillDots(score) {
+function metricSentiment(score, direction) {
+  if (direction === "lower") {
+    if (score <= 2) return "good";
+    if (score === 3) return "mixed";
+    return "bad";
+  }
+
+  if (score >= 4) return "good";
+  if (score === 3) return "mixed";
+  return "bad";
+}
+
+function pillDots(score, direction) {
+  const sentiment = metricSentiment(score, direction);
   return new Array(5)
     .fill(0)
-    .map((_, index) => `<span class="noise-dot ${index < score ? "active" : ""}"></span>`)
+    .map((_, index) => `<span class="noise-dot ${index < score ? `active noise-dot-${sentiment}` : ""}"></span>`)
     .join("");
+}
+
+function metricDirectionLabel(metric) {
+  return metricDefinitions[metric.label]?.direction === "lower"
+    ? "Lower is better"
+    : "Higher is better";
 }
 
 function renderFrameworkChips() {
@@ -412,19 +454,25 @@ function renderComparison() {
         <h4>Modeled Execution Delta</h4>
         <span>Before vs skill-assisted</span>
       </div>
+      <p class="skill-metric-legend">Green = favorable for this metric, amber = mixed, red = weaker.</p>
       <div class="noise-budget-grid">
         ${framework.metrics.map((metric) => `
           <article class="skill-metric-row">
-            <div>
+            <div class="skill-metric-copy">
               <strong>${metric.label}</strong>
+              <span class="skill-metric-direction">${metricDirectionLabel(metric)}</span>
+              <p>${metricDefinitions[metric.label].definition}</p>
+              <span class="skill-metric-scale">${metricDefinitions[metric.label].scaleLabel}</span>
             </div>
             <div class="skill-metric-compare">
               <span>Without</span>
-              <div class="noise-dot-row">${pillDots(metric.base)}</div>
+              <div class="noise-dot-row">${pillDots(metric.base, metricDefinitions[metric.label].direction)}</div>
+              <strong>${metric.base}/5</strong>
             </div>
             <div class="skill-metric-compare">
               <span>With skill</span>
-              <div class="noise-dot-row">${pillDots(metric.skill)}</div>
+              <div class="noise-dot-row">${pillDots(metric.skill, metricDefinitions[metric.label].direction)}</div>
+              <strong>${metric.skill}/5</strong>
             </div>
           </article>
         `).join("")}
