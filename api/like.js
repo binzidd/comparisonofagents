@@ -65,6 +65,24 @@ async function appendLike(repo, token, sha, currentContent) {
   return countLikes(newContent);
 }
 
+async function appendLikeWithRetry(repo, token, attempts = 3) {
+  let lastError;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      const { sha, content } = await fetchFile(repo, token);
+      return await appendLike(repo, token, sha, content);
+    } catch (error) {
+      lastError = error;
+      const message = String(error?.message || "");
+      const retryable = message.includes("GitHub PUT 409") || message.includes("GitHub PUT 422");
+      if (!retryable || attempt === attempts - 1) {
+        throw error;
+      }
+    }
+  }
+  throw lastError;
+}
+
 module.exports = async function handler(req, res) {
   corsHeaders(res);
 
@@ -93,8 +111,7 @@ module.exports = async function handler(req, res) {
       return res.status(503).json({ error: "Like tracking not configured" });
     }
     try {
-      const { sha, content } = await fetchFile(GITHUB_REPO, GITHUB_TOKEN);
-      const total = await appendLike(GITHUB_REPO, GITHUB_TOKEN, sha, content);
+      const total = await appendLikeWithRetry(GITHUB_REPO, GITHUB_TOKEN);
       return res.status(200).json({ total });
     } catch (err) {
       console.error("POST /api/like error:", err);

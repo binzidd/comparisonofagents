@@ -736,26 +736,25 @@ function renderFooterLike(serverTotal) {
 
 async function toggleFooterLike() {
   const state = likeStore.read();
-  const nowLiked = !state.liked;
+  if (state.liked) {
+    return;
+  }
 
-  if (nowLiked) {
-    const optimisticCount = state.count + 1;
-    likeStore.write({ count: optimisticCount, liked: true });
-    renderFooterLike(optimisticCount);
-    try {
-      const res = await fetch("/api/like", { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        likeStore.write({ count: data.total, liked: true });
-        renderFooterLike(data.total);
-      }
-    } catch (_error) {
-      // Keep optimistic state if the endpoint is unavailable.
+  const optimisticCount = state.count + 1;
+  likeStore.write({ count: optimisticCount, liked: true });
+  renderFooterLike(optimisticCount);
+  try {
+    const res = await fetch("/api/like", { method: "POST" });
+    if (res.ok) {
+      const data = await res.json();
+      likeStore.write({ count: data.total, liked: true });
+      renderFooterLike(data.total);
+      return;
     }
-  } else {
-    const newCount = Math.max(0, state.count - 1);
-    likeStore.write({ count: newCount, liked: false });
-    renderFooterLike(newCount);
+    throw new Error(`like POST ${res.status}`);
+  } catch (_error) {
+    likeStore.write({ count: state.count, liked: false });
+    renderFooterLike(state.count);
   }
 }
 

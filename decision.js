@@ -45,6 +45,8 @@ const criterionDefinitions = {
   "Security & Compliance": "How well the framework supports governance, controls, auditable behavior, and enterprise-oriented safety requirements."
 };
 
+const sharedScenario = "Shared scenario: answer one GitHub privacy-policy question through Intake, Review, Challenge, Synthesis, and Verdict.";
+
 let selectedRuntime = "python";
 let selectedComplexity = "moderate";
 let selectedPriority = "reliability";
@@ -193,7 +195,7 @@ function renderChipRow(root, options, selectedId, onSelect) {
 }
 
 function renderControls() {
-  decisionSupport.textContent = "This layer is driven by structured metadata rather than the execution traces. Use it to narrow the field before dropping into the execution lab.";
+  decisionSupport.textContent = `${sharedScenario} This page explains which framework is the best fit before you open the full execution trace.`;
   renderChipRow(runtimeRow, runtimeOptions, selectedRuntime, (id) => {
     selectedRuntime = id;
     render();
@@ -225,7 +227,7 @@ function renderRecommendations() {
           </div>
           <span class="capability-pattern">${framework.runtime}</span>
         </div>
-        <p>${framework.criteria_notes["Developer Experience"]}</p>
+        <p>${sharedScenario} ${framework.name} is a strong fit when ${selectedPriority} matters most.</p>
         <div class="decision-result-pills">
           <span class="summary-pill">Match score: ${scoreFramework(framework)}</span>
           <span class="summary-pill">Best for: ${framework.best_for.join(", ")}</span>
@@ -262,7 +264,7 @@ function renderRecommendations() {
 }
 
 function renderCriteriaMatrix() {
-  matrixSupport.textContent = "This matrix uses the same criteria for every framework, so you can compare them without each framework reordering the score story.";
+  matrixSupport.textContent = `${sharedScenario} Hover any score to see why it landed there and how it compares with the rest of the framework pool.`;
   const criteria = metadata.criteria;
   criteriaMatrix.innerHTML = `
     <thead>
@@ -338,7 +340,7 @@ function renderDecisionRationale() {
       <div class="capability-card-head">
         <div>
           <p class="eyebrow">Why This Decision</p>
-          <h3>${framework.name} scores ${scoreFramework(framework)} for the current inputs</h3>
+          <h3>${framework.name} scores ${scoreFramework(framework)} for this GitHub policy checker</h3>
         </div>
       </div>
       <div class="decision-breakdown-list">
@@ -355,19 +357,19 @@ function renderDecisionRationale() {
       <div class="capability-card-head">
         <div>
           <p class="eyebrow">Relative To The Pool</p>
-          <h3>Strengths and weaknesses against this framework set</h3>
+          <h3>Where it stands in this framework set</h3>
         </div>
       </div>
       <div class="metadata-chip-group">${listMarkup(topCriteria(framework).map((item) => `${item.criterion} (${item.score}/5)`))}</div>
-      <p>${framework.name}'s strongest areas in this comparison pool are ${topCriteria(framework).map((item) => item.criterion).join(" and ")}.</p>
+      <p>Best relative strengths: ${topCriteria(framework).map((item) => item.criterion).join(" and ")}.</p>
       <div class="metadata-chip-group">${listMarkup(lowCriteria(framework).map((item) => `${item.criterion} (${item.score}/5)`))}</div>
-      <p class="metadata-risk">Main watchouts in this pool: ${lowCriteria(framework).map((item) => item.criterion).join(" and ")}.</p>
+      <p class="metadata-risk">Main watchouts: ${lowCriteria(framework).map((item) => item.criterion).join(" and ")}.</p>
     </article>
     <article class="metadata-card" style="--framework-color:${framework.color}">
       <div class="capability-card-head">
         <div>
           <p class="eyebrow">Context Behind The Scores</p>
-          <h3>Memory, deployment, and security at a glance</h3>
+          <h3>What that means in this 5-stage run</h3>
         </div>
       </div>
       <div class="decision-context-block">
@@ -402,25 +404,25 @@ function renderFooterLike(serverTotal) {
 
 async function toggleFooterLike() {
   const state = likeStore.read();
-  const nowLiked = !state.liked;
-  if (nowLiked) {
-    const optimisticCount = state.count + 1;
-    likeStore.write({ count: optimisticCount, liked: true });
-    renderFooterLike(optimisticCount);
-    try {
-      const res = await fetch("/api/like", { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        likeStore.write({ count: data.total, liked: true });
-        renderFooterLike(data.total);
-      }
-    } catch (_error) {
-      // Keep optimistic state.
+  if (state.liked) {
+    return;
+  }
+
+  const optimisticCount = state.count + 1;
+  likeStore.write({ count: optimisticCount, liked: true });
+  renderFooterLike(optimisticCount);
+  try {
+    const res = await fetch("/api/like", { method: "POST" });
+    if (res.ok) {
+      const data = await res.json();
+      likeStore.write({ count: data.total, liked: true });
+      renderFooterLike(data.total);
+      return;
     }
-  } else {
-    const newCount = Math.max(0, state.count - 1);
-    likeStore.write({ count: newCount, liked: false });
-    renderFooterLike(newCount);
+    throw new Error(`like POST ${res.status}`);
+  } catch (_error) {
+    likeStore.write({ count: state.count, liked: false });
+    renderFooterLike(state.count);
   }
 }
 
