@@ -31,7 +31,7 @@
             </div>
           </div>
           <h1>Natural language to insight: the analytics agent architecture.</h1>
-          <p class="hero-intro">Pick a business question, step through the seven-stage pipeline, and see how Claude Agent SDK translates language into SQL, code, and charts — without ever loading raw data into the context window. Based on the BGL + AgentCore production pattern.</p>
+          <p class="hero-intro">Pick a product line and a business question, then step through the seven-stage pipeline. At each stage the right knowledge file — CLAUDE.md or SKILL.md — is highlighted alongside the agent action, so you can see exactly what the agent reads and why.</p>
           <div class="page-nav" aria-label="Page navigation">
             <a class="page-nav-link" href="./index.html">Framework Lab</a>
             <a class="page-nav-link" href="./skills.html">Claude Skills Lab</a>
@@ -48,28 +48,35 @@
           <div class="section-heading">
             <p class="eyebrow">Separation of Concerns</p>
             <h2>What the data layer handles vs what the agent handles</h2>
-            <p>The common anti-pattern is letting the agent handle everything: joins, aggregations, business logic, and language. The right pattern splits the work — the data platform encodes all business rules deterministically, and the agent focuses only on language and orchestration.</p>
+            <p>The common anti-pattern is letting the agent handle everything: joins, aggregations, business logic, and language. The right split — S3 + Athena for deterministic data, Claude Agent SDK for language and orchestration — keeps each layer responsible for what it does best.</p>
           </div>
           <div class="arch-layers-board" id="arch-layers-board"></div>
         </section>
 
-        <!-- ── Query Flow Simulator ─────────────────────────────────────── -->
+        <!-- ── Query Flow + Knowledge ───────────────────────────────────── -->
         <section class="section">
           <div class="section-heading">
-            <p class="eyebrow">Query Flow Simulator</p>
-            <h2>Walk through a live analytics request</h2>
-            <p>Select a business question and step through each stage of the agent pipeline — from the natural language question to the delivered insight.</p>
+            <p class="eyebrow">Query Flow · Modular Knowledge</p>
+            <h2>Pipeline and knowledge files, step by step</h2>
+            <p>Select a product line and a question. Step through the seven stages — the right CLAUDE.md or SKILL.md section surfaces alongside each agent action.</p>
           </div>
 
+          <!-- Two-group toolbar: product line + question -->
           <div class="skills-toolbar">
+            <div class="toolbar-group">
+              <span class="control-label">Product Line</span>
+              <div class="chip-row" id="product-chip-row"></div>
+            </div>
             <div class="toolbar-group">
               <span class="control-label">Business Question</span>
               <div class="chip-row" id="query-chip-row"></div>
             </div>
           </div>
 
+          <!-- Selected question card -->
           <div class="flow-question-card" id="flow-question"></div>
 
+          <!-- Stage progress pips -->
           <div class="lab-block">
             <div class="lab-block-head">
               <span class="lab-block-num">Pipeline</span>
@@ -78,8 +85,13 @@
             <div id="flow-progress" class="flow-pip-row"></div>
           </div>
 
-          <div id="flow-detail"></div>
+          <!-- Two-column: step detail | knowledge panel -->
+          <div class="flow-body-grid">
+            <div id="flow-detail"></div>
+            <aside class="flow-knowledge-panel" id="flow-knowledge" aria-label="Active knowledge file"></aside>
+          </div>
 
+          <!-- Step navigation -->
           <div class="flow-nav-row">
             <button class="secondary-btn compact" id="flow-prev-btn" type="button">Previous</button>
             <span class="flow-step-counter" id="flow-step-counter"></span>
@@ -87,30 +99,12 @@
           </div>
         </section>
 
-        <!-- ── Modular Knowledge ────────────────────────────────────────── -->
-        <section class="section">
-          <div class="section-heading">
-            <p class="eyebrow">Modular Knowledge</p>
-            <h2>CLAUDE.md and SKILL.md working together</h2>
-            <p>CLAUDE.md gives the agent global context — project structure, environment config, and SQL execution rules. SKILL.md files add domain-specific expertise per product line, loaded only when the agent detects a relevant question. Together they keep the context window efficient while providing deep coverage.</p>
-          </div>
-
-          <div class="skills-toolbar">
-            <div class="toolbar-group">
-              <span class="control-label">Product Line</span>
-              <div class="chip-row" id="knowledge-product-row"></div>
-            </div>
-          </div>
-
-          <div id="knowledge-panel"></div>
-        </section>
-
         <!-- ── AgentCore Deployment ─────────────────────────────────────── -->
         <section class="section">
           <div class="section-heading">
             <p class="eyebrow">Amazon Bedrock AgentCore</p>
             <h2>Why AgentCore for production analytics agents</h2>
-            <p>AgentCore wraps Claude Agent SDK with the stateful execution, session isolation, and identity-based access controls that financial services analytics requires. These are not optional production concerns — they are the difference between a demo and a deployed system.</p>
+            <p>AgentCore wraps Claude Agent SDK with the stateful execution, session isolation, and identity-based access controls that production analytics requires. These are not optional concerns — they are the difference between a prototype and a deployed system.</p>
           </div>
           <div class="agentcore-features-board" id="agentcore-features-board"></div>
         </section>

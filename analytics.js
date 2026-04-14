@@ -11,7 +11,7 @@ const likeStore = {
         count: Number.isFinite(Number(parsed.count)) ? Number(parsed.count) : 0,
         liked: parsed.liked === true
       };
-    } catch (_error) {
+    } catch (_) {
       return { count: 0, liked: false };
     }
   },
@@ -20,46 +20,79 @@ const likeStore = {
   }
 };
 
-// ── Data ──────────────────────────────────────────────────────────────────
+// ── Data: products ────────────────────────────────────────────────────────
+
+const products = [
+  {
+    id: "sf360",
+    name: "Simple Fund 360",
+    short: "SF360",
+    domain: "Fund administration and compliance",
+    color: "#4b8dff",
+    skillTrigger: "Questions about fund compliance, investment performance, member contributions, contribution caps, or regulatory reporting obligations",
+    tables: [
+      { name: "mart.compliance_tracking",   desc: "Per-fund compliance status with obligation tracking and breach history" },
+      { name: "mart.investment_performance", desc: "Holdings, returns, and benchmark comparisons by account and asset class" },
+      { name: "mart.member_contributions",   desc: "Contribution amounts, caps, catch-up contributions, and historical trends" },
+      { name: "mart.fund_status",            desc: "Active/inactive fund registry with administrator assignment and audit trail" }
+    ],
+    complexScenarios: [
+      "Multi-year compliance trends: join compliance_tracking with fund_status using fund_id to track cohort status transitions over time",
+      "Contribution cap breach detection: aggregate member_contributions by financial_year and member_id, then compare against cap thresholds from mart.contribution_caps"
+    ]
+  },
+  {
+    id: "cas360",
+    name: "CAS 360",
+    short: "CAS360",
+    domain: "Company and trust management",
+    color: "#7fb1ff",
+    skillTrigger: "Questions about company structures, trust deeds, filing status, shareholder records, client feedback, or advisor performance",
+    tables: [
+      { name: "mart.aggregated_customer_feedback", desc: "Sentiment-scored feedback aggregated per product and quarter with NPS and category breakdown" },
+      { name: "mart.advisor_performance",          desc: "AUM, retention rate, filing accuracy, and client satisfaction score per advisor" },
+      { name: "mart.entity_filings",               desc: "Lodgement status, due dates, overdue count, and penalty risk by entity" },
+      { name: "mart.client_retention_quarterly",   desc: "Quarterly cohort retention with churn attribution and reactivation tracking" }
+    ],
+    complexScenarios: [
+      "Advisor risk scoring: combine entity_filings (late lodgement rate) with advisor_performance (client churn rate) using advisor_id to produce a composite risk indicator",
+      "Feedback-to-churn correlation: join aggregated_customer_feedback with client_retention_quarterly on product_id and quarter to find which sentiment drops predict churn spikes"
+    ]
+  },
+  {
+    id: "smartdocs360",
+    name: "SmartDocs 360",
+    short: "SmartDocs",
+    domain: "Document intelligence and workflow automation",
+    color: "#18cdc5",
+    skillTrigger: "Questions about document processing volumes, workflow stage completions, extraction accuracy, template performance, or processing time bottlenecks",
+    tables: [
+      { name: "mart.document_processing",  desc: "Volume, accuracy, and end-to-end processing time per document type and extraction model" },
+      { name: "mart.workflow_completions", desc: "Stage-level completion rates with drop-off attribution and SLA tracking" },
+      { name: "mart.extraction_quality",   desc: "Field-level extraction confidence scores, error rates, and model version comparisons" },
+      { name: "mart.template_usage",       desc: "Template adoption counts, version history, and per-template success and failure rates" }
+    ],
+    complexScenarios: [
+      "Bottleneck detection: join workflow_completions with document_processing on workflow_id to find stage transitions with the highest average processing time",
+      "Accuracy trend: 30-day rolling average of extraction_quality.confidence grouped by document_type and extraction_model_version to detect model drift"
+    ]
+  }
+];
+
+// ── Data: queries (one product id per query) ──────────────────────────────
 
 const businessQueries = [
   {
-    id: "feedback",
-    label: "Product Feedback",
-    question: "Which products had the most negative feedback last quarter?",
-    domain: "Customer Analytics",
-    skill: "cas360",
-    skillName: "CAS 360 Data Analyst",
-    tables: ["mart.aggregated_customer_feedback", "mart.product_reviews_summary"],
-    sql: [
-      "SELECT",
-      "  product_name,",
-      "  COUNT(*)                     AS negative_reviews,",
-      "  ROUND(AVG(sentiment_score), 2) AS avg_sentiment",
-      "FROM mart.aggregated_customer_feedback",
-      "WHERE sentiment_label = 'negative'",
-      "  AND review_quarter = DATE_TRUNC('quarter',",
-      "        CURRENT_DATE - INTERVAL '3' MONTH)",
-      "GROUP BY product_name",
-      "ORDER BY negative_reviews DESC",
-      "LIMIT 10"
-    ].join("\n"),
-    resultShape: "10 rows · 3 columns",
-    visualization: "Horizontal bar chart: negative review count per product",
-    insight: "CAS 360 had 2.3× more negative feedback than average, concentrated in the billing module over the last quarter."
-  },
-  {
     id: "investment",
+    productId: "sf360",
     label: "Investment Trends",
     question: "Show me investment trends for high-net-worth accounts.",
     domain: "Investment Analytics",
-    skill: "sf360",
-    skillName: "Simple Fund 360 Data Analyst",
     tables: ["mart.investment_performance", "mart.account_tiers"],
     sql: [
       "SELECT",
       "  asset_class,",
-      "  SUM(holding_value)          AS total_value_aud,",
+      "  SUM(holding_value)          AS total_value,",
       "  AVG(return_pct)             AS avg_return,",
       "  COUNT(DISTINCT account_id)  AS account_count",
       "FROM mart.investment_performance",
@@ -67,19 +100,18 @@ const businessQueries = [
       "  AND period_month >= DATE_TRUNC('month',",
       "        CURRENT_DATE - INTERVAL '12' MONTH)",
       "GROUP BY asset_class",
-      "ORDER BY total_value_aud DESC"
+      "ORDER BY total_value DESC"
     ].join("\n"),
     resultShape: "8 rows · 4 columns",
     visualization: "Stacked area chart: holding value by asset class over 12 months",
-    insight: "Australian equities grew 18% YoY for HNW accounts; property trusts saw a 6% decline in average return."
+    insight: "Equities grew 18% YoY for high-net-worth accounts; property trusts saw a 6% decline in average return."
   },
   {
     id: "compliance",
-    label: "SMSF Compliance",
-    question: "What is the compliance rate across all active SMSF funds?",
+    productId: "sf360",
+    label: "Fund Compliance",
+    question: "What is the compliance rate across all active funds?",
     domain: "Compliance Analytics",
-    skill: "sf360",
-    skillName: "Simple Fund 360 Data Analyst",
     tables: ["mart.compliance_tracking", "mart.fund_status"],
     sql: [
       "SELECT",
@@ -100,19 +132,42 @@ const businessQueries = [
     insight: "Overall compliance rate is 94.2%. Self-managed accumulation funds lag at 89.1%, flagged for follow-up."
   },
   {
+    id: "feedback",
+    productId: "cas360",
+    label: "Product Feedback",
+    question: "Which products had the most negative feedback last quarter?",
+    domain: "Customer Analytics",
+    tables: ["mart.aggregated_customer_feedback"],
+    sql: [
+      "SELECT",
+      "  product_name,",
+      "  COUNT(*)                      AS negative_reviews,",
+      "  ROUND(AVG(sentiment_score), 2) AS avg_sentiment",
+      "FROM mart.aggregated_customer_feedback",
+      "WHERE sentiment_label = 'negative'",
+      "  AND review_quarter = DATE_TRUNC('quarter',",
+      "        CURRENT_DATE - INTERVAL '3' MONTH)",
+      "GROUP BY product_name",
+      "ORDER BY negative_reviews DESC",
+      "LIMIT 10"
+    ].join("\n"),
+    resultShape: "10 rows · 3 columns",
+    visualization: "Horizontal bar chart: negative review count per product",
+    insight: "The billing module drove 2.3× more negative feedback than any other area in the last quarter."
+  },
+  {
     id: "retention",
+    productId: "cas360",
     label: "Advisor Retention",
     question: "Which advisors have the highest client retention in Q4?",
     domain: "Advisor Analytics",
-    skill: "cas360",
-    skillName: "CAS 360 Data Analyst",
     tables: ["mart.advisor_performance", "mart.client_retention_quarterly"],
     sql: [
       "SELECT",
       "  advisor_name,",
-      "  COUNT(DISTINCT client_id)     AS active_clients,",
+      "  COUNT(DISTINCT client_id)      AS active_clients,",
       "  ROUND(retention_rate * 100, 1) AS retention_pct,",
-      "  SUM(assets_under_management)  AS total_aum",
+      "  SUM(assets_under_management)   AS total_aum",
       "FROM mart.advisor_performance",
       "WHERE quarter_label = 'Q4'",
       "  AND employment_status = 'active'",
@@ -122,10 +177,310 @@ const businessQueries = [
     resultShape: "10 rows · 4 columns",
     visualization: "Ranked table with sparklines: top 10 advisors by retention rate",
     insight: "Top 3 advisors averaged 97.4% retention and 2.8× the median AUM per client."
+  },
+  {
+    id: "processing",
+    productId: "smartdocs360",
+    label: "Processing Bottleneck",
+    question: "What is the processing time bottleneck across document types?",
+    domain: "Operational Analytics",
+    tables: ["mart.document_processing", "mart.workflow_completions"],
+    sql: [
+      "SELECT",
+      "  document_type,",
+      "  AVG(processing_time_sec)   AS avg_sec,",
+      "  MAX(processing_time_sec)   AS max_sec,",
+      "  COUNT(*)                   AS total_docs,",
+      "  SUM(CASE WHEN processing_time_sec > sla_threshold_sec",
+      "      THEN 1 ELSE 0 END)     AS sla_breaches",
+      "FROM mart.document_processing",
+      "WHERE processed_date >= CURRENT_DATE - INTERVAL '30' DAY",
+      "GROUP BY document_type",
+      "ORDER BY avg_sec DESC",
+      "LIMIT 10"
+    ].join("\n"),
+    resultShape: "10 rows · 5 columns",
+    visualization: "Bar chart: average vs max processing time with SLA breach overlay",
+    insight: "Tax return documents average 4.2× longer processing than invoices; 18% of that volume breaches SLA."
+  },
+  {
+    id: "accuracy",
+    productId: "smartdocs360",
+    label: "Extraction Accuracy",
+    question: "Which templates have the lowest extraction accuracy this month?",
+    domain: "Quality Analytics",
+    tables: ["mart.extraction_quality", "mart.template_usage"],
+    sql: [
+      "SELECT",
+      "  template_name,",
+      "  AVG(confidence_score)    AS avg_confidence,",
+      "  COUNT(*)                 AS total_extractions,",
+      "  ROUND(100.0 *",
+      "    SUM(CASE WHEN is_correct THEN 1 ELSE 0 END)",
+      "    / COUNT(*), 1)         AS accuracy_pct",
+      "FROM mart.extraction_quality",
+      "WHERE extraction_date >= DATE_TRUNC('month', CURRENT_DATE)",
+      "GROUP BY template_name",
+      "ORDER BY accuracy_pct ASC",
+      "LIMIT 10"
+    ].join("\n"),
+    resultShape: "10 rows · 4 columns",
+    visualization: "Heatmap: accuracy by template and extraction field",
+    insight: "Legacy EOFY template accuracy dropped to 71% this month — well below the 90% threshold."
   }
 ];
 
+// ── Data: architecture layers ─────────────────────────────────────────────
+
+const architectureLayers = [
+  {
+    title: "Data Foundation Layer",
+    badge: "Amazon S3 + Athena",
+    badgeColor: "#1f5f5b",
+    description: "Data is stored in S3 as partitioned Parquet files and queried via Athena external tables. Business logic — aggregations, KPI definitions, compliance rules — is encoded here before the agent ever sees the data.",
+    responsibilities: [
+      {
+        label: "Structured S3 Storage",
+        detail: "Analytic tables live in S3 as typed, partitioned Parquet files. Athena external table definitions map SQL names to S3 paths — giving the agent a clean relational interface over object storage."
+      },
+      {
+        label: "Business Rules in Views",
+        detail: "Compliance thresholds, metric calculations, and KPI definitions are encoded in Athena views and CTAS jobs — not in agent prompts. Rules cannot drift because they are not part of the language model."
+      },
+      {
+        label: "Schema Enforcement",
+        detail: "Column types and partition schemas are enforced via the Glue Data Catalog. The agent always reads typed, validated data — malformed rows are filtered at the storage layer."
+      },
+      {
+        label: "Single Source of Truth",
+        detail: "BI tools, scheduled reports, and the AI agent all query the same S3-backed Athena tables. A schema change propagates everywhere without touching any agent configuration."
+      }
+    ]
+  },
+  {
+    title: "Agent Layer",
+    badge: "Claude Agent SDK",
+    badgeColor: "#4b8dff",
+    description: "The agent handles language and orchestration only — not data transformation. It interprets questions, loads the right skill, writes basic SELECT statements, and executes Python to turn results into insights.",
+    responsibilities: [
+      {
+        label: "Language Understanding",
+        detail: "Translates natural language questions into structured data requests and identifies the right product skill to activate."
+      },
+      {
+        label: "Skill Orchestration",
+        detail: "Reads the matching SKILL.md to gain domain-specific table knowledge and complex-query guidance before writing any SQL."
+      },
+      {
+        label: "SELECT Query Generation",
+        detail: "Writes basic SELECT queries against well-structured Athena tables. Joins and aggregations are pre-encoded in the data layer — not reproduced in agent SQL."
+      },
+      {
+        label: "Code Execution",
+        detail: "Writes and runs sandboxed Python to process downloaded CSVs and generate charts — without loading any raw data into the context window."
+      }
+    ]
+  }
+];
+
+// ── Data: AgentCore features ──────────────────────────────────────────────
+
+const agentcoreFeatures = [
+  {
+    title: "Stateful Session Execution",
+    badge: "Persistence",
+    description: "Each conversation runs inside a persistent AgentCore session. The agent retains state across tool calls — downloaded CSVs, generated charts, prior query results, and conversation context all remain accessible throughout the session.",
+    impact: "A user can ask 'now break that down by quarter' and the agent refers to the same downloaded file without re-querying Athena."
+  },
+  {
+    title: "Session Isolation",
+    badge: "Security",
+    description: "Each user gets a fully isolated execution environment. No shared file system, no shared memory, and no cross-session data leakage — meeting strict data separation requirements.",
+    impact: "A user querying one account's data cannot accidentally access or affect another user's session, even under concurrent load."
+  },
+  {
+    title: "Identity-Based Access Control",
+    badge: "Compliance",
+    description: "AgentCore integrates with existing identity providers. The agent inherits the calling user's permissions so data access aligns with your existing IAM policies — no separate permission layer to build.",
+    impact: "A read-only analyst's session can only query the Athena tables they are authorized to see, enforced at the session level."
+  },
+  {
+    title: "Sandboxed Code Execution",
+    badge: "Safety",
+    description: "Python scripts the agent writes run inside a sandboxed environment. File system writes land in a defined output path. No uncontrolled network access. No persistent side effects outside the session boundary.",
+    impact: "The agent can iterate on chart styles and data transformations without any risk of touching production systems or leaking results."
+  }
+];
+
+// ── Knowledge excerpts per step ───────────────────────────────────────────
+
+function getKnowledgeExcerpt(stepIndex, product, query) {
+  const queryTables = product.tables.filter((t) => query.tables.includes(t.name));
+  const tableBlock = queryTables.length
+    ? queryTables.map((t) => `${t.name}\n  → ${t.desc}`).join("\n\n")
+    : product.tables.slice(0, 2).map((t) => `${t.name}\n  → ${t.desc}`).join("\n\n");
+
+  switch (stepIndex) {
+    case 0:
+      return {
+        active: false,
+        label: "No knowledge file loaded",
+        filePath: null,
+        note: "The agent has not yet accessed any knowledge files. It identifies the question as a data analytics request and determines the relevant product domain.",
+        code: null
+      };
+
+    case 1:
+      return {
+        active: true,
+        label: "SKILL.md · When to trigger",
+        filePath: `skills/${product.id}/SKILL.md`,
+        note: "Agent reads the trigger conditions to confirm this skill matches the question, then scans the table list to understand available data.",
+        code: [
+          `# ${product.name} Data Analyst`,
+          ``,
+          `## When to trigger`,
+          product.skillTrigger,
+          ``,
+          `## Analytic tables`,
+          ...product.tables.map((t) => `${t.name}\n  → ${t.desc}`)
+        ].join("\n")
+      };
+
+    case 2:
+      return {
+        active: true,
+        label: "SKILL.md · Analytic tables",
+        filePath: `skills/${product.id}/SKILL.md`,
+        note: "Skill maps the question to specific tables. Agent reads schema.md and sample_data.csv for each before writing SQL.",
+        code: [
+          `## Analytic tables (relevant to this query)`,
+          ``,
+          tableBlock,
+          ``,
+          `# CLAUDE.md (referenced for SQL rules)`,
+          ``,
+          `## SQL execution`,
+          `- Run SELECT queries via run_athena_query`,
+          `- Results → s3://results-bucket/queries/`,
+          `- Download CSV to /results/raw/ before analysis`
+        ].join("\n")
+      };
+
+    case 3:
+      return {
+        active: true,
+        label: "CLAUDE.md · Security",
+        filePath: "CLAUDE.md",
+        note: "The SELECT-only rule is defined globally in CLAUDE.md. The validation layer enforces it against every generated query before it reaches Athena.",
+        code: [
+          `## Security`,
+          ``,
+          `Only SELECT queries are permitted.`,
+          `The validation layer rejects any query containing`,
+          `write operations:`,
+          ``,
+          `  Blocked: DELETE · UPDATE · INSERT`,
+          `           DROP   · ALTER  · TRUNCATE`,
+          ``,
+          `If a write keyword is detected, the query is`,
+          `rejected and the agent is asked to revise.`
+        ].join("\n")
+      };
+
+    case 4:
+      return {
+        active: true,
+        label: "CLAUDE.md · SQL execution · Environments",
+        filePath: "CLAUDE.md",
+        note: "CLAUDE.md tells the agent where Athena results land in S3 and where to download the CSV — keeping large result sets off the context window.",
+        code: [
+          `## SQL execution`,
+          `- Use run_athena_query for all SELECT queries`,
+          `- Athena writes results to:`,
+          `    s3://results-bucket/queries/{query_id}.csv`,
+          `- Download CSV to /results/raw/ for analysis`,
+          `- Save final outputs to /results/output/`,
+          ``,
+          `## Environments`,
+          `- TEST: s3://analytics-test/mart/`,
+          `- PROD: s3://analytics-prod/mart/`,
+          ``,
+          `## Data folder structure`,
+          `data/`,
+          `  mart/`,
+          `    [table_name]/`,
+          `      schema.md        ← column defs`,
+          `      sample_data.csv  ← 20-row sample`,
+          `      statistics.md    ← distributions`
+        ].join("\n")
+      };
+
+    case 5:
+      return {
+        active: true,
+        label: "CLAUDE.md · Output paths",
+        filePath: "CLAUDE.md",
+        note: "Agent reads the output path from CLAUDE.md to know where to save the chart and summary so the session can serve them back to the user.",
+        code: [
+          `## Output conventions`,
+          ``,
+          `Charts  → /results/output/chart.png`,
+          `Tables  → /results/output/summary.csv`,
+          `Reports → /results/output/report.md`,
+          ``,
+          `## Python execution`,
+          `- Write scripts to /tmp/analysis.py`,
+          `- Read from /results/raw/query_result.csv`,
+          `- Sandboxed: no network access outside`,
+          `  allowed Athena and S3 endpoints`,
+          `- No persistent side effects outside /results/`
+        ].join("\n")
+      };
+
+    case 6:
+      return {
+        active: true,
+        label: "SKILL.md · Complex scenario guidance",
+        filePath: `skills/${product.id}/SKILL.md`,
+        note: "Session stays open for follow-ups. The skill's multi-step guidance applies if the user continues the conversation.",
+        code: [
+          `## Complex scenario guidance`,
+          ``,
+          ...product.complexScenarios.map((s, i) => `${i + 1}. ${s}`)
+        ].join("\n")
+      };
+
+    default:
+      return { active: false, label: null, filePath: null, note: "", code: null };
+  }
+}
+
+// ── State ─────────────────────────────────────────────────────────────────
+
+let selectedProductId = "sf360";
+let selectedQueryId = "investment";
+let currentStep = 0;
+let footerLikeBtn;
+let footerLikeCount;
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+
+function queriesForProduct(productId) {
+  return businessQueries.filter((q) => q.productId === productId);
+}
+
+function getSelectedProduct() {
+  return products.find((p) => p.id === selectedProductId) || products[0];
+}
+
+function getSelectedQuery() {
+  const available = queriesForProduct(selectedProductId);
+  return available.find((q) => q.id === selectedQueryId) || available[0];
+}
+
 function getFlowSteps(query) {
+  const product = getSelectedProduct();
   return [
     {
       number: "01",
@@ -133,16 +488,24 @@ function getFlowSteps(query) {
       who: "User → AgentCore",
       title: "Natural language question received",
       description: `"${query.question}"`,
-      agentOutput: "AgentCore opens an isolated session with identity-based access controls. Agent identifies this as a data analytics request and begins reasoning about the domain.",
+      agentOutput: "AgentCore opens an isolated session with identity-based access controls. Agent identifies this as a data analytics request and begins reasoning about the relevant product domain.",
       sql: null
     },
     {
       number: "02",
       label: "Schema Discovery",
       who: "Agent → Skills",
-      title: `${query.skillName} skill triggered`,
-      description: `Agent reads the question and triggers the ${query.skillName} skill to gain domain-specific table expertise.`,
-      agentOutput: `Skill loaded: skills/${query.skill}/SKILL.md\n\nTables identified:\n${query.tables.map(t => `  · ${t}`).join("\n")}\n\nSchema and sample data explored via CLAUDE.md data folder structure.`,
+      title: `${product.name} skill triggered`,
+      description: `Agent reads the question and triggers the ${product.name} skill to gain domain-specific table expertise.`,
+      agentOutput: [
+        `Skill loaded: skills/${product.id}/SKILL.md`,
+        ``,
+        `Tables identified:`,
+        ...query.tables.map((t) => `  · ${t}`),
+        ``,
+        `Reading schema.md and sample_data.csv for each table`,
+        `via CLAUDE.md data folder structure.`
+      ].join("\n"),
       sql: null
     },
     {
@@ -150,7 +513,7 @@ function getFlowSteps(query) {
       label: "SQL Generation",
       who: "Agent → Athena",
       title: "SELECT query written against analytic tables",
-      description: "Agent writes a SQL SELECT query targeting pre-aggregated mart tables. Business logic (joins, aggregations, KPI rules) is already encoded in the table — the agent only writes basic SELECT statements.",
+      description: "Agent writes a SQL SELECT query targeting pre-aggregated Athena tables. Joins, aggregations, and business rules are already encoded in the table — the agent only writes basic SELECT statements.",
       agentOutput: null,
       sql: query.sql
     },
@@ -159,194 +522,65 @@ function getFlowSteps(query) {
       label: "Security Validation",
       who: "Security Layer",
       title: "Query inspected before reaching Athena",
-      description: "A validation layer scans the generated SQL before execution. This prevents unintended data modification and satisfies financial services compliance requirements.",
-      agentOutput: "Validation passed.\n\nAllowed:   SELECT\nBlocked:   DELETE · UPDATE · INSERT · DROP · ALTER · TRUNCATE\n\nQuery cleared for execution.",
+      description: "A validation layer scans the generated SQL. Any query containing a write keyword is rejected before it reaches Athena.",
+      agentOutput: [
+        `Validation passed.`,
+        ``,
+        `Allowed:  SELECT`,
+        `Blocked:  DELETE · UPDATE · INSERT · DROP · ALTER · TRUNCATE`,
+        ``,
+        `Query cleared for execution.`
+      ].join("\n"),
       sql: null
     },
     {
       number: "05",
       label: "Query Execution",
       who: "Athena → S3",
-      title: "Athena runs the query; CSV result stored in S3",
-      description: "Amazon Athena executes the validated query against analytic tables. Results are written to S3 as CSV. The agent downloads the file directly to the AgentCore file system — bypassing the context window entirely to handle large result sets without hitting token limits.",
-      agentOutput: `Query result: ${query.resultShape}\n\nCSV downloaded to: /results/raw/query_result.csv\n\nContext window used for data: 0 tokens (file system bypass)`,
+      title: "Athena runs the query; result written to S3",
+      description: "Athena executes the validated query against tables stored in S3 as Parquet. Results are written back to S3 as CSV. The agent downloads the file to its local file system — bypassing the context window entirely.",
+      agentOutput: [
+        `Query result: ${query.resultShape}`,
+        ``,
+        `Athena result → s3://results-bucket/queries/result.csv`,
+        `Downloaded   → /results/raw/query_result.csv`,
+        ``,
+        `Context window tokens used for data: 0`,
+        `(file system bypass — no token limit risk)`
+      ].join("\n"),
       sql: null
     },
     {
       number: "06",
       label: "Analysis",
       who: "Agent → Python",
-      title: "Python processes the CSV and generates a visualization",
-      description: "Agent writes and executes a sandboxed Python script to analyze the result set. The script reads the CSV from the file system, performs any needed transformations, and produces the requested chart.",
-      agentOutput: `Chart produced: ${query.visualization}\n\nSaved to: /results/output/chart.png\n\nPython executed in sandboxed AgentCore environment. No production system access.`,
+      title: "Python processes the CSV and generates a chart",
+      description: "Agent writes and executes a sandboxed Python script to analyze the result set. The script reads the CSV from the file system, applies transformations, and produces the requested visualization.",
+      agentOutput: [
+        `Chart produced: ${query.visualization}`,
+        ``,
+        `Saved to: /results/output/chart.png`,
+        ``,
+        `Python executed in sandboxed AgentCore environment.`,
+        `No production system access. No cross-session state.`
+      ].join("\n"),
       sql: null
     },
     {
       number: "07",
       label: "Response",
-      who: "AgentCore → Slack",
+      who: "AgentCore → User",
       title: "Insight and chart delivered to the user",
-      description: "The chart, summary, and supporting data are formatted and returned to the user in Slack. The session stays open for follow-up questions.",
-      agentOutput: `Insight: ${query.insight}\n\nSession preserved — user can ask follow-up questions without re-querying.`,
+      description: "The chart, summary, and supporting data are formatted and returned to the user. The session stays open for follow-up questions — the agent retains all downloaded files and prior context.",
+      agentOutput: [
+        `Insight: ${query.insight}`,
+        ``,
+        `Session preserved — user can ask follow-up questions`,
+        `without re-querying Athena.`
+      ].join("\n"),
       sql: null
     }
   ];
-}
-
-const architectureLayers = [
-  {
-    id: "foundation",
-    title: "Data Foundation Layer",
-    badge: "dbt + Amazon Athena",
-    badgeColor: "#1f5f5b",
-    description: "Complex business logic lives here — handled deterministically before the agent sees any data.",
-    responsibilities: [
-      {
-        label: "Joins & Aggregations",
-        detail: "dbt models define exactly how raw tables join and aggregate — validated by the data team against known business rules."
-      },
-      {
-        label: "Business Rules & KPIs",
-        detail: "Compliance thresholds, return calculations, and metric definitions live in dbt, not in agent prompts — so they cannot drift."
-      },
-      {
-        label: "Data Quality",
-        detail: "Schema tests run on every dbt build. The agent always reads clean, tested data. Bad rows never reach the agent."
-      },
-      {
-        label: "Single Source of Truth",
-        detail: "BI dashboards, reports, and the AI agent all read the same analytic tables. One rule change in dbt propagates everywhere."
-      }
-    ]
-  },
-  {
-    id: "agent",
-    title: "Agent Layer",
-    badge: "Claude Agent SDK",
-    badgeColor: "#4b8dff",
-    description: "The agent handles language and orchestration — not data transformation. It interprets questions, selects skills, and writes simple SELECT queries.",
-    responsibilities: [
-      {
-        label: "Language Understanding",
-        detail: "Translates natural language questions into structured data requests. Identifies the right domain and skill to activate."
-      },
-      {
-        label: "Skill Orchestration",
-        detail: "Loads the matching SKILL.md to gain domain-specific table knowledge before generating any SQL."
-      },
-      {
-        label: "SELECT Query Generation",
-        detail: "Writes basic SELECT queries against well-structured analytic tables. No complex joins or business logic in the SQL."
-      },
-      {
-        label: "Code Execution",
-        detail: "Writes and runs sandboxed Python scripts to process CSVs and generate charts — without loading data into the context window."
-      }
-    ]
-  }
-];
-
-const products = [
-  {
-    id: "sf360",
-    name: "Simple Fund 360",
-    short: "SF360",
-    domain: "SMSF administration and compliance",
-    color: "#4b8dff",
-    skillTrigger: "Questions about SMSF compliance, fund performance, member contributions, contribution caps, or regulatory reporting obligations",
-    tables: [
-      { name: "mart.compliance_tracking", desc: "Per-fund compliance status with ATO obligation tracking and breach history" },
-      { name: "mart.investment_performance", desc: "Holdings, returns, and benchmark comparisons by account and asset class" },
-      { name: "mart.member_contributions", desc: "Contribution amounts, caps, catch-up contributions, and historical trends" },
-      { name: "mart.fund_status", desc: "Active/inactive fund registry with administrator assignment and audit trail" }
-    ],
-    complexScenarios: [
-      "Multi-year compliance trends: join compliance_tracking with fund_status using fund_id to track cohort status transitions over time",
-      "Contribution cap breach detection: aggregate member_contributions by financial_year and member_id, then compare against ATO cap thresholds from mart.ato_caps"
-    ]
-  },
-  {
-    id: "cas360",
-    name: "CAS 360",
-    short: "CAS360",
-    domain: "Company and trust management with ASIC compliance",
-    color: "#7fb1ff",
-    skillTrigger: "Questions about company structures, trust deeds, ASIC filing status, shareholder records, client feedback, or advisor performance metrics",
-    tables: [
-      { name: "mart.aggregated_customer_feedback", desc: "Sentiment-scored feedback aggregated per product and quarter with NPS and category breakdown" },
-      { name: "mart.advisor_performance", desc: "AUM, retention rate, filing accuracy, and client satisfaction score per advisor" },
-      { name: "mart.asic_filings", desc: "Lodgement status, due dates, overdue count, and penalty risk by entity" },
-      { name: "mart.client_retention_quarterly", desc: "Quarterly cohort retention with churn attribution and reactivation tracking" }
-    ],
-    complexScenarios: [
-      "Advisor risk scoring: combine asic_filings (late lodgement rate) with advisor_performance (client churn rate) using advisor_id to produce a composite risk indicator",
-      "Feedback-to-churn correlation: join aggregated_customer_feedback with client_retention_quarterly on product_id and quarter to identify which sentiment drops predict churn spikes"
-    ]
-  },
-  {
-    id: "smartdocs360",
-    name: "SmartDocs 360",
-    short: "SmartDocs",
-    domain: "Document intelligence and workflow automation",
-    color: "#18cdc5",
-    skillTrigger: "Questions about document processing volumes, workflow stage completion, extraction accuracy, template performance, or processing time bottlenecks",
-    tables: [
-      { name: "mart.document_processing", desc: "Volume, accuracy, and end-to-end processing time per document type and extraction model" },
-      { name: "mart.workflow_completions", desc: "Stage-level completion rates with drop-off attribution and SLA tracking" },
-      { name: "mart.extraction_quality", desc: "Field-level extraction confidence scores, error rates, and model version comparisons" },
-      { name: "mart.template_usage", desc: "Template adoption counts, version history, and per-template success and failure rates" }
-    ],
-    complexScenarios: [
-      "Bottleneck detection: join workflow_completions with document_processing on workflow_id to find which stage-to-stage transitions have the highest average processing time",
-      "Accuracy trend analysis: 30-day rolling average of extraction_quality.confidence grouped by document_type and extraction_model_version to track model drift"
-    ]
-  }
-];
-
-const agentcoreFeatures = [
-  {
-    title: "Stateful Session Execution",
-    badge: "Persistence",
-    description: "Each conversation runs inside a persistent AgentCore session. The agent retains state across tool calls — downloaded CSVs, generated charts, prior query results, and conversation context all remain accessible throughout the session.",
-    impact: "A user can ask 'now break that down by quarter' and the agent refers back to the same data without re-querying Athena."
-  },
-  {
-    title: "Session Isolation",
-    badge: "Security",
-    description: "Each user gets a fully isolated execution environment. No shared file system, no shared memory, and no cross-session data leakage — meeting the strict data separation requirements of financial services regulations.",
-    impact: "An advisor querying one client's fund data cannot accidentally access or affect another client's session, even under concurrent load."
-  },
-  {
-    title: "Identity-Based Access Control",
-    badge: "Compliance",
-    description: "AgentCore integrates with existing identity providers. The agent inherits the calling user's permissions so data access aligns with your existing IAM policies — no separate permission layer to build or maintain.",
-    impact: "A junior analyst's session can only query the analytic tables they are authorized to see, enforced at the session level, not just at the UI."
-  },
-  {
-    title: "Sandboxed Code Execution",
-    badge: "Safety",
-    description: "Python scripts the agent writes run inside a sandboxed environment on AgentCore. File system writes land in a defined output path. No uncontrolled network access. No persistent side effects outside the session boundary.",
-    impact: "The agent can experiment with data transformations and chart styles without any risk of touching production systems or leaking data across requests."
-  }
-];
-
-// ── State ─────────────────────────────────────────────────────────────────
-
-let selectedQueryId = "feedback";
-let currentStep = 0;
-let selectedProductId = "sf360";
-
-let footerLikeBtn;
-let footerLikeCount;
-
-// ── Helpers ───────────────────────────────────────────────────────────────
-
-function getSelectedQuery() {
-  return businessQueries.find((q) => q.id === selectedQueryId) || businessQueries[0];
-}
-
-function getSelectedProduct() {
-  return products.find((p) => p.id === selectedProductId) || products[0];
 }
 
 function applyTheme(theme) {
@@ -368,20 +602,45 @@ function initTheme() {
   }
 }
 
+// ── Render: product selector ──────────────────────────────────────────────
+
+function renderProductSelector() {
+  const row = document.getElementById("product-chip-row");
+  if (!row) return;
+  row.innerHTML = products
+    .map(
+      (p) => `
+    <button class="chip decision-chip ${p.id === selectedProductId ? "active" : ""}" type="button" data-id="${p.id}">
+      ${p.short}
+    </button>`
+    )
+    .join("");
+  row.querySelectorAll("[data-id]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      selectedProductId = btn.dataset.id;
+      // Reset to first query of new product
+      const available = queriesForProduct(selectedProductId);
+      selectedQueryId = available[0]?.id || selectedQueryId;
+      currentStep = 0;
+      renderProductSelector();
+      renderQuerySelector();
+      renderFlowSection();
+    });
+  });
+}
+
 // ── Render: query selector ────────────────────────────────────────────────
 
 function renderQuerySelector() {
   const row = document.getElementById("query-chip-row");
   if (!row) return;
-  row.innerHTML = businessQueries
+  const available = queriesForProduct(selectedProductId);
+  row.innerHTML = available
     .map(
       (q) => `
-    <button
-      class="chip decision-chip ${q.id === selectedQueryId ? "active" : ""}"
-      type="button"
-      data-id="${q.id}"
-    >${q.label}</button>
-  `
+    <button class="chip decision-chip ${q.id === selectedQueryId ? "active" : ""}" type="button" data-id="${q.id}">
+      ${q.label}
+    </button>`
     )
     .join("");
   row.querySelectorAll("[data-id]").forEach((btn) => {
@@ -394,25 +653,28 @@ function renderQuerySelector() {
   });
 }
 
-// ── Render: flow section ──────────────────────────────────────────────────
+// ── Render: flow section (step + knowledge panel) ─────────────────────────
 
 function renderFlowSection() {
   const query = getSelectedQuery();
+  const product = getSelectedProduct();
   const steps = getFlowSteps(query);
   const step = steps[currentStep];
+  const excerpt = getKnowledgeExcerpt(currentStep, product, query);
 
+  // Question card
   const questionEl = document.getElementById("flow-question");
   if (questionEl) {
     questionEl.innerHTML = `
-      <p class="eyebrow">${query.domain}</p>
+      <p class="eyebrow">${query.domain} · ${product.name}</p>
       <blockquote class="flow-question-text">"${query.question}"</blockquote>
       <div class="flow-meta-row">
-        <span class="capability-pattern">Skill: ${query.skillName}</span>
+        <span class="capability-pattern">Skill: ${product.name}</span>
         <span class="capability-pattern">${query.tables.length} analytic tables</span>
-      </div>
-    `;
+      </div>`;
   }
 
+  // Step progress pips
   const progress = document.getElementById("flow-progress");
   if (progress) {
     progress.innerHTML = steps
@@ -420,14 +682,10 @@ function renderFlowSection() {
         (s, i) => `
       <button
         class="flow-pip ${i === currentStep ? "active" : i < currentStep ? "done" : ""}"
-        type="button"
-        data-step="${i}"
-        title="${s.label}"
-      >
+        type="button" data-step="${i}" title="${s.label}">
         <span class="flow-pip-num">${s.number}</span>
         <span class="flow-pip-label">${s.label}</span>
-      </button>
-    `
+      </button>`
       )
       .join("");
     progress.querySelectorAll("[data-step]").forEach((btn) => {
@@ -438,6 +696,7 @@ function renderFlowSection() {
     });
   }
 
+  // Step detail
   const detail = document.getElementById("flow-detail");
   if (detail) {
     detail.innerHTML = `
@@ -451,34 +710,43 @@ function renderFlowSection() {
           </div>
         </div>
         <p class="flow-step-description">${step.description}</p>
-        ${
-          step.sql
-            ? `
+        ${step.sql ? `
           <div class="flow-step-block">
             <span class="flow-step-block-label">Generated SQL</span>
             <pre class="skill-stage-snippet"><code>${step.sql}</code></pre>
-          </div>
-        `
-            : ""
-        }
-        ${
-          step.agentOutput
-            ? `
+          </div>` : ""}
+        ${step.agentOutput ? `
           <div class="flow-step-block">
             <span class="flow-step-block-label">Agent output</span>
             <pre class="flow-agent-output">${step.agentOutput}</pre>
-          </div>
-        `
-            : ""
-        }
-      </div>
-    `;
+          </div>` : ""}
+      </div>`;
   }
 
+  // Knowledge panel
+  const knowledge = document.getElementById("flow-knowledge");
+  if (knowledge) {
+    if (!excerpt.active) {
+      knowledge.innerHTML = `
+        <div class="flow-knowledge-inactive">
+          <span class="flow-knowledge-file-label">No file loaded yet</span>
+          <p>${excerpt.note}</p>
+        </div>`;
+    } else {
+      knowledge.innerHTML = `
+        <div class="flow-knowledge-header">
+          <span class="flow-knowledge-file-label">${excerpt.label}</span>
+          ${excerpt.filePath ? `<span class="capability-pattern flow-knowledge-path">${excerpt.filePath}</span>` : ""}
+        </div>
+        <p class="flow-knowledge-note">${excerpt.note}</p>
+        ${excerpt.code ? `<pre class="skill-stage-snippet flow-knowledge-code"><code>${excerpt.code}</code></pre>` : ""}`;
+    }
+  }
+
+  // Nav buttons state
   const prevBtn = document.getElementById("flow-prev-btn");
   const nextBtn = document.getElementById("flow-next-btn");
   const counter = document.getElementById("flow-step-counter");
-
   if (prevBtn) prevBtn.disabled = currentStep === 0;
   if (nextBtn) nextBtn.disabled = currentStep === steps.length - 1;
   if (counter) counter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
@@ -489,7 +757,6 @@ function renderFlowSection() {
 function renderArchitectureLayers() {
   const board = document.getElementById("arch-layers-board");
   if (!board) return;
-
   board.innerHTML = architectureLayers
     .map(
       (layer) => `
@@ -506,113 +773,13 @@ function renderArchitectureLayers() {
           <li class="arch-layer-item">
             <strong>${r.label}</strong>
             <p>${r.detail}</p>
-          </li>
-        `
+          </li>`
           )
           .join("")}
       </ul>
-    </article>
-  `
+    </article>`
     )
     .join("");
-}
-
-// ── Render: modular knowledge ─────────────────────────────────────────────
-
-function renderKnowledge() {
-  const tabRow = document.getElementById("knowledge-product-row");
-  const panel = document.getElementById("knowledge-panel");
-  if (!tabRow || !panel) return;
-
-  const product = getSelectedProduct();
-
-  tabRow.innerHTML = products
-    .map(
-      (p) => `
-    <button
-      class="chip decision-chip ${p.id === selectedProductId ? "active" : ""}"
-      type="button"
-      data-id="${p.id}"
-    >${p.short}</button>
-  `
-    )
-    .join("");
-
-  tabRow.querySelectorAll("[data-id]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      selectedProductId = btn.dataset.id;
-      renderKnowledge();
-    });
-  });
-
-  panel.innerHTML = `
-    <div class="knowledge-grid">
-      <article class="knowledge-card">
-        <div class="knowledge-card-head">
-          <span class="eyebrow">Global Context</span>
-          <span class="capability-pattern">CLAUDE.md</span>
-        </div>
-        <p>Project-wide instructions shared by all skills. Defines the data folder structure, environment config, and how to run Athena queries.</p>
-        <pre class="skill-stage-snippet"><code># Analytics Agent — BGL Data Platform
-
-## Project context
-AI agent for querying analytic mart tables built on
-Amazon Athena and dbt. Tables are pre-aggregated and
-business-logic-complete under the \`mart.\` schema.
-
-## SQL execution
-- Use the run_athena_query tool for all SELECT queries
-- Results arrive as CSV at /results/raw/
-- Final outputs (charts, summaries) go to /results/output/
-
-## Environments
-- TEST:  athena-test.bgl.internal
-- PROD:  athena-prod.bgl.internal
-
-## Data folder structure
-data/
-  mart/
-    [table_name]/
-      schema.md        ← column definitions + data dict
-      sample_data.csv  ← 20-row representative sample
-      statistics.md    ← row counts, nulls, distributions
-
-## Security
-Only SELECT queries are permitted. The validation layer
-will reject any query containing write operations.</code></pre>
-      </article>
-
-      <article class="knowledge-card knowledge-card-accent" style="--product-color:${product.color}">
-        <div class="knowledge-card-head">
-          <span class="eyebrow">Domain Expertise · ${product.name}</span>
-          <span class="capability-pattern" style="border-color:color-mix(in srgb, ${product.color} 30%, var(--line));color:${product.color}">skills/${product.id}/SKILL.md</span>
-        </div>
-        <p>${product.name} — ${product.domain}</p>
-        <pre class="skill-stage-snippet"><code># ${product.name} Data Analyst
-
-## When to trigger
-${product.skillTrigger}
-
-## Analytic tables
-${product.tables.map((t) => `${t.name}\n  → ${t.desc}`).join("\n\n")}
-
-## Complex scenario guidance
-${product.complexScenarios.map((s, i) => `${i + 1}. ${s}`).join("\n\n")}</code></pre>
-        <div class="knowledge-tables-grid">
-          ${product.tables
-            .map(
-              (t) => `
-            <div class="knowledge-table-row">
-              <strong>${t.name}</strong>
-              <p>${t.desc}</p>
-            </div>
-          `
-            )
-            .join("")}
-        </div>
-      </article>
-    </div>
-  `;
 }
 
 // ── Render: AgentCore features ────────────────────────────────────────────
@@ -620,22 +787,20 @@ ${product.complexScenarios.map((s, i) => `${i + 1}. ${s}`).join("\n\n")}</code><
 function renderAgentcoreFeatures() {
   const board = document.getElementById("agentcore-features-board");
   if (!board) return;
-
   board.innerHTML = agentcoreFeatures
     .map(
-      (feature) => `
+      (f) => `
     <article class="agentcore-feature-card">
       <div class="agentcore-feature-head">
-        <h4>${feature.title}</h4>
-        <span class="capability-pattern">${feature.badge}</span>
+        <h4>${f.title}</h4>
+        <span class="capability-pattern">${f.badge}</span>
       </div>
-      <p>${feature.description}</p>
+      <p>${f.description}</p>
       <div class="agentcore-callout">
         <span>In practice</span>
-        <strong>${feature.impact}</strong>
+        <strong>${f.impact}</strong>
       </div>
-    </article>
-  `
+    </article>`
     )
     .join("");
 }
@@ -657,14 +822,10 @@ function toggleFooterLike() {
   const next = { liked: !state.liked, count: state.liked ? Math.max(0, state.count - 1) : state.count + 1 };
   likeStore.write(next);
   renderFooterLike();
-
   if (next.liked) {
     fetch("/api/like", { method: "POST" })
       .then((r) => r.json())
-      .then((data) => {
-        likeStore.write({ liked: true, count: data.total });
-        renderFooterLike();
-      })
+      .then((data) => { likeStore.write({ liked: true, count: data.total }); renderFooterLike(); })
       .catch(() => {});
   }
 }
@@ -672,10 +833,10 @@ function toggleFooterLike() {
 // ── Render: all ───────────────────────────────────────────────────────────
 
 function render() {
+  renderProductSelector();
   renderQuerySelector();
   renderFlowSection();
   renderArchitectureLayers();
-  renderKnowledge();
   renderAgentcoreFeatures();
 }
 
@@ -685,24 +846,18 @@ function initApp() {
   footerLikeBtn = document.getElementById("footer-like-btn");
   footerLikeCount = document.getElementById("footer-like-count");
 
-  // Flow nav buttons wired once
+  // Wire flow nav once — not inside renderFlowSection
   const prevBtn = document.getElementById("flow-prev-btn");
   const nextBtn = document.getElementById("flow-next-btn");
   if (prevBtn) {
     prevBtn.addEventListener("click", () => {
-      if (currentStep > 0) {
-        currentStep--;
-        renderFlowSection();
-      }
+      if (currentStep > 0) { currentStep--; renderFlowSection(); }
     });
   }
   if (nextBtn) {
     nextBtn.addEventListener("click", () => {
       const steps = getFlowSteps(getSelectedQuery());
-      if (currentStep < steps.length - 1) {
-        currentStep++;
-        renderFlowSection();
-      }
+      if (currentStep < steps.length - 1) { currentStep++; renderFlowSection(); }
     });
   }
 
@@ -710,14 +865,9 @@ function initApp() {
 
   initTheme();
   renderFooterLike();
-
   fetch("/api/like")
     .then((r) => r.json())
-    .then((data) => {
-      const state = likeStore.read();
-      likeStore.write({ liked: state.liked, count: data.total });
-      renderFooterLike();
-    })
+    .then((data) => { const s = likeStore.read(); likeStore.write({ liked: s.liked, count: data.total }); renderFooterLike(); })
     .catch(() => {});
 
   render();
