@@ -337,6 +337,14 @@ function getStepLayerMeta(step) {
     .filter(Boolean);
 }
 
+function makeOwnership(agent, mcp, data) {
+  return [
+    { label: "Agent", color: "#4b8dff", ...agent },
+    { label: "MCP / Gateway", color: "#b46cff", ...mcp },
+    { label: "Data Foundation", color: "#1f8f8a", ...data }
+  ];
+}
+
 // ── Knowledge excerpts per step ───────────────────────────────────────────
 
 // CLAUDE.md accent = teal, SKILL.md accent = product color
@@ -540,6 +548,20 @@ function getFlowSteps(query) {
       layer: 1,
       title: "Natural language question received",
       description: `"${query.question}"`,
+      ownership: makeOwnership(
+        {
+          status: "Active",
+          detail: "Starts the AgentCore session, interprets intent, and decides this is an analytics request."
+        },
+        {
+          status: "Idle",
+          detail: "No catalog or execution tool is called until the domain and question shape are understood."
+        },
+        {
+          status: "Idle",
+          detail: "No tables are touched yet."
+        }
+      ),
       agentOutput: "AgentCore opens an isolated session with identity-based access controls. Agent identifies this as a data analytics request and begins reasoning about the relevant product domain.",
       sql: null
     },
@@ -551,6 +573,20 @@ function getFlowSteps(query) {
       layers: [0, 1],
       title: `${product.name} skill plus governed schema tools`,
       description: `Agent reads the question and triggers the ${product.name} skill to identify the domain, then uses MCP tools behind AgentCore Gateway to discover authoritative table and column metadata.`,
+      ownership: makeOwnership(
+        {
+          status: "Active",
+          detail: "Chooses the product skill, extracts the business terms, and asks which mart tables can answer the question."
+        },
+        {
+          status: "Active",
+          detail: "AgentCore Gateway exposes catalog tools such as analytics_schema_search and analytics_table_profile."
+        },
+        {
+          status: "Active",
+          detail: "Glue/Athena catalog metadata returns table names, columns, owners, partitions, freshness, and profile stats."
+        }
+      ),
       agentOutput: [
         `Skill loaded: skills/${product.id}/SKILL.md`,
         ``,
@@ -573,6 +609,20 @@ function getFlowSteps(query) {
       layer: 1,
       title: "SELECT query written against analytic tables",
       description: "Agent writes a SQL SELECT query targeting pre-aggregated Athena tables. Joins, aggregations, and business rules are already encoded in the table — the agent only writes basic SELECT statements.",
+      ownership: makeOwnership(
+        {
+          status: "Active",
+          detail: "Composes a SELECT over the chosen mart tables using the resolved schema contract."
+        },
+        {
+          status: "Reference",
+          detail: "No fresh tool call is needed unless the agent detects an unresolved column or table ambiguity."
+        },
+        {
+          status: "Contract",
+          detail: "Pre-built views and typed columns constrain what SQL is valid."
+        }
+      ),
       agentOutput: null,
       sql: query.sql
     },
@@ -583,6 +633,20 @@ function getFlowSteps(query) {
       layer: 1,
       title: "Query inspected before reaching Athena",
       description: "A validation layer scans the generated SQL. Any query containing a write keyword is rejected before it reaches Athena.",
+      ownership: makeOwnership(
+        {
+          status: "Controlled",
+          detail: "The agent submits SQL but does not get to self-approve it."
+        },
+        {
+          status: "Bypassed",
+          detail: "Validation is a policy gate, not schema discovery."
+        },
+        {
+          status: "Protected",
+          detail: "Athena and S3 are not reached until the query passes the SELECT-only gate."
+        }
+      ),
       agentOutput: [
         `Validation passed.`,
         ``,
@@ -600,6 +664,20 @@ function getFlowSteps(query) {
       layer: 0,
       title: "Athena runs the query; result written to S3",
       description: "Athena executes the validated query against tables stored in S3 as Parquet. Results are written back to S3 as CSV. The agent downloads the file to its local file system — bypassing the context window entirely.",
+      ownership: makeOwnership(
+        {
+          status: "Orchestrates",
+          detail: "Submits the cleared SQL and downloads the result file into the session."
+        },
+        {
+          status: "Not needed",
+          detail: "The schema question is already resolved, so the gateway is not on the hot path."
+        },
+        {
+          status: "Active",
+          detail: "Athena reads S3-backed Parquet tables and writes the result set back to S3."
+        }
+      ),
       agentOutput: [
         `Query result: ${query.resultShape}`,
         ``,
@@ -618,6 +696,20 @@ function getFlowSteps(query) {
       layer: 1,
       title: "Python processes the CSV and generates a chart",
       description: "Agent writes and executes a sandboxed Python script to analyze the result set. The script reads the CSV from the file system, applies transformations, and produces the requested visualization.",
+      ownership: makeOwnership(
+        {
+          status: "Active",
+          detail: "Writes Python, reads the downloaded result, and creates the requested analysis artifact."
+        },
+        {
+          status: "Not needed",
+          detail: "No schema lookup is needed while processing the already-returned result file."
+        },
+        {
+          status: "Source file",
+          detail: "The data foundation supplied the CSV, but does not execute the local analysis code."
+        }
+      ),
       agentOutput: [
         `Chart produced: ${query.visualization}`,
         ``,
@@ -635,6 +727,20 @@ function getFlowSteps(query) {
       layer: 1,
       title: "Insight and chart delivered to the user",
       description: "The chart, summary, and supporting data are formatted and returned to the user. The session stays open for follow-up questions — the agent retains all downloaded files and prior context.",
+      ownership: makeOwnership(
+        {
+          status: "Active",
+          detail: "Explains the result, attaches outputs, and keeps session context for follow-up questions."
+        },
+        {
+          status: "Idle",
+          detail: "Gateway tools return only if the follow-up needs more schema or system context."
+        },
+        {
+          status: "Cached",
+          detail: "No re-query happens unless the user asks for a new cut of data."
+        }
+      ),
       agentOutput: [
         `Insight: ${query.insight}`,
         ``,
@@ -808,6 +914,24 @@ function renderFlowSection() {
           <span class="flow-step-layer-tag" style="--layer-tag-c:${layerColor}" title="Handled by ${layerTitle}">${layerLabel}</span>
         </div>
         <p class="flow-step-description">${step.description}</p>
+        ${step.ownership ? `
+          <div class="flow-ownership">
+            <span class="flow-step-block-label">Stage ownership</span>
+            <div class="flow-ownership-grid">
+              ${step.ownership
+                .map(
+                  (owner) => `
+                <div class="flow-ownership-item" style="--owner-c:${owner.color}">
+                  <div class="flow-ownership-head">
+                    <strong>${owner.label}</strong>
+                    <span>${owner.status}</span>
+                  </div>
+                  <p>${owner.detail}</p>
+                </div>`
+                )
+                .join("")}
+            </div>
+          </div>` : ""}
         ${step.sql ? `
           <div class="flow-step-block">
             <span class="flow-step-block-label">Generated SQL</span>

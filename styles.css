@@ -1486,6 +1486,9 @@ p {
   .agentcore-features-board {
     grid-template-columns: 1fr;
   }
+  .flow-ownership-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .agentcore-callout-grid {
@@ -1567,6 +1570,54 @@ p {
   background: color-mix(in srgb, var(--layer-tag-c, var(--primary)) 10%, var(--bg-card));
   color: var(--layer-tag-c, var(--text));
   letter-spacing: 0.01em;
+}
+
+.flow-ownership {
+  display: grid;
+  gap: 10px;
+}
+
+.flow-ownership-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.flow-ownership-item {
+  border: 1px solid color-mix(in srgb, var(--owner-c, var(--primary)) 32%, var(--line));
+  border-radius: 8px;
+  padding: 12px;
+  background: color-mix(in srgb, var(--owner-c, var(--primary)) 8%, var(--bg-card-str));
+  min-width: 0;
+}
+
+.flow-ownership-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 7px;
+}
+
+.flow-ownership-head strong {
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.flow-ownership-head span {
+  flex-shrink: 0;
+  color: var(--owner-c, var(--primary));
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.flow-ownership-item p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 /* ── Best Practices + Anti-Patterns layout ── */
