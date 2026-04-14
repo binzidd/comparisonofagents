@@ -312,6 +312,14 @@ const agentcoreFeatures = [
   }
 ];
 
+// ── Layer metadata ────────────────────────────────────────────────────────
+
+// Maps index → arch-layer-card order (must match architectureLayers array)
+const LAYERS = [
+  { index: 0, name: "Data Foundation Layer", label: "Amazon S3 + Athena", color: "#1f8f8a" },
+  { index: 1, name: "Agent Layer",           label: "Claude Agent SDK",   color: "#4b8dff" }
+];
+
 // ── Knowledge excerpts per step ───────────────────────────────────────────
 
 // CLAUDE.md accent = teal, SKILL.md accent = product color
@@ -501,6 +509,7 @@ function getFlowSteps(query) {
       number: "01",
       label: "User Request",
       who: "User → AgentCore",
+      layer: 1,
       title: "Natural language question received",
       description: `"${query.question}"`,
       agentOutput: "AgentCore opens an isolated session with identity-based access controls. Agent identifies this as a data analytics request and begins reasoning about the relevant product domain.",
@@ -510,6 +519,7 @@ function getFlowSteps(query) {
       number: "02",
       label: "Schema Discovery",
       who: "Agent → Skills",
+      layer: 1,
       title: `${product.name} skill triggered`,
       description: `Agent reads the question and triggers the ${product.name} skill to gain domain-specific table expertise.`,
       agentOutput: [
@@ -527,6 +537,7 @@ function getFlowSteps(query) {
       number: "03",
       label: "SQL Generation",
       who: "Agent → Athena",
+      layer: 1,
       title: "SELECT query written against analytic tables",
       description: "Agent writes a SQL SELECT query targeting pre-aggregated Athena tables. Joins, aggregations, and business rules are already encoded in the table — the agent only writes basic SELECT statements.",
       agentOutput: null,
@@ -536,6 +547,7 @@ function getFlowSteps(query) {
       number: "04",
       label: "Security Validation",
       who: "Security Layer",
+      layer: 1,
       title: "Query inspected before reaching Athena",
       description: "A validation layer scans the generated SQL. Any query containing a write keyword is rejected before it reaches Athena.",
       agentOutput: [
@@ -552,6 +564,7 @@ function getFlowSteps(query) {
       number: "05",
       label: "Query Execution",
       who: "Athena → S3",
+      layer: 0,
       title: "Athena runs the query; result written to S3",
       description: "Athena executes the validated query against tables stored in S3 as Parquet. Results are written back to S3 as CSV. The agent downloads the file to its local file system — bypassing the context window entirely.",
       agentOutput: [
@@ -569,6 +582,7 @@ function getFlowSteps(query) {
       number: "06",
       label: "Analysis",
       who: "Agent → Python",
+      layer: 1,
       title: "Python processes the CSV and generates a chart",
       description: "Agent writes and executes a sandboxed Python script to analyze the result set. The script reads the CSV from the file system, applies transformations, and produces the requested visualization.",
       agentOutput: [
@@ -585,6 +599,7 @@ function getFlowSteps(query) {
       number: "07",
       label: "Response",
       who: "AgentCore → User",
+      layer: 1,
       title: "Insight and chart delivered to the user",
       description: "The chart, summary, and supporting data are formatted and returned to the user. The session stays open for follow-up questions — the agent retains all downloaded files and prior context.",
       agentOutput: [
@@ -668,6 +683,22 @@ function renderQuerySelector() {
   });
 }
 
+// ── Layer highlight (ties Separation of Concerns to the active step) ──────
+
+function updateLayerHighlight(layerIndex) {
+  document.querySelectorAll(".arch-layer-card").forEach((card, i) => {
+    card.classList.toggle("arch-active", i === layerIndex);
+    card.classList.toggle("arch-dim", i !== layerIndex);
+  });
+  const callout = document.getElementById("layer-live-callout");
+  if (callout) {
+    const meta = LAYERS[layerIndex];
+    callout.innerHTML = `Active now: <strong>${meta.name}</strong> &mdash; ${meta.label}`;
+    callout.style.setProperty("--callout-c", meta.color);
+    callout.removeAttribute("hidden");
+  }
+}
+
 // ── Render: flow section (step + knowledge panel) ─────────────────────────
 
 function renderFlowSection() {
@@ -724,6 +755,7 @@ function renderFlowSection() {
   // ── Step detail card ──
   const detail = document.getElementById("flow-detail");
   if (detail) {
+    const layerMeta = LAYERS[step.layer];
     detail.innerHTML = `
       <div class="flow-step-card">
         <div class="flow-step-head">
@@ -733,6 +765,7 @@ function renderFlowSection() {
             <h3>${step.title}</h3>
             <p class="flow-step-who">${step.who}</p>
           </div>
+          <span class="flow-step-layer-tag" style="--layer-tag-c:${layerMeta.color}" title="Handled by ${layerMeta.name}">${layerMeta.label}</span>
         </div>
         <p class="flow-step-description">${step.description}</p>
         ${step.sql ? `
@@ -784,6 +817,9 @@ function renderFlowSection() {
   if (prevBtn) prevBtn.disabled = currentStep === 0;
   if (nextBtn) nextBtn.disabled = currentStep === steps.length - 1;
   if (counter) counter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
+
+  // ── Sync arch-layer highlight ──
+  updateLayerHighlight(step.layer);
 }
 
 // ── Render: architecture layers ───────────────────────────────────────────
@@ -839,6 +875,138 @@ function renderAgentcoreFeatures() {
     .join("");
 }
 
+// ── Data: best practices ──────────────────────────────────────────────────
+
+const bestPractices = [
+  {
+    title: "Encode business logic in the data layer",
+    principle: "Rules in Athena views, not agent prompts",
+    detail: "Compliance thresholds, KPI definitions, and metric formulas belong in Athena views and CTAS jobs. Rules encoded in the data layer are version-controlled, testable, and single-sourced across every consumer.",
+    example: "compliance_rate_pct is pre-calculated in mart.compliance_tracking — the agent SELECTs it, not computes it."
+  },
+  {
+    title: "Bypass the context window for result sets",
+    principle: "File system, not token budget",
+    detail: "Route Athena results to S3, then download to the AgentCore file system. Never paste raw query output into the prompt — large result sets cause context limit errors and make responses non-deterministic.",
+    example: "s3://results/query.csv → /results/raw/ (0 context tokens consumed for data)."
+  },
+  {
+    title: "Scope each skill to one product domain",
+    principle: "Narrow context, precise answers",
+    detail: "Keep SKILL.md files scoped to a single product line. Skills that span multiple domains force the agent to sift through irrelevant table definitions and resolve naming conflicts inconsistently.",
+    example: "skills/sf360/SKILL.md covers only fund administration — no CAS360 or SmartDocs tables."
+  },
+  {
+    title: "Gate every query through a security layer",
+    principle: "Hard block, not agent self-restriction",
+    detail: "Intercept every generated query at a dedicated validation middleware before it reaches Athena. Block write keywords unconditionally — never rely on the agent to self-restrict its SQL output.",
+    example: "Validation rejects any query containing DELETE, UPDATE, INSERT, DROP, ALTER, or TRUNCATE."
+  },
+  {
+    title: "Ground schema knowledge in static files",
+    principle: "schema.md + sample_data.csv, not live introspection",
+    detail: "Provide schema.md and sample_data.csv per table via CLAUDE.md. Avoid live DESCRIBE TABLE calls at query time — they add latency, burn Athena query budget, and create a dependency on catalog availability.",
+    example: "data/mart/compliance_tracking/schema.md is read at schema discovery, not queried live per request."
+  },
+  {
+    title: "Keep sessions open for multi-turn queries",
+    principle: "AgentCore session persistence",
+    detail: "Use AgentCore's stateful sessions to preserve downloaded files, generated charts, and conversation context across turns. Re-querying Athena on every follow-up wastes cost and latency.",
+    example: "User asks 'break that down by quarter' — agent reuses the already-downloaded CSV, no new Athena query."
+  }
+];
+
+// ── Data: anti-patterns ───────────────────────────────────────────────────
+
+const antiPatterns = [
+  {
+    title: "Loading result data into the context window",
+    signal: "Prompt contains raw CSV rows or query output",
+    detail: "Pasting Athena results directly into the prompt burns token budget, risks hitting context limits on large tables, and makes the model's answer dependent on how much data fits — not what the question needs.",
+    fix: "Download results to the AgentCore file system. Use Python to process the file without touching the context window."
+  },
+  {
+    title: "Agent writing complex joins and aggregations",
+    signal: "Agent SQL contains multi-table JOINs with inline GROUP BY logic",
+    detail: "When the agent builds joins from scratch, it duplicates business logic that belongs in the data layer. That logic drifts across sessions, cannot be audited, and is untestable outside the agent.",
+    fix: "Pre-encode joins and aggregations in Athena views. The agent writes basic SELECT statements against pre-built mart tables."
+  },
+  {
+    title: "Business rules hardcoded in prompts",
+    signal: "System prompt or skill file contains threshold values or formula definitions",
+    detail: "Encoding 'a compliance rate below 90% is a breach' in a prompt means the rule drifts from the data layer definition, lives outside version control, and must be updated manually per environment.",
+    fix: "Define the rule once in an Athena view. The agent reads the pre-calculated result — it does not recompute the threshold."
+  },
+  {
+    title: "One generic skill covering all products",
+    signal: "Single SKILL.md lists tables from multiple product lines",
+    detail: "A catch-all skill forces the agent to load irrelevant table definitions and resolve overlapping terminology across product domains. Answers become less precise and harder to debug.",
+    fix: "One SKILL.md per product domain, each triggered exclusively by question intent matching that product."
+  },
+  {
+    title: "No query validation before Athena execution",
+    signal: "Generated SQL reaches Athena without interception",
+    detail: "Trusting the agent to produce safe SQL is not a security posture. Model outputs are probabilistic — unexpected syntax, hallucinated table names, or write keywords can appear under edge conditions.",
+    fix: "Intercept every query at a dedicated middleware layer. Reject on any write keyword, log every rejection."
+  },
+  {
+    title: "Live schema introspection at query time",
+    signal: "Agent runs DESCRIBE TABLE or queries information_schema per request",
+    detail: "Running schema introspection on every request adds Athena query cost, increases p99 latency, and creates a hard dependency on catalog availability. Schema drift discovered at query time produces runtime failures.",
+    fix: "Pre-cache schema.md and sample_data.csv per table. Refresh those files on schema change events, not on user requests."
+  }
+];
+
+// ── Render: best practices + anti-patterns ────────────────────────────────
+
+function renderBestPractices() {
+  const layout = document.getElementById("practices-layout");
+  if (!layout) return;
+  layout.innerHTML = `
+    <div class="practices-col">
+      <div class="practices-col-head practices-do-head">
+        <span class="practices-col-icon">✓</span>
+        <div>
+          <p class="practices-col-title">Best Practices</p>
+          <p class="practices-col-sub">What the pattern gets right</p>
+        </div>
+      </div>
+      ${bestPractices.map((p) => `
+        <article class="practice-card">
+          <div class="practice-card-head">
+            <strong class="practice-card-title">${p.title}</strong>
+            <span class="practice-principle">${p.principle}</span>
+          </div>
+          <p class="practice-detail">${p.detail}</p>
+          <div class="practice-example">
+            <span class="practice-example-label">Example</span>
+            <span>${p.example}</span>
+          </div>
+        </article>`).join("")}
+    </div>
+    <div class="practices-col">
+      <div class="practices-col-head practices-avoid-head">
+        <span class="practices-col-icon">✗</span>
+        <div>
+          <p class="practices-col-title">Anti-Patterns</p>
+          <p class="practices-col-sub">What to avoid</p>
+        </div>
+      </div>
+      ${antiPatterns.map((a) => `
+        <article class="antipattern-card">
+          <div class="practice-card-head">
+            <strong class="practice-card-title">${a.title}</strong>
+            <span class="antipattern-signal">${a.signal}</span>
+          </div>
+          <p class="practice-detail">${a.detail}</p>
+          <div class="antipattern-fix">
+            <span class="practice-example-label">Fix</span>
+            <span>${a.fix}</span>
+          </div>
+        </article>`).join("")}
+    </div>`;
+}
+
 // ── Render: footer like ───────────────────────────────────────────────────
 
 function renderFooterLike() {
@@ -871,6 +1039,7 @@ function render() {
   renderQuerySelector();
   renderFlowSection();
   renderArchitectureLayers();
+  renderBestPractices();
   renderAgentcoreFeatures();
 }
 

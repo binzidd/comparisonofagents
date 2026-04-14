@@ -98,8 +98,19 @@
             <p class="eyebrow">Separation of Concerns</p>
             <h2>What S3 + Athena handles vs what the agent handles</h2>
             <p>The common anti-pattern is letting the agent own joins, aggregations, and business logic. The right split keeps deterministic rules in the data layer and leaves language and orchestration to the agent.</p>
+            <p class="layer-live-callout" id="layer-live-callout" hidden>Step through the pipeline above to see which layer handles each stage.</p>
           </div>
           <div class="arch-layers-board" id="arch-layers-board"></div>
+        </section>
+
+        <!-- ── Best Practices + Anti-Patterns ──────────────────────────── -->
+        <section class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Best Practices · Anti-Patterns</p>
+            <h2>What the pattern gets right, and what to avoid</h2>
+            <p>Six concrete practices that make the text-to-SQL agent pattern production-ready, paired with the anti-patterns each one prevents.</p>
+          </div>
+          <div class="practices-layout" id="practices-layout"></div>
         </section>
 
         <!-- ── AgentCore ────────────────────────────────────────────────── -->

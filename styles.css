@@ -1225,6 +1225,7 @@ p {
   display: flex;
   align-items: start;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .flow-step-num-badge {
@@ -1246,6 +1247,8 @@ p {
 .flow-step-meta {
   display: grid;
   gap: 4px;
+  flex: 1;
+  min-width: 0;
 }
 
 .flow-step-meta h3 {
@@ -1509,6 +1512,225 @@ p {
 .agentcore-callout strong {
   color: var(--text);
   line-height: 1.45;
+}
+
+/* ── Arch layer active/dim states (tied to pipeline step) ── */
+
+.arch-layer-card {
+  transition: opacity 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease, transform 0.25s ease;
+}
+
+.arch-layer-card.arch-active {
+  border-color: color-mix(in srgb, var(--layer-color, #4b8dff) 55%, var(--line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--layer-color, #4b8dff) 18%, transparent),
+              0 16px 40px rgba(0, 0, 0, 0.22);
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+.arch-layer-card.arch-dim {
+  opacity: 0.38;
+  transform: translateY(0);
+}
+
+/* ── Live layer callout in separation of concerns section ── */
+
+.layer-live-callout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--callout-c, var(--primary)) 35%, var(--line));
+  background: color-mix(in srgb, var(--callout-c, var(--primary)) 9%, var(--bg-card));
+  font-size: 0.85rem;
+  color: var(--muted);
+  transition: border-color 0.35s, background 0.35s;
+}
+
+.layer-live-callout strong {
+  color: var(--callout-c, var(--text));
+}
+
+/* ── Layer tag on step card ── */
+
+.flow-step-layer-tag {
+  flex-shrink: 0;
+  align-self: flex-start;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: "IBM Plex Sans", monospace;
+  border: 1px solid color-mix(in srgb, var(--layer-tag-c, var(--primary)) 35%, var(--line));
+  background: color-mix(in srgb, var(--layer-tag-c, var(--primary)) 10%, var(--bg-card));
+  color: var(--layer-tag-c, var(--text));
+  letter-spacing: 0.01em;
+}
+
+/* ── Best Practices + Anti-Patterns layout ── */
+
+.practices-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.practices-col {
+  display: grid;
+  gap: 12px;
+}
+
+.practices-col-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  margin-bottom: 4px;
+}
+
+.practices-do-head {
+  background: color-mix(in srgb, var(--status-safe) 8%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--status-safe) 25%, var(--line));
+}
+
+.practices-avoid-head {
+  background: color-mix(in srgb, var(--status-danger) 8%, var(--bg-card));
+  border-color: color-mix(in srgb, var(--status-danger) 22%, var(--line));
+}
+
+.practices-col-icon {
+  font-size: 1.3rem;
+  font-weight: 700;
+  line-height: 1;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.practices-do-head .practices-col-icon {
+  background: color-mix(in srgb, var(--status-safe) 16%, transparent);
+  color: var(--status-safe);
+}
+
+.practices-avoid-head .practices-col-icon {
+  background: color-mix(in srgb, var(--status-danger) 14%, transparent);
+  color: var(--status-danger);
+}
+
+.practices-col-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 2px;
+}
+
+.practices-col-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+.practice-card,
+.antipattern-card {
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px;
+  background: var(--bg-card);
+  display: grid;
+  gap: 10px;
+}
+
+.practice-card {
+  border-left: 3px solid var(--status-safe);
+}
+
+.antipattern-card {
+  border-left: 3px solid var(--status-danger);
+}
+
+.practice-card-head {
+  display: grid;
+  gap: 6px;
+}
+
+.practice-card-title {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.35;
+}
+
+.practice-principle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--status-safe);
+  font-family: "IBM Plex Sans", monospace;
+  letter-spacing: 0.01em;
+}
+
+.antipattern-signal {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--status-caution);
+  font-family: "IBM Plex Sans", monospace;
+  letter-spacing: 0.01em;
+}
+
+.practice-detail {
+  font-size: 0.86rem;
+  color: var(--muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.practice-example,
+.antipattern-fix {
+  display: grid;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.practice-example {
+  background: color-mix(in srgb, var(--status-safe) 7%, var(--bg-card-str));
+  border: 1px solid color-mix(in srgb, var(--status-safe) 18%, transparent);
+  color: var(--muted);
+}
+
+.antipattern-fix {
+  background: color-mix(in srgb, #4b8dff 7%, var(--bg-card-str));
+  border: 1px solid color-mix(in srgb, #4b8dff 18%, transparent);
+  color: var(--muted);
+}
+
+.practice-example-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--status-safe);
+  margin-bottom: 2px;
+}
+
+.antipattern-fix .practice-example-label {
+  color: #7fb1ff;
+}
+
+@media (max-width: 860px) {
+  .practices-layout {
+    grid-template-columns: 1fr;
+  }
 }
 
 .capability-board {
