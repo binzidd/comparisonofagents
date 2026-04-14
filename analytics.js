@@ -252,6 +252,10 @@ const architectureLayers = [
         detail: "Column types and partition schemas are enforced via the Glue Data Catalog. The agent always reads typed, validated data — malformed rows are filtered at the storage layer."
       },
       {
+        label: "Catalog Metadata",
+        detail: "Table names, owners, column types, freshness, and sample-safe profile stats are exposed through a governed metadata endpoint instead of being guessed from files."
+      },
+      {
         label: "Single Source of Truth",
         detail: "BI tools, scheduled reports, and the AI agent all query the same S3-backed Athena tables. A schema change propagates everywhere without touching any agent configuration."
       }
@@ -269,7 +273,7 @@ const architectureLayers = [
       },
       {
         label: "Skill Orchestration",
-        detail: "Reads the matching SKILL.md to gain domain-specific table knowledge and complex-query guidance before writing any SQL."
+        detail: "Reads the matching SKILL.md to select the right domain, then calls governed schema tools before writing any SQL."
       },
       {
         label: "SELECT Query Generation",
@@ -320,6 +324,19 @@ const LAYERS = [
   { index: 1, name: "Agent Layer",           label: "Claude Agent SDK",   color: "#4b8dff" }
 ];
 
+function getStepLayerIndexes(stepOrLayer) {
+  if (Array.isArray(stepOrLayer)) return stepOrLayer;
+  if (stepOrLayer && Array.isArray(stepOrLayer.layers)) return stepOrLayer.layers;
+  if (stepOrLayer && typeof stepOrLayer.layer === "number") return [stepOrLayer.layer];
+  return [stepOrLayer];
+}
+
+function getStepLayerMeta(step) {
+  return getStepLayerIndexes(step)
+    .map((layerIndex) => LAYERS[layerIndex])
+    .filter(Boolean);
+}
+
 // ── Knowledge excerpts per step ───────────────────────────────────────────
 
 // CLAUDE.md accent = teal, SKILL.md accent = product color
@@ -369,13 +386,21 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
         fileColor: product.color,
         sectionLabel: "Analytic tables (query-relevant)",
         filePath: `skills/${product.id}/SKILL.md`,
-        note: "Skill narrows to the tables that answer this specific question. Agent reads schema.md and sample_data.csv for each before writing any SQL.",
+        note: "Skill narrows to candidate tables, then the agent calls governed schema tools exposed through AgentCore Gateway/MCP. Cached schema docs remain a fast reference, not the authority.",
         code: [
           `## Analytic tables (relevant to this query)`,
           ``,
           tableBlock,
           ``,
-          `# Also references: CLAUDE.md`,
+          `# Also references: AgentCore Gateway tools`,
+          ``,
+          `tools/list`,
+          `  -> analytics_schema_search`,
+          `  -> analytics_table_profile`,
+          ``,
+          `tools/call analytics_schema_search`,
+          `  domain: ${product.id}`,
+          `  question: "${query.question}"`,
           ``,
           `## SQL execution`,
           `- Run SELECT queries via run_athena_query`,
@@ -429,9 +454,12 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
           ``,
           `## Data folder structure`,
           `data/mart/[table_name]/`,
-          `  schema.md        ← column defs`,
-          `  sample_data.csv  ← 20-row sample`,
-          `  statistics.md    ← distributions`
+          `  schema.md        -> cached column reference`,
+          `  statistics.md    -> profile summary`,
+          `  lineage.md       -> owner + freshness`,
+          ``,
+          `Authoritative schema discovery runs through`,
+          `AgentCore Gateway MCP tools backed by the catalog.`
         ].join("\n")
       };
 
@@ -518,18 +546,23 @@ function getFlowSteps(query) {
     {
       number: "02",
       label: "Schema Discovery",
-      who: "Agent → Skills",
+      who: "Agent -> AgentCore Gateway -> Data Catalog",
       layer: 1,
-      title: `${product.name} skill triggered`,
-      description: `Agent reads the question and triggers the ${product.name} skill to gain domain-specific table expertise.`,
+      layers: [0, 1],
+      title: `${product.name} skill plus governed schema tools`,
+      description: `Agent reads the question and triggers the ${product.name} skill to identify the domain, then uses MCP tools behind AgentCore Gateway to discover authoritative table and column metadata.`,
       agentOutput: [
         `Skill loaded: skills/${product.id}/SKILL.md`,
         ``,
-        `Tables identified:`,
+        `Candidate tables identified by skill:`,
         ...query.tables.map((t) => `  · ${t}`),
         ``,
-        `Reading schema.md and sample_data.csv for each table`,
-        `via CLAUDE.md data folder structure.`
+        `MCP tools listed through AgentCore Gateway:`,
+        `  · analytics_schema_search`,
+        `  · analytics_table_profile`,
+        ``,
+        `Data Catalog returned table owners, column types,`,
+        `freshness, partitions, and sample-safe profile stats.`
       ].join("\n"),
       sql: null
     },
@@ -685,16 +718,20 @@ function renderQuerySelector() {
 
 // ── Layer highlight (ties Separation of Concerns to the active step) ──────
 
-function updateLayerHighlight(layerIndex) {
+function updateLayerHighlight(layerInput) {
+  const activeLayers = getStepLayerIndexes(layerInput);
   document.querySelectorAll(".arch-layer-card").forEach((card, i) => {
-    card.classList.toggle("arch-active", i === layerIndex);
-    card.classList.toggle("arch-dim", i !== layerIndex);
+    const isActive = activeLayers.includes(i);
+    card.classList.toggle("arch-active", isActive);
+    card.classList.toggle("arch-dim", !isActive);
   });
   const callout = document.getElementById("layer-live-callout");
   if (callout) {
-    const meta = LAYERS[layerIndex];
-    callout.innerHTML = `Active now: <strong>${meta.name}</strong> &mdash; ${meta.label}`;
-    callout.style.setProperty("--callout-c", meta.color);
+    const metas = activeLayers.map((layerIndex) => LAYERS[layerIndex]).filter(Boolean);
+    const names = metas.map((meta) => `<strong>${meta.name}</strong>`).join(" + ");
+    const labels = metas.map((meta) => meta.label).join(" + ");
+    callout.innerHTML = `Active now: ${names} &mdash; ${labels}`;
+    callout.style.setProperty("--callout-c", metas[0]?.color || "#4b8dff");
     callout.removeAttribute("hidden");
   }
 }
@@ -755,7 +792,10 @@ function renderFlowSection() {
   // ── Step detail card ──
   const detail = document.getElementById("flow-detail");
   if (detail) {
-    const layerMeta = LAYERS[step.layer];
+    const layerMetas = getStepLayerMeta(step);
+    const layerLabel = layerMetas.map((meta) => meta.label).join(" + ");
+    const layerTitle = layerMetas.map((meta) => meta.name).join(" + ");
+    const layerColor = layerMetas[0]?.color || "#4b8dff";
     detail.innerHTML = `
       <div class="flow-step-card">
         <div class="flow-step-head">
@@ -765,7 +805,7 @@ function renderFlowSection() {
             <h3>${step.title}</h3>
             <p class="flow-step-who">${step.who}</p>
           </div>
-          <span class="flow-step-layer-tag" style="--layer-tag-c:${layerMeta.color}" title="Handled by ${layerMeta.name}">${layerMeta.label}</span>
+          <span class="flow-step-layer-tag" style="--layer-tag-c:${layerColor}" title="Handled by ${layerTitle}">${layerLabel}</span>
         </div>
         <p class="flow-step-description">${step.description}</p>
         ${step.sql ? `
@@ -819,7 +859,7 @@ function renderFlowSection() {
   if (counter) counter.textContent = `Step ${currentStep + 1} of ${steps.length}`;
 
   // ── Sync arch-layer highlight ──
-  updateLayerHighlight(step.layer);
+  updateLayerHighlight(step);
 }
 
 // ── Render: architecture layers ───────────────────────────────────────────
@@ -903,10 +943,10 @@ const bestPractices = [
     example: "Validation rejects any query containing DELETE, UPDATE, INSERT, DROP, ALTER, or TRUNCATE."
   },
   {
-    title: "Ground schema knowledge in static files",
-    principle: "schema.md + sample_data.csv, not live introspection",
-    detail: "Provide schema.md and sample_data.csv per table via CLAUDE.md. Avoid live DESCRIBE TABLE calls at query time — they add latency, burn Athena query budget, and create a dependency on catalog availability.",
-    example: "data/mart/compliance_tracking/schema.md is read at schema discovery, not queried live per request."
+    title: "Ground schema knowledge in governed metadata",
+    principle: "AgentCore Gateway/MCP tools, with cached docs as reference",
+    detail: "Expose schema search and table profile tools through AgentCore Gateway so the agent can ask how tables were identified, who owns them, when they refreshed, and which columns are valid. Keep cached schema docs for speed, but do not make sample CSVs the source of truth.",
+    example: "analytics_schema_search returns candidate mart tables, then analytics_table_profile returns columns, partitions, owners, freshness, and sample-safe stats."
   },
   {
     title: "Keep sessions open for multi-turn queries",
@@ -950,10 +990,10 @@ const antiPatterns = [
     fix: "Intercept every query at a dedicated middleware layer. Reject on any write keyword, log every rejection."
   },
   {
-    title: "Live schema introspection at query time",
-    signal: "Agent runs DESCRIBE TABLE or queries information_schema per request",
-    detail: "Running schema introspection on every request adds Athena query cost, increases p99 latency, and creates a hard dependency on catalog availability. Schema drift discovered at query time produces runtime failures.",
-    fix: "Pre-cache schema.md and sample_data.csv per table. Refresh those files on schema change events, not on user requests."
+    title: "Ungoverned schema discovery",
+    signal: "Agent infers columns from sample_data.csv or runs ad hoc DESCRIBE TABLE calls",
+    detail: "Sample rows are incomplete, can leak sensitive values, and do not answer operational questions like ownership, freshness, lineage, partitioning, or why a table was selected. Raw introspection also adds latency and cost when every request repeats it.",
+    fix: "Put a governed metadata service behind AgentCore Gateway as MCP tools. Refresh cached schema docs from catalog change events and use them as a local reference, not as the authority."
   }
 ];
 
