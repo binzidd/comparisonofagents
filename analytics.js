@@ -314,6 +314,9 @@ const agentcoreFeatures = [
 
 // ── Knowledge excerpts per step ───────────────────────────────────────────
 
+// CLAUDE.md accent = teal, SKILL.md accent = product color
+const CLAUDE_COLOR = "#18cdc5";
+
 function getKnowledgeExcerpt(stepIndex, product, query) {
   const queryTables = product.tables.filter((t) => query.tables.includes(t.name));
   const tableBlock = queryTables.length
@@ -324,18 +327,22 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
     case 0:
       return {
         active: false,
-        label: "No knowledge file loaded",
+        fileType: null,
+        fileColor: null,
+        sectionLabel: null,
         filePath: null,
-        note: "The agent has not yet accessed any knowledge files. It identifies the question as a data analytics request and determines the relevant product domain.",
+        note: "No knowledge files loaded yet. The agent identifies this as a data analytics request and determines the relevant product domain before loading any file.",
         code: null
       };
 
     case 1:
       return {
         active: true,
-        label: "SKILL.md · When to trigger",
+        fileType: "skill",
+        fileColor: product.color,
+        sectionLabel: "When to trigger · Analytic tables",
         filePath: `skills/${product.id}/SKILL.md`,
-        note: "Agent reads the trigger conditions to confirm this skill matches the question, then scans the table list to understand available data.",
+        note: "Agent reads the trigger conditions to confirm this skill matches the question, then scans the full table list to understand available data.",
         code: [
           `# ${product.name} Data Analyst`,
           ``,
@@ -350,15 +357,17 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
     case 2:
       return {
         active: true,
-        label: "SKILL.md · Analytic tables",
+        fileType: "skill",
+        fileColor: product.color,
+        sectionLabel: "Analytic tables (query-relevant)",
         filePath: `skills/${product.id}/SKILL.md`,
-        note: "Skill maps the question to specific tables. Agent reads schema.md and sample_data.csv for each before writing SQL.",
+        note: "Skill narrows to the tables that answer this specific question. Agent reads schema.md and sample_data.csv for each before writing any SQL.",
         code: [
           `## Analytic tables (relevant to this query)`,
           ``,
           tableBlock,
           ``,
-          `# CLAUDE.md (referenced for SQL rules)`,
+          `# Also references: CLAUDE.md`,
           ``,
           `## SQL execution`,
           `- Run SELECT queries via run_athena_query`,
@@ -370,30 +379,34 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
     case 3:
       return {
         active: true,
-        label: "CLAUDE.md · Security",
+        fileType: "claude",
+        fileColor: CLAUDE_COLOR,
+        sectionLabel: "Security",
         filePath: "CLAUDE.md",
         note: "The SELECT-only rule is defined globally in CLAUDE.md. The validation layer enforces it against every generated query before it reaches Athena.",
         code: [
           `## Security`,
           ``,
           `Only SELECT queries are permitted.`,
-          `The validation layer rejects any query containing`,
-          `write operations:`,
+          `The validation layer rejects any query`,
+          `containing write operations:`,
           ``,
           `  Blocked: DELETE · UPDATE · INSERT`,
           `           DROP   · ALTER  · TRUNCATE`,
           ``,
-          `If a write keyword is detected, the query is`,
-          `rejected and the agent is asked to revise.`
+          `If a write keyword is detected, the query`,
+          `is rejected and the agent must revise.`
         ].join("\n")
       };
 
     case 4:
       return {
         active: true,
-        label: "CLAUDE.md · SQL execution · Environments",
+        fileType: "claude",
+        fileColor: CLAUDE_COLOR,
+        sectionLabel: "SQL execution · Environments",
         filePath: "CLAUDE.md",
-        note: "CLAUDE.md tells the agent where Athena results land in S3 and where to download the CSV — keeping large result sets off the context window.",
+        note: "CLAUDE.md tells the agent where Athena results land in S3 and where to download the CSV — keeping large result sets entirely off the context window.",
         code: [
           `## SQL execution`,
           `- Use run_athena_query for all SELECT queries`,
@@ -407,21 +420,21 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
           `- PROD: s3://analytics-prod/mart/`,
           ``,
           `## Data folder structure`,
-          `data/`,
-          `  mart/`,
-          `    [table_name]/`,
-          `      schema.md        ← column defs`,
-          `      sample_data.csv  ← 20-row sample`,
-          `      statistics.md    ← distributions`
+          `data/mart/[table_name]/`,
+          `  schema.md        ← column defs`,
+          `  sample_data.csv  ← 20-row sample`,
+          `  statistics.md    ← distributions`
         ].join("\n")
       };
 
     case 5:
       return {
         active: true,
-        label: "CLAUDE.md · Output paths",
+        fileType: "claude",
+        fileColor: CLAUDE_COLOR,
+        sectionLabel: "Output conventions · Python execution",
         filePath: "CLAUDE.md",
-        note: "Agent reads the output path from CLAUDE.md to know where to save the chart and summary so the session can serve them back to the user.",
+        note: "Agent reads the output path from CLAUDE.md to know where to save the chart and summary so the session can return them to the user.",
         code: [
           `## Output conventions`,
           ``,
@@ -441,9 +454,11 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
     case 6:
       return {
         active: true,
-        label: "SKILL.md · Complex scenario guidance",
+        fileType: "skill",
+        fileColor: product.color,
+        sectionLabel: "Complex scenario guidance",
         filePath: `skills/${product.id}/SKILL.md`,
-        note: "Session stays open for follow-ups. The skill's multi-step guidance applies if the user continues the conversation.",
+        note: "Session stays open for follow-ups. The skill's multi-step guidance applies if the user continues the conversation with a harder question.",
         code: [
           `## Complex scenario guidance`,
           ``,
@@ -452,7 +467,7 @@ function getKnowledgeExcerpt(stepIndex, product, query) {
       };
 
     default:
-      return { active: false, label: null, filePath: null, note: "", code: null };
+      return { active: false, fileType: null, fileColor: null, sectionLabel: null, filePath: null, note: "", code: null };
   }
 }
 
@@ -660,34 +675,44 @@ function renderFlowSection() {
   const product = getSelectedProduct();
   const steps = getFlowSteps(query);
   const step = steps[currentStep];
-  const excerpt = getKnowledgeExcerpt(currentStep, product, query);
 
-  // Question card
+  // Pre-compute all excerpts so each pip gets its file-hint color
+  const allExcerpts = steps.map((_, i) => getKnowledgeExcerpt(i, product, query));
+  const excerpt = allExcerpts[currentStep];
+
+  // ── Question card ──
   const questionEl = document.getElementById("flow-question");
   if (questionEl) {
     questionEl.innerHTML = `
       <p class="eyebrow">${query.domain} · ${product.name}</p>
       <blockquote class="flow-question-text">"${query.question}"</blockquote>
       <div class="flow-meta-row">
-        <span class="capability-pattern">Skill: ${product.name}</span>
+        <span class="capability-pattern" style="border-color:color-mix(in srgb,${product.color} 30%,var(--line));color:${product.color}">
+          Skill: ${product.name}
+        </span>
         <span class="capability-pattern">${query.tables.length} analytic tables</span>
       </div>`;
   }
 
-  // Step progress pips
+  // ── Timeline pips ──
   const progress = document.getElementById("flow-progress");
   if (progress) {
-    progress.innerHTML = steps
-      .map(
-        (s, i) => `
-      <button
-        class="flow-pip ${i === currentStep ? "active" : i < currentStep ? "done" : ""}"
-        type="button" data-step="${i}" title="${s.label}">
-        <span class="flow-pip-num">${s.number}</span>
-        <span class="flow-pip-label">${s.label}</span>
-      </button>`
-      )
-      .join("");
+    const items = [];
+    steps.forEach((s, i) => {
+      const cls = i === currentStep ? "active" : i < currentStep ? "done" : "";
+      const hint = allExcerpts[i].fileColor || "";
+      const hintStyle = hint ? `background:${hint};opacity:1` : "";
+      items.push(`
+        <button class="flow-pip ${cls}" type="button" data-step="${i}">
+          <span class="flow-pip-dot">${cls === "done" ? "✓" : s.number}</span>
+          <span class="flow-pip-label">${s.label}</span>
+          <span class="flow-pip-file-hint" style="${hintStyle}" title="${allExcerpts[i].fileType === "claude" ? "CLAUDE.md" : allExcerpts[i].fileType === "skill" ? "SKILL.md" : "No file"}"></span>
+        </button>`);
+      if (i < steps.length - 1) {
+        items.push(`<div class="flow-connector ${i < currentStep ? "done" : ""}"></div>`);
+      }
+    });
+    progress.innerHTML = items.join("");
     progress.querySelectorAll("[data-step]").forEach((btn) => {
       btn.addEventListener("click", () => {
         currentStep = parseInt(btn.dataset.step, 10);
@@ -696,7 +721,7 @@ function renderFlowSection() {
     });
   }
 
-  // Step detail
+  // ── Step detail card ──
   const detail = document.getElementById("flow-detail");
   if (detail) {
     detail.innerHTML = `
@@ -723,27 +748,36 @@ function renderFlowSection() {
       </div>`;
   }
 
-  // Knowledge panel
+  // ── Knowledge panel ──
   const knowledge = document.getElementById("flow-knowledge");
   if (knowledge) {
+    const accent = excerpt.fileColor || "rgba(126,155,196,0.25)";
+    knowledge.style.setProperty("--knowledge-accent", accent);
+
     if (!excerpt.active) {
       knowledge.innerHTML = `
         <div class="flow-knowledge-inactive">
-          <span class="flow-knowledge-file-label">No file loaded yet</span>
-          <p>${excerpt.note}</p>
+          <span class="flow-knowledge-file-name" style="color:var(--muted)">No knowledge file</span>
+          <p class="flow-knowledge-note">${excerpt.note}</p>
         </div>`;
     } else {
+      const fileLabel = excerpt.fileType === "claude" ? "CLAUDE.md" : "SKILL.md";
       knowledge.innerHTML = `
         <div class="flow-knowledge-header">
-          <span class="flow-knowledge-file-label">${excerpt.label}</span>
-          ${excerpt.filePath ? `<span class="capability-pattern flow-knowledge-path">${excerpt.filePath}</span>` : ""}
+          <div class="flow-knowledge-file-top">
+            <span class="flow-knowledge-file-name">${fileLabel}</span>
+            <span class="flow-knowledge-section-name">§ ${excerpt.sectionLabel}</span>
+          </div>
+          <code class="flow-knowledge-file-path">${excerpt.filePath}</code>
         </div>
-        <p class="flow-knowledge-note">${excerpt.note}</p>
-        ${excerpt.code ? `<pre class="skill-stage-snippet flow-knowledge-code"><code>${excerpt.code}</code></pre>` : ""}`;
+        <div class="flow-knowledge-body">
+          <p class="flow-knowledge-note">${excerpt.note}</p>
+          ${excerpt.code ? `<pre class="skill-stage-snippet" style="font-size:0.76rem;line-height:1.62"><code>${excerpt.code}</code></pre>` : ""}
+        </div>`;
     }
   }
 
-  // Nav buttons state
+  // ── Nav state ──
   const prevBtn = document.getElementById("flow-prev-btn");
   const nextBtn = document.getElementById("flow-next-btn");
   const counter = document.getElementById("flow-step-counter");
