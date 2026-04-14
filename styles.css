@@ -2056,6 +2056,7 @@ select {
   overflow-x: auto;
   align-items: start;
   padding-bottom: 8px;
+  min-width: 0; /* grid item: prevent expanding parent track beyond viewport */
 }
 
 .compare-lane {
@@ -2854,7 +2855,7 @@ button.step-item:hover {
 }
 
 .tool-ribbon {
-  grid-template-columns: repeat(auto-fit, minmax(132px, max-content));
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
 }
 
 .tool-ribbon-top {
