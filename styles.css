@@ -1006,6 +1006,324 @@ p {
   text-underline-offset: 0.16em;
 }
 
+/* ── Analytics Agent Lab ──────────────────────────────────── */
+
+.flow-pip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.flow-pip {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  background: var(--bg-card);
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.flow-pip:hover {
+  border-color: rgba(75, 141, 255, 0.34);
+  color: var(--text);
+}
+
+.flow-pip.active {
+  background: rgba(75, 141, 255, 0.12);
+  border-color: rgba(75, 141, 255, 0.45);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.flow-pip.done {
+  border-color: rgba(32, 173, 110, 0.3);
+  color: var(--status-safe);
+}
+
+.flow-pip-num {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  font-family: "IBM Plex Sans", monospace;
+}
+
+.flow-question-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 20px 24px;
+  background: var(--bg-card);
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.flow-question-text {
+  margin: 0;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  border-left: 3px solid var(--primary);
+  padding-left: 14px;
+}
+
+.flow-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.flow-step-card {
+  border: 1px solid rgba(75, 141, 255, 0.24);
+  border-radius: 22px;
+  padding: 22px 24px;
+  display: grid;
+  gap: 16px;
+  background:
+    linear-gradient(180deg, rgba(75, 141, 255, 0.04), rgba(75, 141, 255, 0.01)),
+    var(--bg-card);
+  margin-bottom: 18px;
+}
+
+.flow-step-head {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+}
+
+.flow-step-num-badge {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(75, 141, 255, 0.14);
+  border: 1px solid rgba(75, 141, 255, 0.28);
+  color: var(--primary);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-family: "IBM Plex Sans", monospace;
+  display: grid;
+  place-items: center;
+}
+
+.flow-step-meta {
+  display: grid;
+  gap: 3px;
+}
+
+.flow-step-meta h3 {
+  font-size: 1.15rem;
+}
+
+.flow-step-who {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--secondary);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.flow-step-description {
+  font-size: 0.97rem;
+  line-height: 1.65;
+  color: var(--muted);
+  margin: 0;
+}
+
+.flow-step-block {
+  display: grid;
+  gap: 8px;
+}
+
+.flow-step-block-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.flow-agent-output {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--code-bg);
+  color: var(--code-text);
+  font-size: 0.84rem;
+  line-height: 1.65;
+  border: 1px solid rgba(126, 155, 196, 0.18);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.flow-nav-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.flow-step-counter {
+  font-size: 0.82rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.arch-layers-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.arch-layer-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.01), rgba(255, 255, 255, 0)),
+    radial-gradient(circle at top right, color-mix(in srgb, var(--layer-color, #4b8dff) 12%, transparent), transparent 30%),
+    var(--bg-card);
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.arch-layer-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.arch-layer-badge {
+  border-color: color-mix(in srgb, var(--badge-c, #4b8dff) 30%, var(--line));
+  color: var(--badge-c, var(--muted));
+}
+
+.arch-layer-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.arch-layer-item {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: var(--bg-card-str);
+}
+
+.arch-layer-item strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.arch-layer-item p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.knowledge-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.knowledge-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 22px;
+  background: var(--bg-card);
+  display: grid;
+  gap: 14px;
+  align-content: start;
+}
+
+.knowledge-card-accent {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--product-color, #4b8dff) 6%, transparent), transparent 50%),
+    var(--bg-card);
+  border-color: color-mix(in srgb, var(--product-color, #4b8dff) 20%, var(--line));
+}
+
+.knowledge-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.knowledge-tables-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.knowledge-table-row {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: var(--bg-card-str);
+}
+
+.knowledge-table-row strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.8rem;
+  font-family: "IBM Plex Sans", monospace;
+  margin-bottom: 3px;
+}
+
+.knowledge-table-row p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.agentcore-features-board {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.agentcore-feature-card {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 20px;
+  background: var(--bg-card);
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.agentcore-feature-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+@media (max-width: 860px) {
+  .arch-layers-board,
+  .knowledge-grid,
+  .agentcore-features-board {
+    grid-template-columns: 1fr;
+  }
+}
+
 .agentcore-callout-grid {
   display: grid;
   gap: 10px;
