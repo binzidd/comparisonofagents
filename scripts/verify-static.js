@@ -22,6 +22,7 @@ requiredFiles.forEach((filePath) => {
 const html = fs.readFileSync(htmlPath, "utf8");
 const skillsHtml = fs.readFileSync(skillsHtmlPath, "utf8");
 const decisionHtml = fs.readFileSync(decisionHtmlPath, "utf8");
+const traceStore = JSON.parse(fs.readFileSync(tracePath, "utf8"));
 
 const requiredIds = [
   "framework-catalog-cards",
@@ -93,6 +94,41 @@ if (missingDecisionIds.length > 0) {
 
 if (!decisionHtml.includes('<script src="./decision.js" defer></script>')) {
   throw new Error("Expected deferred decision.js script tag was not found.");
+}
+
+const stageTimeSignature = (frameworkTrace) =>
+  Object.fromEntries(
+    Object.entries(frameworkTrace.stages).map(([stageId, stage]) => [stageId, stage.metrics.time_ms])
+  );
+
+const repeatedStageProfiles = [];
+for (const [questionId, questionTrace] of Object.entries(traceStore.questions || {})) {
+  for (const [frameworkId, frameworkTrace] of Object.entries(questionTrace.frameworks || {})) {
+    const times = Object.values(stageTimeSignature(frameworkTrace));
+    if (new Set(times).size !== times.length) {
+      repeatedStageProfiles.push(`${questionId}/${frameworkId}`);
+    }
+  }
+}
+
+if (repeatedStageProfiles.length > 0) {
+  throw new Error(`Suspicious repeated stage times: ${repeatedStageProfiles.join(", ")}`);
+}
+
+const questionIds = Object.keys(traceStore.questions || {});
+const firstQuestion = traceStore.questions?.[questionIds[0]];
+const staticQuestionProfiles = [];
+for (const frameworkId of Object.keys(firstQuestion?.frameworks || {})) {
+  const signatures = questionIds.map((questionId) =>
+    JSON.stringify(stageTimeSignature(traceStore.questions[questionId].frameworks[frameworkId]))
+  );
+  if (new Set(signatures).size === 1) {
+    staticQuestionProfiles.push(frameworkId);
+  }
+}
+
+if (staticQuestionProfiles.length > 0) {
+  throw new Error(`Framework timing profiles do not vary by question: ${staticQuestionProfiles.join(", ")}`);
 }
 
 console.log("Static app verification passed.");

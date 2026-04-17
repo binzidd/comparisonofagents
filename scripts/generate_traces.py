@@ -41,6 +41,20 @@ QUESTIONS = {
     },
 }
 
+QUESTION_METRIC_FACTORS = {
+    "retention": {"time_ms": 1.00, "tokens_in": 1.00, "tokens_out": 1.00},
+    "sharing": {"time_ms": 1.12, "tokens_in": 1.06, "tokens_out": 1.08},
+    "rights": {"time_ms": 1.24, "tokens_in": 1.14, "tokens_out": 1.12},
+}
+
+STAGE_TIME_VARIANCE = {
+    "intake": 0.94,
+    "review": 1.08,
+    "challenge": 1.03,
+    "synthesis": 0.90,
+    "verdict": 0.96,
+}
+
 
 FRAMEWORKS = {
     "langgraph": {
@@ -54,7 +68,7 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 340, "review": 1160, "challenge": 820, "synthesis": 510, "verdict": 280},
+            "time_ms": {"intake": 3900, "review": 3500, "challenge": 4300, "synthesis": 2200, "verdict": 3200},
             "tokens_in": {"intake": 430, "review": 1320, "challenge": 880, "synthesis": 640, "verdict": 320},
             "tokens_out": {"intake": 65, "review": 240, "challenge": 170, "synthesis": 210, "verdict": 170},
         },
@@ -72,12 +86,30 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 290, "review": 1490, "challenge": 670, "synthesis": 420, "verdict": 240},
+            "time_ms": {"intake": 9600, "review": 34500, "challenge": 17000, "synthesis": 4200, "verdict": 4700},
             "tokens_in": {"intake": 390, "review": 1410, "challenge": 610, "synthesis": 540, "verdict": 290},
             "tokens_out": {"intake": 60, "review": 230, "challenge": 135, "synthesis": 190, "verdict": 150},
         },
         "confidence": 0.81,
         "cost_multiplier": 0.0000032,
+    },
+    "claude-agent-sdk": {
+        "runtime": "python-harness:claude-session",
+        "state_container": "claude_session",
+        "links": {
+            "intake": ["principal-compliance", "principal-security"],
+            "review": ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+            "challenge": ["compliance-reviewer", "security-reviewer", "legal-reviewer", "finance-reviewer"],
+            "synthesis": ["reviewer-principal"],
+            "verdict": ["principal-decision"],
+        },
+        "metrics": {
+            "time_ms": {"intake": 7800, "review": 19500, "challenge": 9300, "synthesis": 4800, "verdict": 5200},
+            "tokens_in": {"intake": 470, "review": 1480, "challenge": 760, "synthesis": 620, "verdict": 340},
+            "tokens_out": {"intake": 70, "review": 260, "challenge": 155, "synthesis": 205, "verdict": 168},
+        },
+        "confidence": 0.87,
+        "cost_multiplier": 0.0000036,
     },
     "ag2": {
         "runtime": "python-harness:conversation",
@@ -90,7 +122,7 @@ FRAMEWORKS = {
             "verdict": ["principal-decision", "reviewer-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 420, "review": 1840, "challenge": 1220, "synthesis": 760, "verdict": 340},
+            "time_ms": {"intake": 4100, "review": 9900, "challenge": 11200, "synthesis": 3200, "verdict": 3900},
             "tokens_in": {"intake": 520, "review": 1920, "challenge": 1180, "synthesis": 830, "verdict": 360},
             "tokens_out": {"intake": 75, "review": 310, "challenge": 240, "synthesis": 260, "verdict": 190},
         },
@@ -108,7 +140,7 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 320, "review": 1280, "challenge": 760, "synthesis": 470, "verdict": 250},
+            "time_ms": {"intake": 5200, "review": 22000, "challenge": 9800, "synthesis": 4800, "verdict": 3900},
             "tokens_in": {"intake": 410, "review": 1240, "challenge": 780, "synthesis": 560, "verdict": 310},
             "tokens_out": {"intake": 58, "review": 210, "challenge": 150, "synthesis": 185, "verdict": 160},
         },
@@ -126,7 +158,7 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 360, "review": 1360, "challenge": 710, "synthesis": 500, "verdict": 270},
+            "time_ms": {"intake": 4800, "review": 12500, "challenge": 6800, "synthesis": 4300, "verdict": 3600},
             "tokens_in": {"intake": 430, "review": 1280, "challenge": 640, "synthesis": 590, "verdict": 300},
             "tokens_out": {"intake": 62, "review": 220, "challenge": 140, "synthesis": 180, "verdict": 155},
         },
@@ -144,7 +176,7 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 270, "review": 980, "challenge": 620, "synthesis": 410, "verdict": 230},
+            "time_ms": {"intake": 4200, "review": 3000, "challenge": 5000, "synthesis": 2700, "verdict": 3300},
             "tokens_in": {"intake": 350, "review": 1090, "challenge": 550, "synthesis": 510, "verdict": 260},
             "tokens_out": {"intake": 56, "review": 185, "challenge": 125, "synthesis": 175, "verdict": 145},
         },
@@ -162,7 +194,7 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 310, "review": 1210, "challenge": 690, "synthesis": 460, "verdict": 245},
+            "time_ms": {"intake": 11000, "review": 12000, "challenge": 9000, "synthesis": 3600, "verdict": 4600},
             "tokens_in": {"intake": 400, "review": 1170, "challenge": 610, "synthesis": 540, "verdict": 285},
             "tokens_out": {"intake": 55, "review": 210, "challenge": 132, "synthesis": 182, "verdict": 150},
         },
@@ -180,7 +212,7 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 280, "review": 1120, "challenge": 650, "synthesis": 430, "verdict": 220},
+            "time_ms": {"intake": 9500, "review": 33000, "challenge": 10000, "synthesis": 4300, "verdict": 5400},
             "tokens_in": {"intake": 360, "review": 1010, "challenge": 530, "synthesis": 500, "verdict": 250},
             "tokens_out": {"intake": 54, "review": 175, "challenge": 118, "synthesis": 168, "verdict": 142},
         },
@@ -213,6 +245,13 @@ STAGE_MESSAGE_TEMPLATES = {
         "challenge": "reviewer handoff blocks",
         "synthesis": "reviewed context returns",
         "verdict": "final agent responds",
+    },
+    "claude-agent-sdk": {
+        "intake": "Claude session opened",
+        "review": "session streams specialist findings",
+        "challenge": "reviewer turn checks evidence",
+        "synthesis": "principal turn compacts context",
+        "verdict": "ResultMessage closes run",
     },
     "ag2": {
         "intake": "conversation starts",
@@ -269,6 +308,20 @@ def _real_stage(framework_id: str, question_id: str, stage_id: str) -> dict | No
         return None
 
 
+def stable_jitter(*parts: str, spread: int = 17) -> float:
+    seed = sum((index + 1) * ord(char) for index, char in enumerate(":".join(parts)))
+    return 1 + ((seed % spread) - (spread // 2)) / 100
+
+
+def simulated_metric_value(framework_id: str, question_id: str, stage_id: str, metric_name: str) -> int:
+    meta = FRAMEWORKS[framework_id]
+    base = meta["metrics"][metric_name][stage_id]
+    question_factor = QUESTION_METRIC_FACTORS[question_id][metric_name]
+    stage_factor = STAGE_TIME_VARIANCE[stage_id] if metric_name == "time_ms" else 1
+    jitter = stable_jitter(framework_id, question_id, stage_id, metric_name)
+    return max(1, round(base * question_factor * stage_factor * jitter))
+
+
 def framework_metrics(framework_id: str, stage_id: str, question_id: str = "retention") -> dict:
     real = _real_stage(framework_id, question_id, stage_id)
     if real:
@@ -281,13 +334,13 @@ def framework_metrics(framework_id: str, stage_id: str, question_id: str = "rete
             "token_total_estimate": ti + to,
             "usd_cost_estimate": round(real.get("usd", (ti + to) * FRAMEWORKS[framework_id]["cost_multiplier"]), 5),
         }
-    # Fallback to hardcoded simulated values
+    # Fallback to deterministic, question-aware estimates.
     meta = FRAMEWORKS[framework_id]
-    tokens_in = meta["metrics"]["tokens_in"][stage_id]
-    tokens_out = meta["metrics"]["tokens_out"][stage_id]
+    tokens_in = simulated_metric_value(framework_id, question_id, stage_id, "tokens_in")
+    tokens_out = simulated_metric_value(framework_id, question_id, stage_id, "tokens_out")
     total_tokens = tokens_in + tokens_out
     return {
-        "time_ms": meta["metrics"]["time_ms"][stage_id],
+        "time_ms": simulated_metric_value(framework_id, question_id, stage_id, "time_ms"),
         "token_input_estimate": tokens_in,
         "token_output_estimate": tokens_out,
         "token_total_estimate": total_tokens,
@@ -343,6 +396,7 @@ def reviewer_notes(framework_id: str, lead_clause: str) -> list[str]:
     by_framework = {
         "langgraph": [f"cite {lead_clause} clause explicitly", "retain conditional wording"],
         "openai-agents": [f"carry {lead_clause} citation through handoff", "do not drop reviewer caveat"],
+        "claude-agent-sdk": [f"keep {lead_clause} visible in the live session", "final ResultMessage must preserve reviewer caveat"],
         "ag2": [f"trim unsupported debate around {lead_clause}", "pin the final claim to policy text"],
         "crewai": [f"manager must keep {lead_clause} evidence attached", "check task summaries for drift"],
         "semantic-kernel": [f"governance gate requires {lead_clause}", "record explicit ambiguity note"],
@@ -355,7 +409,7 @@ def reviewer_notes(framework_id: str, lead_clause: str) -> list[str]:
 
 def verdict_citations(question: dict, framework_id: str) -> list[str]:
     clause_ids = list(question["clauses"])
-    if framework_id in {"langgraph", "semantic-kernel", "pydanticai"} and "rights" not in clause_ids:
+    if framework_id in {"langgraph", "claude-agent-sdk", "semantic-kernel", "pydanticai"} and "rights" not in clause_ids:
         clause_ids.append("rights")
     if framework_id == "ag2" and len(clause_ids) > 2:
         return clause_ids[:2]
@@ -367,6 +421,7 @@ def verdict_answer(question: dict, framework_id: str) -> str:
         "retention": {
             "langgraph": "Yes, but only under the retention exceptions the graph gathered: GitHub can keep personal data for contracts, legal duties, disputes, and agreement enforcement, and the period depends on purpose.",
             "openai-agents": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
+            "claude-agent-sdk": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
             "ag2": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
             "crewai": "Yes. The manager summary says data retention may continue where contracts, legal obligations, disputes, or agreement enforcement require it, with duration tied to purpose.",
             "semantic-kernel": "Yes, subject to the governed caveat that retention remains purpose-bound: GitHub may keep data for contracts, legal duties, disputes, and agreement enforcement.",
@@ -377,6 +432,7 @@ def verdict_answer(question: dict, framework_id: str) -> str:
         "sharing": {
             "langgraph": "GitHub may share personal data with affiliates, organization accounts, competent authorities, fraud-prevention parties, and third-party apps when the user directs that sharing.",
             "openai-agents": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
+            "claude-agent-sdk": "The Claude agent loop keeps sharing scoped to affiliates, organization accounts, lawful authorities, abuse-prevention entities, and user-directed third-party applications.",
             "ag2": "The debate outcome is that sharing is conditional rather than open-ended: GitHub may share with affiliates, organization accounts, authorities, fraud-prevention entities, and third-party apps under user instruction.",
             "crewai": "Yes, but under scoped pathways. Crew outputs point to affiliates, organization accounts, authorities, abuse-prevention actors, and instructed third-party applications.",
             "semantic-kernel": "The governed answer distinguishes user-directed sharing from authority-driven disclosure, and includes affiliates, organization accounts, and anti-abuse disclosures.",
@@ -387,6 +443,7 @@ def verdict_answer(question: dict, framework_id: str) -> str:
         "rights": {
             "langgraph": "Users may have access, correction, erasure in some cases, objection, consent-withdrawal, portability, and region-specific rights; the graph also preserves that some rights depend on applicable law.",
             "openai-agents": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
+            "claude-agent-sdk": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",
             "ag2": "The team converged on a qualified rights answer: access, correction, deletion in some cases, objection, consent withdrawal, portability, and some state-specific rights exist, but they depend on jurisdiction.",
             "crewai": "Crew outputs identify access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights that vary with applicable law.",
             "semantic-kernel": "The governed answer distinguishes baseline privacy rights from region-specific rights, including access, correction, deletion in some cases, objection, consent withdrawal, portability, and appeal pathways.",
@@ -422,6 +479,7 @@ def stage_output(question: dict, framework_id: str, stage_id: str) -> dict:
         by_framework = {
             "langgraph": {"reviewer_action": "branch_to_revision", "notes": ["missing conditional caveat", "add explicit clause citation"]},
             "openai-agents": {"reviewer_action": "reject_handoff", "notes": ["summary compressed legal caveat", "rehydrate retention limits"]},
+            "claude-agent-sdk": {"reviewer_action": "continue_session_with_review", "notes": ["final response needs clause ids", "preserve narrow policy wording"]},
             "ag2": {"reviewer_action": "stop_debate_and_ground", "notes": ["debate drift detected", "anchor final answer to source clause"]},
             "crewai": {"reviewer_action": "return_task_bundle", "notes": ["manager summary needs source wording", "task outputs disagree on scope"]},
             "semantic-kernel": {"reviewer_action": "fail_governance_gate", "notes": ["audit note missing", "ambiguity statement required"]},
@@ -432,7 +490,7 @@ def stage_output(question: dict, framework_id: str, stage_id: str) -> dict:
         return by_framework[framework_id]
     if stage_id == "review":
         return {
-            "specialist_findings": len(question["clauses"]) + (2 if framework_id in {"langgraph", "crewai"} else 1),
+            "specialist_findings": len(question["clauses"]) + (2 if framework_id in {"langgraph", "crewai", "claude-agent-sdk"} else 1),
             "status": "review_complete",
             "review_shape": FRAMEWORKS[framework_id]["state_container"],
         }
@@ -458,11 +516,13 @@ def build_trace_store() -> dict:
         for fw, stages in q.get("frameworks", {}).items()
         if stages  # only include frameworks with actual stage data
     })
+    models = _real.get("models") or {"openai": _real.get("model", "gpt-4o-mini")}
+    model_note = ", ".join(f"{name}: {model}" for name, model in models.items())
     note = (
-        f"Metrics for {real_frameworks} are from real SDK runs (model: {_real.get('model', 'gpt-4o-mini')}). "
-        "All other metrics are simulated Python harnesses."
+        f"Metrics for {real_frameworks} are from real SDK runs (models: {model_note}). "
+        "All other metrics are deterministic, question-aware Python harness estimates."
         if real_frameworks
-        else "These traces are produced by Python framework-shaped runners in this repo, not by the official framework SDKs."
+        else "These traces are deterministic, question-aware Python framework-shaped estimates, not official framework SDK runs."
     )
     payload = {
         "generated_by": "scripts/generate_traces.py",

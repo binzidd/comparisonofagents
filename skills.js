@@ -136,6 +136,41 @@ const frameworks = [
     ]
   },
   {
+    id: "claude-agent-sdk",
+    name: "Claude Agent SDK",
+    color: "#5f735a",
+    runtime: "python",
+    pattern: "Agent Loop",
+    executionModel: "Claude Code session with streaming messages, hooks, permissions, and custom agents",
+    withoutSkill: {
+      capabilityUnit: "SDK session plus app-local prompt and hook policy",
+      headline: "The agent loop is powerful, but policy-grounding rules can still spread across prompts, hooks, and result parsing.",
+      resultPacket: "Streamed messages plus ResultMessage metadata",
+      promptGlue: "Moderate: session prompts and reviewer instructions still need shared structure",
+      reuse: "Reuse means reusing SDK options, agent definitions, and hook callbacks"
+    },
+    withSkill: {
+      skillName: "Claude Policy Grounding Skill",
+      capabilityUnit: "Claude session plus reusable skill contract",
+      headline: "The SDK keeps live tool/session control, while the skill packages the repeatable GitHub evidence behavior.",
+      resultPacket: "Session transcript plus skill-defined evidence and verdict packet",
+      promptGlue: "Lower: the same skill carries clause extraction, reviewer caveats, and final answer shape",
+      reuse: "Reuse means attaching the same skill contract to multiple Claude Agent SDK sessions"
+    },
+    metrics: [
+      { label: "Prompt Glue", base: 3, skill: 2 },
+      { label: "Tool Wiring", base: 2, skill: 2 },
+      { label: "Output Consistency", base: 3, skill: 5 },
+      { label: "Reuse Across Tasks", base: 4, skill: 5 }
+    ],
+    stages: [
+      { stage: "Intake", framework: "Starts a ClaudeSDKClient session for the GitHub privacy case.", skill: "Loads the same policy intake brief and required clause fields before the session begins." },
+      { stage: "Review", framework: "Uses custom agent definitions or follow-up prompts for specialist review inside the live session.", skill: "Makes every specialist turn return the same clause quote, citation id, answer impact, and confidence fields." },
+      { stage: "Challenge", framework: "Runs the reviewer turn with hooks and permission policy available around tool use.", skill: "Applies the reusable unsupported-claim and missing-caveat checks before the session can finalize." },
+      { stage: "Verdict", framework: "Streams the final assistant response and records ResultMessage metadata.", skill: "Keeps the final answer in one reusable packet with GitHub citations, caveats, and confidence." }
+    ]
+  },
+  {
     id: "ag2",
     name: "AG2",
     color: "#cf8f2e",
@@ -588,6 +623,22 @@ function starterPackForFramework(framework) {
       ],
       quickstart: ["Define one shared evidence packet", "Let each specialist handoff call the same Claude skill", "Validate the final return packet before verdict"],
       repoKit: "/starter-kits/zips/openai-agents.zip"
+    },
+    "claude-agent-sdk": {
+      actualFiles: [
+        ["agents.py", "Claude Agent SDK session pipeline"],
+        ["app.py", "Streamlit entrypoint"],
+        ["README.md", "Setup and usage"],
+        ["requirements.txt", "Python dependencies"]
+      ],
+      suggestedFiles: [
+        ["skill_contract.py", "Claude skill boundary"],
+        ["permissions.py", "Tool allowlist and can_use_tool policy"],
+        ["hooks.py", "Progress and reviewer hook callbacks"],
+        [".env.example", "Optional config template"]
+      ],
+      quickstart: ["Install Claude Code and claude-agent-sdk", "Keep allowed tools explicit", "Make the final ResultMessage pass the skill evidence contract"],
+      repoKit: "/starter-kits/zips/claude-agent-sdk.zip"
     },
     ag2: {
       actualFiles: [

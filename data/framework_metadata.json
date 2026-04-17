@@ -82,6 +82,43 @@
       }
     },
     {
+      "id": "claude-agent-sdk",
+      "name": "Claude Agent SDK",
+      "color": "#5f735a",
+      "runtime": "python",
+      "builder": "code-first",
+      "best_for": ["advanced", "product", "reliability"],
+      "criteria_scores": {
+        "Developer Experience": 4,
+        "Agent Capabilities": 5,
+        "Context & Memory": 4,
+        "Deployment & Hosting": 3,
+        "Security & Compliance": 4
+      },
+      "criteria_notes": {
+        "Developer Experience": "Great for teams that already think in Claude Code sessions, tools, and hooks.",
+        "Agent Capabilities": "Strong autonomous agent loop with streaming progress, tool use, custom agents, and permission controls.",
+        "Context & Memory": "Session continuity preserves previous turns, though compaction and final synthesis still need careful prompts.",
+        "Deployment & Hosting": "Python SDK is straightforward, but production depends on Claude Code CLI availability and auth.",
+        "Security & Compliance": "Permission callbacks, hooks, tool allowlists, and sandbox settings make governance explicit."
+      },
+      "memory": {
+        "model": "Live Claude session with streamed messages and optional session continuation",
+        "strengths": ["Session continuity", "Streaming progress", "Hook-visible tool events"],
+        "risks": ["CLI/auth dependency", "Compaction can hide earlier detail if final prompts are loose"]
+      },
+      "deployment": {
+        "fit": "Strong for app agents that need real file, command, MCP, or tool-driven work under a programmable loop.",
+        "hosting": "Best when the runtime can provision Claude Code and pass explicit SDK options at startup.",
+        "tradeoff": "You get a powerful agent loop, but you own the surrounding CLI, authentication, and permission envelope."
+      },
+      "security": {
+        "fit": "Good for governed tool-use scenarios with explicit allowlists and permission callbacks.",
+        "controls": ["Allowed tools", "Permission modes", "can_use_tool callbacks", "Hooks"],
+        "tradeoff": "Governance is only as strong as the policies and sandbox choices passed into the SDK."
+      }
+    },
+    {
       "id": "ag2",
       "name": "AG2",
       "color": "#cf8f2e",

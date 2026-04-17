@@ -1,167 +1,203 @@
 {
   "execution_mode": "real-sdk-calls",
   "model": "gpt-4o-mini",
+  "models": {
+    "openai": "gpt-4o-mini",
+    "claude-agent-sdk": "sonnet"
+  },
   "questions": {
     "retention": {
       "frameworks": {
         "langgraph": {
           "intake": {
-            "time_ms": 3958,
+            "time_ms": 5535,
             "tokens_in": 398,
             "tokens_out": 200,
             "usd": 0.0001797
           },
           "review": {
-            "time_ms": 3555,
-            "tokens_in": 508,
-            "tokens_out": 361,
-            "usd": 0.0002928
+            "time_ms": 3278,
+            "tokens_in": 488,
+            "tokens_out": 369,
+            "usd": 0.0002946
           },
           "challenge": {
-            "time_ms": 4371,
-            "tokens_in": 434,
-            "tokens_out": 200,
-            "usd": 0.0001851
-          },
-          "synthesis": {
-            "time_ms": 1771,
-            "tokens_in": 166,
-            "tokens_out": 61,
-            "usd": 6.15e-05
-          },
-          "verdict": {
-            "time_ms": 2566,
-            "tokens_in": 126,
-            "tokens_out": 78,
-            "usd": 6.57e-05
-          }
-        },
-        "openai-agents": {
-          "intake": {
-            "time_ms": 9610,
-            "tokens_in": 393,
-            "tokens_out": 408,
-            "usd": 0.0003037
-          },
-          "review": {
-            "time_ms": 34618,
-            "tokens_in": 417,
-            "tokens_out": 1502,
-            "usd": 0.0009637
-          },
-          "challenge": {
-            "time_ms": 17406,
-            "tokens_in": 1569,
-            "tokens_out": 609,
-            "usd": 0.0006007
-          },
-          "synthesis": {
-            "time_ms": 1924,
-            "tokens_in": 151,
-            "tokens_out": 105,
-            "usd": 8.56e-05
-          },
-          "verdict": {
-            "time_ms": 3459,
-            "tokens_in": 131,
-            "tokens_out": 160,
-            "usd": 0.0001157
-          }
-        },
-        "ag2": {
-          "intake": {
             "time_ms": 4051,
-            "tokens_in": 395,
-            "tokens_out": 200,
-            "usd": 0.0001792
-          },
-          "review": {
-            "time_ms": 8799,
-            "tokens_in": 431,
-            "tokens_out": 370,
-            "usd": 0.0002867
-          },
-          "challenge": {
-            "time_ms": 11250,
-            "tokens_in": 606,
-            "tokens_out": 480,
-            "usd": 0.0003789
-          },
-          "synthesis": {
-            "time_ms": 2353,
-            "tokens_in": 180,
-            "tokens_out": 108,
-            "usd": 9.18e-05
-          },
-          "verdict": {
-            "time_ms": 4394,
-            "tokens_in": 129,
-            "tokens_out": 153,
-            "usd": 0.0001111
-          }
-        },
-        "llamaindex": {
-          "intake": {
-            "time_ms": 4203,
-            "tokens_in": 398,
-            "tokens_out": 124,
-            "usd": 0.0001341
-          },
-          "review": {
-            "time_ms": 2799,
-            "tokens_in": 484,
-            "tokens_out": 366,
-            "usd": 0.0002922
-          },
-          "challenge": {
-            "time_ms": 5201,
             "tokens_in": 442,
             "tokens_out": 200,
             "usd": 0.0001863
           },
           "synthesis": {
-            "time_ms": 2349,
-            "tokens_in": 153,
-            "tokens_out": 90,
-            "usd": 7.7e-05
+            "time_ms": 2148,
+            "tokens_in": 168,
+            "tokens_out": 60,
+            "usd": 6.12e-05
           },
           "verdict": {
-            "time_ms": 2807,
-            "tokens_in": 132,
-            "tokens_out": 125,
-            "usd": 9.48e-05
+            "time_ms": 3076,
+            "tokens_in": 125,
+            "tokens_out": 97,
+            "usd": 7.7e-05
+          }
+        },
+        "openai-agents": {
+          "intake": {
+            "time_ms": 8767,
+            "tokens_in": 393,
+            "tokens_out": 422,
+            "usd": 0.0003121
+          },
+          "review": {
+            "time_ms": 88152,
+            "tokens_in": 410,
+            "tokens_out": 1733,
+            "usd": 0.0011013
+          },
+          "challenge": {
+            "time_ms": 14233,
+            "tokens_in": 1800,
+            "tokens_out": 550,
+            "usd": 0.0006
+          },
+          "synthesis": {
+            "time_ms": 3869,
+            "tokens_in": 153,
+            "tokens_out": 141,
+            "usd": 0.0001075
+          },
+          "verdict": {
+            "time_ms": 3045,
+            "tokens_in": 133,
+            "tokens_out": 153,
+            "usd": 0.0001117
+          }
+        },
+        "ag2": {
+          "intake": {
+            "time_ms": 4281,
+            "tokens_in": 395,
+            "tokens_out": 200,
+            "usd": 0.0001792
+          },
+          "review": {
+            "time_ms": 8945,
+            "tokens_in": 433,
+            "tokens_out": 374,
+            "usd": 0.0002893
+          },
+          "challenge": {
+            "time_ms": 11062,
+            "tokens_in": 610,
+            "tokens_out": 480,
+            "usd": 0.0003795
+          },
+          "synthesis": {
+            "time_ms": 4614,
+            "tokens_in": 179,
+            "tokens_out": 191,
+            "usd": 0.0001414
+          },
+          "verdict": {
+            "time_ms": 3080,
+            "tokens_in": 139,
+            "tokens_out": 173,
+            "usd": 0.0001246
+          }
+        },
+        "llamaindex": {
+          "intake": {
+            "time_ms": 2522,
+            "tokens_in": 398,
+            "tokens_out": 165,
+            "usd": 0.0001587
+          },
+          "review": {
+            "time_ms": 2345,
+            "tokens_in": 492,
+            "tokens_out": 376,
+            "usd": 0.0002994
+          },
+          "challenge": {
+            "time_ms": 4030,
+            "tokens_in": 452,
+            "tokens_out": 200,
+            "usd": 0.0001878
+          },
+          "synthesis": {
+            "time_ms": 2075,
+            "tokens_in": 148,
+            "tokens_out": 106,
+            "usd": 8.58e-05
+          },
+          "verdict": {
+            "time_ms": 2286,
+            "tokens_in": 131,
+            "tokens_out": 119,
+            "usd": 9.11e-05
           }
         },
         "pydanticai": {
           "intake": {
-            "time_ms": 12342,
+            "time_ms": 7072,
             "tokens_in": 393,
-            "tokens_out": 454,
-            "usd": 0.0003314
+            "tokens_out": 404,
+            "usd": 0.0003013
           },
           "review": {
-            "time_ms": 36294,
-            "tokens_in": 468,
-            "tokens_out": 1806,
-            "usd": 0.0011538
+            "time_ms": 18343,
+            "tokens_in": 476,
+            "tokens_out": 903,
+            "usd": 0.0006132
           },
           "challenge": {
-            "time_ms": 9639,
-            "tokens_in": 1881,
-            "tokens_out": 565,
-            "usd": 0.0006212
+            "time_ms": 6968,
+            "tokens_in": 978,
+            "tokens_out": 439,
+            "usd": 0.0004101
           },
           "synthesis": {
-            "time_ms": 2987,
-            "tokens_in": 155,
-            "tokens_out": 215,
-            "usd": 0.0001522
+            "time_ms": 2667,
+            "tokens_in": 151,
+            "tokens_out": 84,
+            "usd": 7.31e-05
           },
           "verdict": {
-            "time_ms": 5484,
-            "tokens_in": 137,
-            "tokens_out": 201,
-            "usd": 0.0001411
+            "time_ms": 3242,
+            "tokens_in": 131,
+            "tokens_out": 182,
+            "usd": 0.0001288
+          }
+        },
+        "claude-agent-sdk": {
+          "intake": {
+            "time_ms": 15034,
+            "tokens_in": 20747,
+            "tokens_out": 626,
+            "usd": 0.037951
+          },
+          "review": {
+            "time_ms": 14528,
+            "tokens_in": 20896,
+            "tokens_out": 492,
+            "usd": 0.0355323
+          },
+          "challenge": {
+            "time_ms": 16099,
+            "tokens_in": 21007,
+            "tokens_out": 909,
+            "usd": 0.046651
+          },
+          "synthesis": {
+            "time_ms": 12854,
+            "tokens_in": 20719,
+            "tokens_out": 616,
+            "usd": 0.037526
+          },
+          "verdict": {
+            "time_ms": 18188,
+            "tokens_in": 20583,
+            "tokens_out": 788,
+            "usd": 0.040976
           }
         }
       }
@@ -170,162 +206,194 @@
       "frameworks": {
         "langgraph": {
           "intake": {
-            "time_ms": 3807,
+            "time_ms": 6328,
             "tokens_in": 398,
             "tokens_out": 200,
             "usd": 0.0001797
           },
           "review": {
-            "time_ms": 2854,
-            "tokens_in": 504,
-            "tokens_out": 396,
-            "usd": 0.0003132
+            "time_ms": 2242,
+            "tokens_in": 512,
+            "tokens_out": 364,
+            "usd": 0.0002952
           },
           "challenge": {
-            "time_ms": 4285,
-            "tokens_in": 469,
+            "time_ms": 3714,
+            "tokens_in": 437,
             "tokens_out": 200,
-            "usd": 0.0001903
+            "usd": 0.0001855
           },
           "synthesis": {
-            "time_ms": 2582,
-            "tokens_in": 167,
-            "tokens_out": 136,
-            "usd": 0.0001066
+            "time_ms": 2073,
+            "tokens_in": 172,
+            "tokens_out": 89,
+            "usd": 7.92e-05
           },
           "verdict": {
-            "time_ms": 4791,
-            "tokens_in": 151,
-            "tokens_out": 171,
-            "usd": 0.0001253
+            "time_ms": 3227,
+            "tokens_in": 131,
+            "tokens_out": 180,
+            "usd": 0.0001276
           }
         },
         "openai-agents": {
           "intake": {
-            "time_ms": 9502,
+            "time_ms": 8674,
             "tokens_in": 393,
-            "tokens_out": 500,
-            "usd": 0.0003589
+            "tokens_out": 411,
+            "usd": 0.0003055
           },
           "review": {
-            "time_ms": 40370,
-            "tokens_in": 416,
-            "tokens_out": 1779,
-            "usd": 0.0011298
+            "time_ms": 40812,
+            "tokens_in": 413,
+            "tokens_out": 1842,
+            "usd": 0.0011672
           },
           "challenge": {
-            "time_ms": 12208,
-            "tokens_in": 1846,
-            "tokens_out": 571,
-            "usd": 0.0006195
+            "time_ms": 22994,
+            "tokens_in": 1909,
+            "tokens_out": 633,
+            "usd": 0.0006661
           },
           "synthesis": {
-            "time_ms": 4618,
+            "time_ms": 5979,
             "tokens_in": 152,
             "tokens_out": 198,
             "usd": 0.0001416
           },
           "verdict": {
-            "time_ms": 5383,
+            "time_ms": 6461,
             "tokens_in": 135,
-            "tokens_out": 273,
-            "usd": 0.0001841
+            "tokens_out": 256,
+            "usd": 0.0001738
           }
         },
         "ag2": {
           "intake": {
-            "time_ms": 3568,
+            "time_ms": 4885,
             "tokens_in": 395,
             "tokens_out": 200,
             "usd": 0.0001792
           },
           "review": {
-            "time_ms": 10965,
-            "tokens_in": 429,
-            "tokens_out": 425,
-            "usd": 0.0003193
+            "time_ms": 9880,
+            "tokens_in": 430,
+            "tokens_out": 422,
+            "usd": 0.0003177
           },
           "challenge": {
-            "time_ms": 10886,
-            "tokens_in": 661,
+            "time_ms": 12695,
+            "tokens_in": 658,
             "tokens_out": 480,
-            "usd": 0.0003872
+            "usd": 0.0003867
           },
           "synthesis": {
-            "time_ms": 2724,
-            "tokens_in": 177,
-            "tokens_out": 130,
-            "usd": 0.0001045
+            "time_ms": 3759,
+            "tokens_in": 178,
+            "tokens_out": 147,
+            "usd": 0.0001149
           },
           "verdict": {
-            "time_ms": 2687,
-            "tokens_in": 138,
+            "time_ms": 2559,
+            "tokens_in": 137,
             "tokens_out": 120,
-            "usd": 9.27e-05
+            "usd": 9.25e-05
           }
         },
         "llamaindex": {
           "intake": {
-            "time_ms": 4493,
+            "time_ms": 3802,
             "tokens_in": 398,
-            "tokens_out": 200,
-            "usd": 0.0001797
+            "tokens_out": 190,
+            "usd": 0.0001737
           },
           "review": {
-            "time_ms": 2938,
+            "time_ms": 3247,
             "tokens_in": 488,
-            "tokens_out": 421,
-            "usd": 0.0003258
+            "tokens_out": 426,
+            "usd": 0.0003288
           },
           "challenge": {
-            "time_ms": 4394,
-            "tokens_in": 497,
+            "time_ms": 4054,
+            "tokens_in": 501,
             "tokens_out": 200,
-            "usd": 0.0001945
+            "usd": 0.0001952
           },
           "synthesis": {
-            "time_ms": 2422,
+            "time_ms": 3003,
             "tokens_in": 147,
-            "tokens_out": 92,
-            "usd": 7.73e-05
+            "tokens_out": 123,
+            "usd": 9.58e-05
           },
           "verdict": {
-            "time_ms": 2799,
-            "tokens_in": 125,
-            "tokens_out": 156,
-            "usd": 0.0001123
+            "time_ms": 3719,
+            "tokens_in": 139,
+            "tokens_out": 152,
+            "usd": 0.000112
           }
         },
         "pydanticai": {
           "intake": {
-            "time_ms": 6280,
+            "time_ms": 8639,
             "tokens_in": 393,
-            "tokens_out": 407,
-            "usd": 0.0003031
+            "tokens_out": 446,
+            "usd": 0.0003265
           },
           "review": {
-            "time_ms": 27373,
-            "tokens_in": 472,
-            "tokens_out": 1181,
-            "usd": 0.0007794
+            "time_ms": 42717,
+            "tokens_in": 500,
+            "tokens_out": 2044,
+            "usd": 0.0013014
           },
           "challenge": {
-            "time_ms": 8785,
-            "tokens_in": 1256,
-            "tokens_out": 493,
-            "usd": 0.0004842
+            "time_ms": 9954,
+            "tokens_in": 2119,
+            "tokens_out": 673,
+            "usd": 0.0007217
           },
           "synthesis": {
-            "time_ms": 4348,
-            "tokens_in": 157,
-            "tokens_out": 221,
-            "usd": 0.0001562
+            "time_ms": 5732,
+            "tokens_in": 154,
+            "tokens_out": 226,
+            "usd": 0.0001587
           },
           "verdict": {
-            "time_ms": 4918,
-            "tokens_in": 137,
-            "tokens_out": 251,
-            "usd": 0.0001712
+            "time_ms": 4404,
+            "tokens_in": 135,
+            "tokens_out": 222,
+            "usd": 0.0001534
+          }
+        },
+        "claude-agent-sdk": {
+          "intake": {
+            "time_ms": 11736,
+            "tokens_in": 20748,
+            "tokens_out": 550,
+            "usd": 0.0360572
+          },
+          "review": {
+            "time_ms": 9358,
+            "tokens_in": 20899,
+            "tokens_out": 351,
+            "usd": 0.032026
+          },
+          "challenge": {
+            "time_ms": 27204,
+            "tokens_in": 21009,
+            "tokens_out": 1537,
+            "usd": 0.0623635
+          },
+          "synthesis": {
+            "time_ms": 7327,
+            "tokens_in": 20736,
+            "tokens_out": 385,
+            "usd": 0.0318572
+          },
+          "verdict": {
+            "time_ms": 12077,
+            "tokens_in": 20580,
+            "tokens_out": 572,
+            "usd": 0.0355572
           }
         }
       }
@@ -334,165 +402,202 @@
       "frameworks": {
         "langgraph": {
           "intake": {
-            "time_ms": 8304,
+            "time_ms": 4280,
             "tokens_in": 405,
             "tokens_out": 200,
             "usd": 0.0001807
           },
           "review": {
-            "time_ms": 2612,
-            "tokens_in": 532,
-            "tokens_out": 397,
-            "usd": 0.000318
+            "time_ms": 3973,
+            "tokens_in": 512,
+            "tokens_out": 452,
+            "usd": 0.000348
           },
           "challenge": {
-            "time_ms": 4316,
-            "tokens_in": 477,
+            "time_ms": 4015,
+            "tokens_in": 532,
             "tokens_out": 200,
-            "usd": 0.0001915
+            "usd": 0.0001998
           },
           "synthesis": {
-            "time_ms": 2218,
-            "tokens_in": 183,
-            "tokens_out": 100,
-            "usd": 8.74e-05
+            "time_ms": 2246,
+            "tokens_in": 190,
+            "tokens_out": 99,
+            "usd": 8.79e-05
           },
           "verdict": {
-            "time_ms": 3471,
-            "tokens_in": 148,
-            "tokens_out": 200,
-            "usd": 0.0001422
+            "time_ms": 3490,
+            "tokens_in": 147,
+            "tokens_out": 188,
+            "usd": 0.0001348
           }
         },
         "openai-agents": {
           "intake": {
-            "time_ms": 12990,
+            "time_ms": 8780,
             "tokens_in": 400,
-            "tokens_out": 485,
-            "usd": 0.000351
+            "tokens_out": 491,
+            "usd": 0.0003546
           },
           "review": {
-            "time_ms": 49461,
-            "tokens_in": 448,
-            "tokens_out": 2607,
-            "usd": 0.0016314
+            "time_ms": 49481,
+            "tokens_in": 451,
+            "tokens_out": 2512,
+            "usd": 0.0015749
           },
           "challenge": {
-            "time_ms": 13566,
-            "tokens_in": 2681,
-            "tokens_out": 694,
-            "usd": 0.0008185
+            "time_ms": 12484,
+            "tokens_in": 2586,
+            "tokens_out": 822,
+            "usd": 0.0008811
           },
           "synthesis": {
-            "time_ms": 6846,
-            "tokens_in": 165,
-            "tokens_out": 372,
-            "usd": 0.0002479
+            "time_ms": 10442,
+            "tokens_in": 166,
+            "tokens_out": 353,
+            "usd": 0.0002367
           },
           "verdict": {
-            "time_ms": 6701,
-            "tokens_in": 149,
-            "tokens_out": 407,
-            "usd": 0.0002665
+            "time_ms": 6710,
+            "tokens_in": 144,
+            "tokens_out": 382,
+            "usd": 0.0002508
           }
         },
         "ag2": {
           "intake": {
-            "time_ms": 4053,
+            "time_ms": 4132,
             "tokens_in": 402,
             "tokens_out": 200,
             "usd": 0.0001803
           },
           "review": {
-            "time_ms": 11901,
-            "tokens_in": 484,
-            "tokens_out": 481,
-            "usd": 0.0003612
+            "time_ms": 11457,
+            "tokens_in": 482,
+            "tokens_out": 530,
+            "usd": 0.0003903
           },
           "challenge": {
-            "time_ms": 11761,
-            "tokens_in": 745,
+            "time_ms": 9229,
+            "tokens_in": 795,
             "tokens_out": 480,
-            "usd": 0.0003997
+            "usd": 0.0004073
           },
           "synthesis": {
-            "time_ms": 4964,
-            "tokens_in": 194,
-            "tokens_out": 241,
-            "usd": 0.0001737
+            "time_ms": 5424,
+            "tokens_in": 199,
+            "tokens_out": 250,
+            "usd": 0.0001798
           },
           "verdict": {
-            "time_ms": 4625,
-            "tokens_in": 150,
+            "time_ms": 3283,
+            "tokens_in": 151,
             "tokens_out": 200,
-            "usd": 0.0001425
+            "usd": 0.0001426
           }
         },
         "llamaindex": {
           "intake": {
-            "time_ms": 3639,
+            "time_ms": 4174,
             "tokens_in": 405,
-            "tokens_out": 200,
-            "usd": 0.0001807
+            "tokens_out": 189,
+            "usd": 0.0001741
           },
           "review": {
-            "time_ms": 3073,
-            "tokens_in": 532,
-            "tokens_out": 470,
-            "usd": 0.0003618
+            "time_ms": 2260,
+            "tokens_in": 540,
+            "tokens_out": 435,
+            "usd": 0.000342
           },
           "challenge": {
-            "time_ms": 4169,
-            "tokens_in": 554,
+            "time_ms": 3739,
+            "tokens_in": 518,
             "tokens_out": 200,
-            "usd": 0.0002031
+            "usd": 0.0001977
           },
           "synthesis": {
-            "time_ms": 9474,
-            "tokens_in": 171,
-            "tokens_out": 206,
-            "usd": 0.0001492
+            "time_ms": 3421,
+            "tokens_in": 164,
+            "tokens_out": 175,
+            "usd": 0.0001296
           },
           "verdict": {
-            "time_ms": 4322,
-            "tokens_in": 150,
-            "tokens_out": 180,
-            "usd": 0.0001305
+            "time_ms": 3448,
+            "tokens_in": 151,
+            "tokens_out": 200,
+            "usd": 0.0001426
           }
         },
         "pydanticai": {
           "intake": {
-            "time_ms": 10046,
+            "time_ms": 8320,
             "tokens_in": 400,
-            "tokens_out": 559,
-            "usd": 0.0003954
+            "tokens_out": 509,
+            "usd": 0.0003654
           },
           "review": {
-            "time_ms": 37644,
-            "tokens_in": 516,
-            "tokens_out": 2049,
-            "usd": 0.0013068
+            "time_ms": 27560,
+            "tokens_in": 548,
+            "tokens_out": 1563,
+            "usd": 0.00102
           },
           "challenge": {
-            "time_ms": 13533,
-            "tokens_in": 2131,
-            "tokens_out": 630,
-            "usd": 0.0006976
+            "time_ms": 6354,
+            "tokens_in": 1645,
+            "tokens_out": 471,
+            "usd": 0.0005294
           },
           "synthesis": {
-            "time_ms": 6200,
-            "tokens_in": 164,
-            "tokens_out": 344,
-            "usd": 0.000231
+            "time_ms": 1816,
+            "tokens_in": 169,
+            "tokens_out": 108,
+            "usd": 9.01e-05
           },
           "verdict": {
-            "time_ms": 7009,
-            "tokens_in": 150,
-            "tokens_out": 391,
-            "usd": 0.0002571
+            "time_ms": 3411,
+            "tokens_in": 148,
+            "tokens_out": 234,
+            "usd": 0.0001626
+          }
+        },
+        "claude-agent-sdk": {
+          "intake": {
+            "time_ms": 12360,
+            "tokens_in": 20756,
+            "tokens_out": 572,
+            "usd": 0.0366573
+          },
+          "review": {
+            "time_ms": 13454,
+            "tokens_in": 20924,
+            "tokens_out": 527,
+            "usd": 0.0365823
+          },
+          "challenge": {
+            "time_ms": 16095,
+            "tokens_in": 21054,
+            "tokens_out": 858,
+            "usd": 0.0456698
+          },
+          "synthesis": {
+            "time_ms": 8833,
+            "tokens_in": 20794,
+            "tokens_out": 480,
+            "usd": 0.0345948
+          },
+          "verdict": {
+            "time_ms": 11653,
+            "tokens_in": 20622,
+            "tokens_out": 307,
+            "usd": 0.0291947
           }
         }
       }
     }
+  },
+  "failures": {
+    "retention": {},
+    "sharing": {},
+    "rights": {}
   }
 }

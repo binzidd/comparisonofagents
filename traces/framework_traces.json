@@ -3,13 +3,14 @@
   "execution_mode": "mixed",
   "real_frameworks": [
     "ag2",
+    "claude-agent-sdk",
     "langgraph",
     "llamaindex",
     "mastra",
     "openai-agents",
     "pydanticai"
   ],
-  "note": "Metrics for ['ag2', 'langgraph', 'llamaindex', 'mastra', 'openai-agents', 'pydanticai'] are from real SDK runs (model: gpt-4o-mini). All other metrics are simulated Python harnesses.",
+  "note": "Metrics for ['ag2', 'claude-agent-sdk', 'langgraph', 'llamaindex', 'mastra', 'openai-agents', 'pydanticai'] are from real SDK runs (models: openai: gpt-4o-mini, claude-agent-sdk: sonnet). All other metrics are deterministic, question-aware Python harness estimates.",
   "questions": {
     "retention": {
       "frameworks": {
@@ -54,7 +55,7 @@
                 }
               },
               "metrics": {
-                "time_ms": 3958,
+                "time_ms": 5535,
                 "token_input_estimate": 398,
                 "token_output_estimate": 200,
                 "token_total_estimate": 598,
@@ -116,10 +117,10 @@
                 }
               },
               "metrics": {
-                "time_ms": 3555,
-                "token_input_estimate": 508,
-                "token_output_estimate": 361,
-                "token_total_estimate": 869,
+                "time_ms": 3278,
+                "token_input_estimate": 488,
+                "token_output_estimate": 369,
+                "token_total_estimate": 857,
                 "usd_cost_estimate": 0.00029
               },
               "output": {
@@ -181,10 +182,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4371,
-                "token_input_estimate": 434,
+                "time_ms": 4051,
+                "token_input_estimate": 442,
                 "token_output_estimate": 200,
-                "token_total_estimate": 634,
+                "token_total_estimate": 642,
                 "usd_cost_estimate": 0.00019
               },
               "output": {
@@ -229,10 +230,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 1771,
-                "token_input_estimate": 166,
-                "token_output_estimate": 61,
-                "token_total_estimate": 227,
+                "time_ms": 2148,
+                "token_input_estimate": 168,
+                "token_output_estimate": 60,
+                "token_total_estimate": 228,
                 "usd_cost_estimate": 6e-05
               },
               "output": {
@@ -275,11 +276,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2566,
-                "token_input_estimate": 126,
-                "token_output_estimate": 78,
-                "token_total_estimate": 204,
-                "usd_cost_estimate": 7e-05
+                "time_ms": 3076,
+                "token_input_estimate": 125,
+                "token_output_estimate": 97,
+                "token_total_estimate": 222,
+                "usd_cost_estimate": 8e-05
               },
               "output": {
                 "answer": "Yes, but only under the retention exceptions the graph gathered: GitHub can keep personal data for contracts, legal duties, disputes, and agreement enforcement, and the period depends on purpose.",
@@ -328,11 +329,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 9610,
+                "time_ms": 8767,
                 "token_input_estimate": 393,
-                "token_output_estimate": 408,
-                "token_total_estimate": 801,
-                "usd_cost_estimate": 0.0003
+                "token_output_estimate": 422,
+                "token_total_estimate": 815,
+                "usd_cost_estimate": 0.00031
               },
               "output": {
                 "status": "case_opened",
@@ -390,11 +391,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 34618,
-                "token_input_estimate": 417,
-                "token_output_estimate": 1502,
-                "token_total_estimate": 1919,
-                "usd_cost_estimate": 0.00096
+                "time_ms": 88152,
+                "token_input_estimate": 410,
+                "token_output_estimate": 1733,
+                "token_total_estimate": 2143,
+                "usd_cost_estimate": 0.0011
               },
               "output": {
                 "specialist_findings": 3,
@@ -445,10 +446,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 17406,
-                "token_input_estimate": 1569,
-                "token_output_estimate": 609,
-                "token_total_estimate": 2178,
+                "time_ms": 14233,
+                "token_input_estimate": 1800,
+                "token_output_estimate": 550,
+                "token_total_estimate": 2350,
                 "usd_cost_estimate": 0.0006
               },
               "output": {
@@ -493,11 +494,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 1924,
-                "token_input_estimate": 151,
-                "token_output_estimate": 105,
-                "token_total_estimate": 256,
-                "usd_cost_estimate": 9e-05
+                "time_ms": 3869,
+                "token_input_estimate": 153,
+                "token_output_estimate": 141,
+                "token_total_estimate": 294,
+                "usd_cost_estimate": 0.00011
               },
               "output": {
                 "draft_answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
@@ -539,11 +540,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 3459,
-                "token_input_estimate": 131,
-                "token_output_estimate": 160,
-                "token_total_estimate": 291,
-                "usd_cost_estimate": 0.00012
+                "time_ms": 3045,
+                "token_input_estimate": 133,
+                "token_output_estimate": 153,
+                "token_total_estimate": 286,
+                "usd_cost_estimate": 0.00011
               },
               "output": {
                 "answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
@@ -552,6 +553,285 @@
                   "rights"
                 ],
                 "confidence": 0.81
+              }
+            }
+          }
+        },
+        "claude-agent-sdk": {
+          "stages": {
+            "intake": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal"
+              ],
+              "active_links": [
+                "principal-compliance",
+                "principal-security"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-compliance",
+                  "message": "Claude session opened \u00b7 retention"
+                },
+                {
+                  "link_id": "principal-security",
+                  "message": "Claude session opened \u00b7 retention"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "Can GitHub retain personal data after an account is closed, and under what conditions?",
+                "clauses": [
+                  "retention",
+                  "rights"
+                ],
+                "stage": "intake",
+                "framework": "claude-agent-sdk",
+                "loaded": {
+                  "policy_text": true,
+                  "question_bank": true
+                },
+                "principal_packet": {
+                  "question_id": "Can GitHub retain person",
+                  "needs_review": true
+                }
+              },
+              "metrics": {
+                "time_ms": 15034,
+                "token_input_estimate": 20747,
+                "token_output_estimate": 626,
+                "token_total_estimate": 21373,
+                "usd_cost_estimate": 0.03795
+              },
+              "output": {
+                "status": "case_opened",
+                "runtime": "python-harness:claude-session"
+              }
+            },
+            "review": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "compliance",
+                "security",
+                "legal",
+                "finance"
+              ],
+              "active_links": [
+                "principal-compliance",
+                "principal-security",
+                "principal-legal",
+                "principal-finance"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-compliance",
+                  "message": "session streams specialist findings \u00b7 retention"
+                },
+                {
+                  "link_id": "principal-security",
+                  "message": "session streams specialist findings \u00b7 retention"
+                },
+                {
+                  "link_id": "principal-legal",
+                  "message": "session streams specialist findings \u00b7 retention"
+                },
+                {
+                  "link_id": "principal-finance",
+                  "message": "session streams specialist findings \u00b7 retention"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "Can GitHub retain personal data after an account is closed, and under what conditions?",
+                "clauses": [
+                  "retention",
+                  "rights"
+                ],
+                "stage": "review",
+                "framework": "claude-agent-sdk",
+                "findings": {
+                  "compliance": "retention clause extracted",
+                  "security": "exception path checked",
+                  "legal": "wording and caveats extracted",
+                  "data_ops": "retention lifecycle implications added"
+                }
+              },
+              "metrics": {
+                "time_ms": 14528,
+                "token_input_estimate": 20896,
+                "token_output_estimate": 492,
+                "token_total_estimate": 21388,
+                "usd_cost_estimate": 0.03553
+              },
+              "output": {
+                "specialist_findings": 4,
+                "status": "review_complete",
+                "review_shape": "claude_session"
+              }
+            },
+            "challenge": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "compliance",
+                "security",
+                "legal",
+                "finance",
+                "reviewer"
+              ],
+              "active_links": [
+                "compliance-reviewer",
+                "security-reviewer",
+                "legal-reviewer",
+                "finance-reviewer"
+              ],
+              "messages": [
+                {
+                  "link_id": "compliance-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 retention"
+                },
+                {
+                  "link_id": "security-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 retention"
+                },
+                {
+                  "link_id": "legal-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 retention"
+                },
+                {
+                  "link_id": "finance-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 retention"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "Can GitHub retain personal data after an account is closed, and under what conditions?",
+                "clauses": [
+                  "retention",
+                  "rights"
+                ],
+                "stage": "challenge",
+                "framework": "claude-agent-sdk",
+                "reviewer_notes": [
+                  "remove overclaim",
+                  "preserve conditional wording"
+                ],
+                "open_questions": [
+                  "how long retained",
+                  "which exceptions apply"
+                ]
+              },
+              "metrics": {
+                "time_ms": 16099,
+                "token_input_estimate": 21007,
+                "token_output_estimate": 909,
+                "token_total_estimate": 21916,
+                "usd_cost_estimate": 0.04665
+              },
+              "output": {
+                "reviewer_action": "continue_session_with_review",
+                "notes": [
+                  "final response needs clause ids",
+                  "preserve narrow policy wording"
+                ]
+              }
+            },
+            "synthesis": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "reviewer",
+                "security",
+                "legal"
+              ],
+              "active_links": [
+                "reviewer-principal"
+              ],
+              "messages": [
+                {
+                  "link_id": "reviewer-principal",
+                  "message": "principal turn compacts context \u00b7 retention"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "Can GitHub retain personal data after an account is closed, and under what conditions?",
+                "clauses": [
+                  "retention",
+                  "rights"
+                ],
+                "stage": "synthesis",
+                "framework": "claude-agent-sdk",
+                "draft_answer": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
+                "reviewer_notes": [
+                  "keep retention visible in the live session",
+                  "final ResultMessage must preserve reviewer caveat"
+                ]
+              },
+              "metrics": {
+                "time_ms": 12854,
+                "token_input_estimate": 20719,
+                "token_output_estimate": 616,
+                "token_total_estimate": 21335,
+                "usd_cost_estimate": 0.03753
+              },
+              "output": {
+                "draft_answer": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
+                "status": "ready_for_verdict",
+                "merge_style": "claude-session"
+              }
+            },
+            "verdict": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "reviewer",
+                "decision"
+              ],
+              "active_links": [
+                "principal-decision"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-decision",
+                  "message": "ResultMessage closes run \u00b7 retention"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "Can GitHub retain personal data after an account is closed, and under what conditions?",
+                "clauses": [
+                  "retention",
+                  "rights"
+                ],
+                "stage": "verdict",
+                "framework": "claude-agent-sdk",
+                "final_answer": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
+                "confidence": 0.87,
+                "citations": [
+                  "retention",
+                  "rights"
+                ]
+              },
+              "metrics": {
+                "time_ms": 18188,
+                "token_input_estimate": 20583,
+                "token_output_estimate": 788,
+                "token_total_estimate": 21371,
+                "usd_cost_estimate": 0.04098
+              },
+              "output": {
+                "answer": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
+                "citations": [
+                  "retention",
+                  "rights"
+                ],
+                "confidence": 0.87
               }
             }
           }
@@ -597,7 +877,7 @@
                 }
               },
               "metrics": {
-                "time_ms": 4051,
+                "time_ms": 4281,
                 "token_input_estimate": 395,
                 "token_output_estimate": 200,
                 "token_total_estimate": 595,
@@ -659,10 +939,10 @@
                 }
               },
               "metrics": {
-                "time_ms": 8799,
-                "token_input_estimate": 431,
-                "token_output_estimate": 370,
-                "token_total_estimate": 801,
+                "time_ms": 8945,
+                "token_input_estimate": 433,
+                "token_output_estimate": 374,
+                "token_total_estimate": 807,
                 "usd_cost_estimate": 0.00029
               },
               "output": {
@@ -724,10 +1004,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 11250,
-                "token_input_estimate": 606,
+                "time_ms": 11062,
+                "token_input_estimate": 610,
                 "token_output_estimate": 480,
-                "token_total_estimate": 1086,
+                "token_total_estimate": 1090,
                 "usd_cost_estimate": 0.00038
               },
               "output": {
@@ -782,11 +1062,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2353,
-                "token_input_estimate": 180,
-                "token_output_estimate": 108,
-                "token_total_estimate": 288,
-                "usd_cost_estimate": 9e-05
+                "time_ms": 4614,
+                "token_input_estimate": 179,
+                "token_output_estimate": 191,
+                "token_total_estimate": 370,
+                "usd_cost_estimate": 0.00014
               },
               "output": {
                 "draft_answer": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
@@ -833,11 +1113,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4394,
-                "token_input_estimate": 129,
-                "token_output_estimate": 153,
-                "token_total_estimate": 282,
-                "usd_cost_estimate": 0.00011
+                "time_ms": 3080,
+                "token_input_estimate": 139,
+                "token_output_estimate": 173,
+                "token_total_estimate": 312,
+                "usd_cost_estimate": 0.00012
               },
               "output": {
                 "answer": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
@@ -891,11 +1171,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 320,
-                "token_input_estimate": 410,
+                "time_ms": 5084,
+                "token_input_estimate": 418,
                 "token_output_estimate": 58,
-                "token_total_estimate": 468,
-                "usd_cost_estimate": 0.00145
+                "token_total_estimate": 476,
+                "usd_cost_estimate": 0.00148
               },
               "output": {
                 "status": "case_opened",
@@ -953,11 +1233,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1280,
-                "token_input_estimate": 1240,
-                "token_output_estimate": 210,
-                "token_total_estimate": 1450,
-                "usd_cost_estimate": 0.00449
+                "time_ms": 21859,
+                "token_input_estimate": 1327,
+                "token_output_estimate": 220,
+                "token_total_estimate": 1547,
+                "usd_cost_estimate": 0.0048
               },
               "output": {
                 "specialist_findings": 4,
@@ -1018,11 +1298,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 760,
-                "token_input_estimate": 780,
-                "token_output_estimate": 150,
-                "token_total_estimate": 930,
-                "usd_cost_estimate": 0.00288
+                "time_ms": 9286,
+                "token_input_estimate": 811,
+                "token_output_estimate": 147,
+                "token_total_estimate": 958,
+                "usd_cost_estimate": 0.00297
               },
               "output": {
                 "reviewer_action": "return_task_bundle",
@@ -1066,11 +1346,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 470,
-                "token_input_estimate": 560,
-                "token_output_estimate": 185,
-                "token_total_estimate": 745,
-                "usd_cost_estimate": 0.00231
+                "time_ms": 4234,
+                "token_input_estimate": 521,
+                "token_output_estimate": 192,
+                "token_total_estimate": 713,
+                "usd_cost_estimate": 0.00221
               },
               "output": {
                 "draft_answer": "Yes. The manager summary says data retention may continue where contracts, legal obligations, disputes, or agreement enforcement require it, with duration tied to purpose.",
@@ -1112,11 +1392,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 250,
-                "token_input_estimate": 310,
-                "token_output_estimate": 160,
-                "token_total_estimate": 470,
-                "usd_cost_estimate": 0.00146
+                "time_ms": 3931,
+                "token_input_estimate": 316,
+                "token_output_estimate": 149,
+                "token_total_estimate": 465,
+                "usd_cost_estimate": 0.00144
               },
               "output": {
                 "answer": "Yes. The manager summary says data retention may continue where contracts, legal obligations, disputes, or agreement enforcement require it, with duration tied to purpose.",
@@ -1170,11 +1450,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 360,
-                "token_input_estimate": 430,
-                "token_output_estimate": 62,
-                "token_total_estimate": 492,
-                "usd_cost_estimate": 0.00172
+                "time_ms": 4828,
+                "token_input_estimate": 413,
+                "token_output_estimate": 61,
+                "token_total_estimate": 474,
+                "usd_cost_estimate": 0.00166
               },
               "output": {
                 "status": "case_opened",
@@ -1232,11 +1512,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1360,
-                "token_input_estimate": 1280,
-                "token_output_estimate": 220,
-                "token_total_estimate": 1500,
-                "usd_cost_estimate": 0.00525
+                "time_ms": 14310,
+                "token_input_estimate": 1216,
+                "token_output_estimate": 216,
+                "token_total_estimate": 1432,
+                "usd_cost_estimate": 0.00501
               },
               "output": {
                 "specialist_findings": 3,
@@ -1287,11 +1567,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 710,
-                "token_input_estimate": 640,
+                "time_ms": 6864,
+                "token_input_estimate": 646,
                 "token_output_estimate": 140,
-                "token_total_estimate": 780,
-                "usd_cost_estimate": 0.00273
+                "token_total_estimate": 786,
+                "usd_cost_estimate": 0.00275
               },
               "output": {
                 "reviewer_action": "fail_governance_gate",
@@ -1335,10 +1615,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 500,
+                "time_ms": 3754,
                 "token_input_estimate": 590,
-                "token_output_estimate": 180,
-                "token_total_estimate": 770,
+                "token_output_estimate": 178,
+                "token_total_estimate": 768,
                 "usd_cost_estimate": 0.00269
               },
               "output": {
@@ -1381,11 +1661,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 270,
-                "token_input_estimate": 300,
-                "token_output_estimate": 155,
-                "token_total_estimate": 455,
-                "usd_cost_estimate": 0.00159
+                "time_ms": 3698,
+                "token_input_estimate": 285,
+                "token_output_estimate": 167,
+                "token_total_estimate": 452,
+                "usd_cost_estimate": 0.00158
               },
               "output": {
                 "answer": "Yes, subject to the governed caveat that retention remains purpose-bound: GitHub may keep data for contracts, legal duties, disputes, and agreement enforcement.",
@@ -1434,11 +1714,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 4203,
+                "time_ms": 2522,
                 "token_input_estimate": 398,
-                "token_output_estimate": 124,
-                "token_total_estimate": 522,
-                "usd_cost_estimate": 0.00013
+                "token_output_estimate": 165,
+                "token_total_estimate": 563,
+                "usd_cost_estimate": 0.00016
               },
               "output": {
                 "status": "case_opened",
@@ -1496,11 +1776,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 2799,
-                "token_input_estimate": 484,
-                "token_output_estimate": 366,
-                "token_total_estimate": 850,
-                "usd_cost_estimate": 0.00029
+                "time_ms": 2345,
+                "token_input_estimate": 492,
+                "token_output_estimate": 376,
+                "token_total_estimate": 868,
+                "usd_cost_estimate": 0.0003
               },
               "output": {
                 "specialist_findings": 3,
@@ -1551,10 +1831,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 5201,
-                "token_input_estimate": 442,
+                "time_ms": 4030,
+                "token_input_estimate": 452,
                 "token_output_estimate": 200,
-                "token_total_estimate": 642,
+                "token_total_estimate": 652,
                 "usd_cost_estimate": 0.00019
               },
               "output": {
@@ -1599,11 +1879,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2349,
-                "token_input_estimate": 153,
-                "token_output_estimate": 90,
-                "token_total_estimate": 243,
-                "usd_cost_estimate": 8e-05
+                "time_ms": 2075,
+                "token_input_estimate": 148,
+                "token_output_estimate": 106,
+                "token_total_estimate": 254,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
                 "draft_answer": "Yes. The aggregated evidence points to continued retention for contracts, legal obligations, disputes, and agreement enforcement, with no single universal retention period.",
@@ -1645,10 +1925,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2807,
-                "token_input_estimate": 132,
-                "token_output_estimate": 125,
-                "token_total_estimate": 257,
+                "time_ms": 2286,
+                "token_input_estimate": 131,
+                "token_output_estimate": 119,
+                "token_total_estimate": 250,
                 "usd_cost_estimate": 9e-05
               },
               "output": {
@@ -1972,11 +2252,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 12342,
+                "time_ms": 7072,
                 "token_input_estimate": 393,
-                "token_output_estimate": 454,
-                "token_total_estimate": 847,
-                "usd_cost_estimate": 0.00033
+                "token_output_estimate": 404,
+                "token_total_estimate": 797,
+                "usd_cost_estimate": 0.0003
               },
               "output": {
                 "status": "case_opened",
@@ -2034,11 +2314,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 36294,
-                "token_input_estimate": 468,
-                "token_output_estimate": 1806,
-                "token_total_estimate": 2274,
-                "usd_cost_estimate": 0.00115
+                "time_ms": 18343,
+                "token_input_estimate": 476,
+                "token_output_estimate": 903,
+                "token_total_estimate": 1379,
+                "usd_cost_estimate": 0.00061
               },
               "output": {
                 "specialist_findings": 3,
@@ -2094,11 +2374,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 9639,
-                "token_input_estimate": 1881,
-                "token_output_estimate": 565,
-                "token_total_estimate": 2446,
-                "usd_cost_estimate": 0.00062
+                "time_ms": 6968,
+                "token_input_estimate": 978,
+                "token_output_estimate": 439,
+                "token_total_estimate": 1417,
+                "usd_cost_estimate": 0.00041
               },
               "output": {
                 "reviewer_action": "model_validation_reject",
@@ -2142,11 +2422,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2987,
-                "token_input_estimate": 155,
-                "token_output_estimate": 215,
-                "token_total_estimate": 370,
-                "usd_cost_estimate": 0.00015
+                "time_ms": 2667,
+                "token_input_estimate": 151,
+                "token_output_estimate": 84,
+                "token_total_estimate": 235,
+                "usd_cost_estimate": 7e-05
               },
               "output": {
                 "draft_answer": "Yes. The validated answer model keeps the condition explicit: retention may continue for contracts, legal obligations, disputes, or agreement enforcement, and duration depends on purpose.",
@@ -2188,11 +2468,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 5484,
-                "token_input_estimate": 137,
-                "token_output_estimate": 201,
-                "token_total_estimate": 338,
-                "usd_cost_estimate": 0.00014
+                "time_ms": 3242,
+                "token_input_estimate": 131,
+                "token_output_estimate": 182,
+                "token_total_estimate": 313,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "answer": "Yes. The validated answer model keeps the condition explicit: retention may continue for contracts, legal obligations, disputes, or agreement enforcement, and duration depends on purpose.",
@@ -2251,7 +2531,7 @@
                 }
               },
               "metrics": {
-                "time_ms": 3807,
+                "time_ms": 6328,
                 "token_input_estimate": 398,
                 "token_output_estimate": 200,
                 "token_total_estimate": 598,
@@ -2314,11 +2594,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 2854,
-                "token_input_estimate": 504,
-                "token_output_estimate": 396,
-                "token_total_estimate": 900,
-                "usd_cost_estimate": 0.00031
+                "time_ms": 2242,
+                "token_input_estimate": 512,
+                "token_output_estimate": 364,
+                "token_total_estimate": 876,
+                "usd_cost_estimate": 0.0003
               },
               "output": {
                 "specialist_findings": 5,
@@ -2380,10 +2660,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4285,
-                "token_input_estimate": 469,
+                "time_ms": 3714,
+                "token_input_estimate": 437,
                 "token_output_estimate": 200,
-                "token_total_estimate": 669,
+                "token_total_estimate": 637,
                 "usd_cost_estimate": 0.00019
               },
               "output": {
@@ -2429,11 +2709,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2582,
-                "token_input_estimate": 167,
-                "token_output_estimate": 136,
-                "token_total_estimate": 303,
-                "usd_cost_estimate": 0.00011
+                "time_ms": 2073,
+                "token_input_estimate": 172,
+                "token_output_estimate": 89,
+                "token_total_estimate": 261,
+                "usd_cost_estimate": 8e-05
               },
               "output": {
                 "draft_answer": "GitHub may share personal data with affiliates, organization accounts, competent authorities, fraud-prevention parties, and third-party apps when the user directs that sharing.",
@@ -2478,10 +2758,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4791,
-                "token_input_estimate": 151,
-                "token_output_estimate": 171,
-                "token_total_estimate": 322,
+                "time_ms": 3227,
+                "token_input_estimate": 131,
+                "token_output_estimate": 180,
+                "token_total_estimate": 311,
                 "usd_cost_estimate": 0.00013
               },
               "output": {
@@ -2534,11 +2814,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 9502,
+                "time_ms": 8674,
                 "token_input_estimate": 393,
-                "token_output_estimate": 500,
-                "token_total_estimate": 893,
-                "usd_cost_estimate": 0.00036
+                "token_output_estimate": 411,
+                "token_total_estimate": 804,
+                "usd_cost_estimate": 0.00031
               },
               "output": {
                 "status": "case_opened",
@@ -2597,11 +2877,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 40370,
-                "token_input_estimate": 416,
-                "token_output_estimate": 1779,
-                "token_total_estimate": 2195,
-                "usd_cost_estimate": 0.00113
+                "time_ms": 40812,
+                "token_input_estimate": 413,
+                "token_output_estimate": 1842,
+                "token_total_estimate": 2255,
+                "usd_cost_estimate": 0.00117
               },
               "output": {
                 "specialist_findings": 4,
@@ -2653,11 +2933,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 12208,
-                "token_input_estimate": 1846,
-                "token_output_estimate": 571,
-                "token_total_estimate": 2417,
-                "usd_cost_estimate": 0.00062
+                "time_ms": 22994,
+                "token_input_estimate": 1909,
+                "token_output_estimate": 633,
+                "token_total_estimate": 2542,
+                "usd_cost_estimate": 0.00067
               },
               "output": {
                 "reviewer_action": "reject_handoff",
@@ -2702,7 +2982,7 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4618,
+                "time_ms": 5979,
                 "token_input_estimate": 152,
                 "token_output_estimate": 198,
                 "token_total_estimate": 350,
@@ -2750,11 +3030,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 5383,
+                "time_ms": 6461,
                 "token_input_estimate": 135,
-                "token_output_estimate": 273,
-                "token_total_estimate": 408,
-                "usd_cost_estimate": 0.00018
+                "token_output_estimate": 256,
+                "token_total_estimate": 391,
+                "usd_cost_estimate": 0.00017
               },
               "output": {
                 "answer": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
@@ -2764,6 +3044,294 @@
                   "private_repos"
                 ],
                 "confidence": 0.81
+              }
+            }
+          }
+        },
+        "claude-agent-sdk": {
+          "stages": {
+            "intake": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal"
+              ],
+              "active_links": [
+                "principal-compliance",
+                "principal-security"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-compliance",
+                  "message": "Claude session opened \u00b7 sharing"
+                },
+                {
+                  "link_id": "principal-security",
+                  "message": "Claude session opened \u00b7 sharing"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "When may GitHub share personal data with third parties, affiliates, or public authorities?",
+                "clauses": [
+                  "sharing",
+                  "transfers",
+                  "private_repos"
+                ],
+                "stage": "intake",
+                "framework": "claude-agent-sdk",
+                "loaded": {
+                  "policy_text": true,
+                  "question_bank": true
+                },
+                "principal_packet": {
+                  "question_id": "When may GitHub share pe",
+                  "needs_review": true
+                }
+              },
+              "metrics": {
+                "time_ms": 11736,
+                "token_input_estimate": 20748,
+                "token_output_estimate": 550,
+                "token_total_estimate": 21298,
+                "usd_cost_estimate": 0.03606
+              },
+              "output": {
+                "status": "case_opened",
+                "runtime": "python-harness:claude-session"
+              }
+            },
+            "review": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "compliance",
+                "security",
+                "legal",
+                "finance"
+              ],
+              "active_links": [
+                "principal-compliance",
+                "principal-security",
+                "principal-legal",
+                "principal-finance"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-compliance",
+                  "message": "session streams specialist findings \u00b7 sharing"
+                },
+                {
+                  "link_id": "principal-security",
+                  "message": "session streams specialist findings \u00b7 sharing"
+                },
+                {
+                  "link_id": "principal-legal",
+                  "message": "session streams specialist findings \u00b7 sharing"
+                },
+                {
+                  "link_id": "principal-finance",
+                  "message": "session streams specialist findings \u00b7 sharing"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "When may GitHub share personal data with third parties, affiliates, or public authorities?",
+                "clauses": [
+                  "sharing",
+                  "transfers",
+                  "private_repos"
+                ],
+                "stage": "review",
+                "framework": "claude-agent-sdk",
+                "findings": {
+                  "compliance": "sharing clause extracted",
+                  "security": "exception path checked",
+                  "legal": "wording and caveats extracted",
+                  "data_ops": "retention lifecycle implications added"
+                }
+              },
+              "metrics": {
+                "time_ms": 9358,
+                "token_input_estimate": 20899,
+                "token_output_estimate": 351,
+                "token_total_estimate": 21250,
+                "usd_cost_estimate": 0.03203
+              },
+              "output": {
+                "specialist_findings": 5,
+                "status": "review_complete",
+                "review_shape": "claude_session"
+              }
+            },
+            "challenge": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "compliance",
+                "security",
+                "legal",
+                "finance",
+                "reviewer"
+              ],
+              "active_links": [
+                "compliance-reviewer",
+                "security-reviewer",
+                "legal-reviewer",
+                "finance-reviewer"
+              ],
+              "messages": [
+                {
+                  "link_id": "compliance-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 sharing"
+                },
+                {
+                  "link_id": "security-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 sharing"
+                },
+                {
+                  "link_id": "legal-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 sharing"
+                },
+                {
+                  "link_id": "finance-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 sharing"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "When may GitHub share personal data with third parties, affiliates, or public authorities?",
+                "clauses": [
+                  "sharing",
+                  "transfers",
+                  "private_repos"
+                ],
+                "stage": "challenge",
+                "framework": "claude-agent-sdk",
+                "reviewer_notes": [
+                  "remove overclaim",
+                  "preserve conditional wording"
+                ],
+                "open_questions": [
+                  "how long retained",
+                  "which exceptions apply"
+                ]
+              },
+              "metrics": {
+                "time_ms": 27204,
+                "token_input_estimate": 21009,
+                "token_output_estimate": 1537,
+                "token_total_estimate": 22546,
+                "usd_cost_estimate": 0.06236
+              },
+              "output": {
+                "reviewer_action": "continue_session_with_review",
+                "notes": [
+                  "final response needs clause ids",
+                  "preserve narrow policy wording"
+                ]
+              }
+            },
+            "synthesis": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "reviewer",
+                "security",
+                "legal"
+              ],
+              "active_links": [
+                "reviewer-principal"
+              ],
+              "messages": [
+                {
+                  "link_id": "reviewer-principal",
+                  "message": "principal turn compacts context \u00b7 sharing"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "When may GitHub share personal data with third parties, affiliates, or public authorities?",
+                "clauses": [
+                  "sharing",
+                  "transfers",
+                  "private_repos"
+                ],
+                "stage": "synthesis",
+                "framework": "claude-agent-sdk",
+                "draft_answer": "The Claude agent loop keeps sharing scoped to affiliates, organization accounts, lawful authorities, abuse-prevention entities, and user-directed third-party applications.",
+                "reviewer_notes": [
+                  "keep sharing visible in the live session",
+                  "final ResultMessage must preserve reviewer caveat"
+                ]
+              },
+              "metrics": {
+                "time_ms": 7327,
+                "token_input_estimate": 20736,
+                "token_output_estimate": 385,
+                "token_total_estimate": 21121,
+                "usd_cost_estimate": 0.03186
+              },
+              "output": {
+                "draft_answer": "The Claude agent loop keeps sharing scoped to affiliates, organization accounts, lawful authorities, abuse-prevention entities, and user-directed third-party applications.",
+                "status": "ready_for_verdict",
+                "merge_style": "claude-session"
+              }
+            },
+            "verdict": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "reviewer",
+                "decision"
+              ],
+              "active_links": [
+                "principal-decision"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-decision",
+                  "message": "ResultMessage closes run \u00b7 sharing"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "When may GitHub share personal data with third parties, affiliates, or public authorities?",
+                "clauses": [
+                  "sharing",
+                  "transfers",
+                  "private_repos"
+                ],
+                "stage": "verdict",
+                "framework": "claude-agent-sdk",
+                "final_answer": "The Claude agent loop keeps sharing scoped to affiliates, organization accounts, lawful authorities, abuse-prevention entities, and user-directed third-party applications.",
+                "confidence": 0.87,
+                "citations": [
+                  "sharing",
+                  "transfers",
+                  "private_repos",
+                  "rights"
+                ]
+              },
+              "metrics": {
+                "time_ms": 12077,
+                "token_input_estimate": 20580,
+                "token_output_estimate": 572,
+                "token_total_estimate": 21152,
+                "usd_cost_estimate": 0.03556
+              },
+              "output": {
+                "answer": "The Claude agent loop keeps sharing scoped to affiliates, organization accounts, lawful authorities, abuse-prevention entities, and user-directed third-party applications.",
+                "citations": [
+                  "sharing",
+                  "transfers",
+                  "private_repos",
+                  "rights"
+                ],
+                "confidence": 0.87
               }
             }
           }
@@ -2810,7 +3378,7 @@
                 }
               },
               "metrics": {
-                "time_ms": 3568,
+                "time_ms": 4885,
                 "token_input_estimate": 395,
                 "token_output_estimate": 200,
                 "token_total_estimate": 595,
@@ -2873,10 +3441,10 @@
                 }
               },
               "metrics": {
-                "time_ms": 10965,
-                "token_input_estimate": 429,
-                "token_output_estimate": 425,
-                "token_total_estimate": 854,
+                "time_ms": 9880,
+                "token_input_estimate": 430,
+                "token_output_estimate": 422,
+                "token_total_estimate": 852,
                 "usd_cost_estimate": 0.00032
               },
               "output": {
@@ -2939,10 +3507,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 10886,
-                "token_input_estimate": 661,
+                "time_ms": 12695,
+                "token_input_estimate": 658,
                 "token_output_estimate": 480,
-                "token_total_estimate": 1141,
+                "token_total_estimate": 1138,
                 "usd_cost_estimate": 0.00039
               },
               "output": {
@@ -2998,11 +3566,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2724,
-                "token_input_estimate": 177,
-                "token_output_estimate": 130,
-                "token_total_estimate": 307,
-                "usd_cost_estimate": 0.0001
+                "time_ms": 3759,
+                "token_input_estimate": 178,
+                "token_output_estimate": 147,
+                "token_total_estimate": 325,
+                "usd_cost_estimate": 0.00011
               },
               "output": {
                 "draft_answer": "The debate outcome is that sharing is conditional rather than open-ended: GitHub may share with affiliates, organization accounts, authorities, fraud-prevention entities, and third-party apps under user instruction.",
@@ -3050,10 +3618,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2687,
-                "token_input_estimate": 138,
+                "time_ms": 2559,
+                "token_input_estimate": 137,
                 "token_output_estimate": 120,
-                "token_total_estimate": 258,
+                "token_total_estimate": 257,
                 "usd_cost_estimate": 9e-05
               },
               "output": {
@@ -3109,11 +3677,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 320,
-                "token_input_estimate": 410,
-                "token_output_estimate": 58,
-                "token_total_estimate": 468,
-                "usd_cost_estimate": 0.00145
+                "time_ms": 5091,
+                "token_input_estimate": 404,
+                "token_output_estimate": 66,
+                "token_total_estimate": 470,
+                "usd_cost_estimate": 0.00146
               },
               "output": {
                 "status": "case_opened",
@@ -3172,11 +3740,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1280,
-                "token_input_estimate": 1240,
-                "token_output_estimate": 210,
-                "token_total_estimate": 1450,
-                "usd_cost_estimate": 0.00449
+                "time_ms": 27942,
+                "token_input_estimate": 1380,
+                "token_output_estimate": 227,
+                "token_total_estimate": 1607,
+                "usd_cost_estimate": 0.00498
               },
               "output": {
                 "specialist_findings": 5,
@@ -3238,11 +3806,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 760,
-                "token_input_estimate": 780,
-                "token_output_estimate": 150,
-                "token_total_estimate": 930,
-                "usd_cost_estimate": 0.00288
+                "time_ms": 11644,
+                "token_input_estimate": 827,
+                "token_output_estimate": 175,
+                "token_total_estimate": 1002,
+                "usd_cost_estimate": 0.00311
               },
               "output": {
                 "reviewer_action": "return_task_bundle",
@@ -3287,11 +3855,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 470,
-                "token_input_estimate": 560,
-                "token_output_estimate": 185,
-                "token_total_estimate": 745,
-                "usd_cost_estimate": 0.00231
+                "time_ms": 4984,
+                "token_input_estimate": 594,
+                "token_output_estimate": 216,
+                "token_total_estimate": 810,
+                "usd_cost_estimate": 0.00251
               },
               "output": {
                 "draft_answer": "Yes, but under scoped pathways. Crew outputs point to affiliates, organization accounts, authorities, abuse-prevention actors, and instructed third-party applications.",
@@ -3335,11 +3903,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 250,
-                "token_input_estimate": 310,
-                "token_output_estimate": 160,
-                "token_total_estimate": 470,
-                "usd_cost_estimate": 0.00146
+                "time_ms": 4109,
+                "token_input_estimate": 319,
+                "token_output_estimate": 176,
+                "token_total_estimate": 495,
+                "usd_cost_estimate": 0.00153
               },
               "output": {
                 "answer": "Yes, but under scoped pathways. Crew outputs point to affiliates, organization accounts, authorities, abuse-prevention actors, and instructed third-party applications.",
@@ -3395,11 +3963,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 360,
-                "token_input_estimate": 430,
-                "token_output_estimate": 62,
-                "token_total_estimate": 492,
-                "usd_cost_estimate": 0.00172
+                "time_ms": 4902,
+                "token_input_estimate": 479,
+                "token_output_estimate": 70,
+                "token_total_estimate": 549,
+                "usd_cost_estimate": 0.00192
               },
               "output": {
                 "status": "case_opened",
@@ -3458,11 +4026,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1360,
-                "token_input_estimate": 1280,
-                "token_output_estimate": 220,
-                "token_total_estimate": 1500,
-                "usd_cost_estimate": 0.00525
+                "time_ms": 15574,
+                "token_input_estimate": 1275,
+                "token_output_estimate": 223,
+                "token_total_estimate": 1498,
+                "usd_cost_estimate": 0.00524
               },
               "output": {
                 "specialist_findings": 4,
@@ -3514,11 +4082,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 710,
-                "token_input_estimate": 640,
-                "token_output_estimate": 140,
-                "token_total_estimate": 780,
-                "usd_cost_estimate": 0.00273
+                "time_ms": 7295,
+                "token_input_estimate": 665,
+                "token_output_estimate": 142,
+                "token_total_estimate": 807,
+                "usd_cost_estimate": 0.00282
               },
               "output": {
                 "reviewer_action": "fail_governance_gate",
@@ -3563,11 +4131,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 500,
-                "token_input_estimate": 590,
-                "token_output_estimate": 180,
-                "token_total_estimate": 770,
-                "usd_cost_estimate": 0.00269
+                "time_ms": 4464,
+                "token_input_estimate": 675,
+                "token_output_estimate": 202,
+                "token_total_estimate": 877,
+                "usd_cost_estimate": 0.00307
               },
               "output": {
                 "draft_answer": "The governed answer distinguishes user-directed sharing from authority-driven disclosure, and includes affiliates, organization accounts, and anti-abuse disclosures.",
@@ -3612,11 +4180,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 270,
-                "token_input_estimate": 300,
-                "token_output_estimate": 155,
-                "token_total_estimate": 455,
-                "usd_cost_estimate": 0.00159
+                "time_ms": 3909,
+                "token_input_estimate": 343,
+                "token_output_estimate": 169,
+                "token_total_estimate": 512,
+                "usd_cost_estimate": 0.00179
               },
               "output": {
                 "answer": "The governed answer distinguishes user-directed sharing from authority-driven disclosure, and includes affiliates, organization accounts, and anti-abuse disclosures.",
@@ -3668,11 +4236,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 4493,
+                "time_ms": 3802,
                 "token_input_estimate": 398,
-                "token_output_estimate": 200,
-                "token_total_estimate": 598,
-                "usd_cost_estimate": 0.00018
+                "token_output_estimate": 190,
+                "token_total_estimate": 588,
+                "usd_cost_estimate": 0.00017
               },
               "output": {
                 "status": "case_opened",
@@ -3731,10 +4299,10 @@
                 }
               },
               "metrics": {
-                "time_ms": 2938,
+                "time_ms": 3247,
                 "token_input_estimate": 488,
-                "token_output_estimate": 421,
-                "token_total_estimate": 909,
+                "token_output_estimate": 426,
+                "token_total_estimate": 914,
                 "usd_cost_estimate": 0.00033
               },
               "output": {
@@ -3787,11 +4355,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4394,
-                "token_input_estimate": 497,
+                "time_ms": 4054,
+                "token_input_estimate": 501,
                 "token_output_estimate": 200,
-                "token_total_estimate": 697,
-                "usd_cost_estimate": 0.00019
+                "token_total_estimate": 701,
+                "usd_cost_estimate": 0.0002
               },
               "output": {
                 "reviewer_action": "emit_followup_event",
@@ -3836,11 +4404,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2422,
+                "time_ms": 3003,
                 "token_input_estimate": 147,
-                "token_output_estimate": 92,
-                "token_total_estimate": 239,
-                "usd_cost_estimate": 8e-05
+                "token_output_estimate": 123,
+                "token_total_estimate": 270,
+                "usd_cost_estimate": 0.0001
               },
               "output": {
                 "draft_answer": "The evidence pipeline supports sharing with affiliates, organization accounts, competent authorities, anti-abuse actors, and third-party apps when instructed by the user.",
@@ -3884,10 +4452,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2799,
-                "token_input_estimate": 125,
-                "token_output_estimate": 156,
-                "token_total_estimate": 281,
+                "time_ms": 3719,
+                "token_input_estimate": 139,
+                "token_output_estimate": 152,
+                "token_total_estimate": 291,
                 "usd_cost_estimate": 0.00011
               },
               "output": {
@@ -4220,11 +4788,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 6280,
+                "time_ms": 8639,
                 "token_input_estimate": 393,
-                "token_output_estimate": 407,
-                "token_total_estimate": 800,
-                "usd_cost_estimate": 0.0003
+                "token_output_estimate": 446,
+                "token_total_estimate": 839,
+                "usd_cost_estimate": 0.00033
               },
               "output": {
                 "status": "case_opened",
@@ -4283,11 +4851,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 27373,
-                "token_input_estimate": 472,
-                "token_output_estimate": 1181,
-                "token_total_estimate": 1653,
-                "usd_cost_estimate": 0.00078
+                "time_ms": 42717,
+                "token_input_estimate": 500,
+                "token_output_estimate": 2044,
+                "token_total_estimate": 2544,
+                "usd_cost_estimate": 0.0013
               },
               "output": {
                 "specialist_findings": 4,
@@ -4344,11 +4912,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 8785,
-                "token_input_estimate": 1256,
-                "token_output_estimate": 493,
-                "token_total_estimate": 1749,
-                "usd_cost_estimate": 0.00048
+                "time_ms": 9954,
+                "token_input_estimate": 2119,
+                "token_output_estimate": 673,
+                "token_total_estimate": 2792,
+                "usd_cost_estimate": 0.00072
               },
               "output": {
                 "reviewer_action": "model_validation_reject",
@@ -4393,10 +4961,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4348,
-                "token_input_estimate": 157,
-                "token_output_estimate": 221,
-                "token_total_estimate": 378,
+                "time_ms": 5732,
+                "token_input_estimate": 154,
+                "token_output_estimate": 226,
+                "token_total_estimate": 380,
                 "usd_cost_estimate": 0.00016
               },
               "output": {
@@ -4442,11 +5010,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4918,
-                "token_input_estimate": 137,
-                "token_output_estimate": 251,
-                "token_total_estimate": 388,
-                "usd_cost_estimate": 0.00017
+                "time_ms": 4404,
+                "token_input_estimate": 135,
+                "token_output_estimate": 222,
+                "token_total_estimate": 357,
+                "usd_cost_estimate": 0.00015
               },
               "output": {
                 "answer": "The validated answer separates lawful disclosure from user-directed sharing, covering affiliates, organization accounts, authorities, anti-abuse parties, and third-party apps.",
@@ -4507,7 +5075,7 @@
                 }
               },
               "metrics": {
-                "time_ms": 8304,
+                "time_ms": 4280,
                 "token_input_estimate": 405,
                 "token_output_estimate": 200,
                 "token_total_estimate": 605,
@@ -4570,11 +5138,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 2612,
-                "token_input_estimate": 532,
-                "token_output_estimate": 397,
-                "token_total_estimate": 929,
-                "usd_cost_estimate": 0.00032
+                "time_ms": 3973,
+                "token_input_estimate": 512,
+                "token_output_estimate": 452,
+                "token_total_estimate": 964,
+                "usd_cost_estimate": 0.00035
               },
               "output": {
                 "specialist_findings": 5,
@@ -4636,11 +5204,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4316,
-                "token_input_estimate": 477,
+                "time_ms": 4015,
+                "token_input_estimate": 532,
                 "token_output_estimate": 200,
-                "token_total_estimate": 677,
-                "usd_cost_estimate": 0.00019
+                "token_total_estimate": 732,
+                "usd_cost_estimate": 0.0002
               },
               "output": {
                 "reviewer_action": "branch_to_revision",
@@ -4685,10 +5253,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 2218,
-                "token_input_estimate": 183,
-                "token_output_estimate": 100,
-                "token_total_estimate": 283,
+                "time_ms": 2246,
+                "token_input_estimate": 190,
+                "token_output_estimate": 99,
+                "token_total_estimate": 289,
                 "usd_cost_estimate": 9e-05
               },
               "output": {
@@ -4733,11 +5301,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 3471,
-                "token_input_estimate": 148,
-                "token_output_estimate": 200,
-                "token_total_estimate": 348,
-                "usd_cost_estimate": 0.00014
+                "time_ms": 3490,
+                "token_input_estimate": 147,
+                "token_output_estimate": 188,
+                "token_total_estimate": 335,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "answer": "Users may have access, correction, erasure in some cases, objection, consent-withdrawal, portability, and region-specific rights; the graph also preserves that some rights depend on applicable law.",
@@ -4788,10 +5356,10 @@
                 }
               },
               "metrics": {
-                "time_ms": 12990,
+                "time_ms": 8780,
                 "token_input_estimate": 400,
-                "token_output_estimate": 485,
-                "token_total_estimate": 885,
+                "token_output_estimate": 491,
+                "token_total_estimate": 891,
                 "usd_cost_estimate": 0.00035
               },
               "output": {
@@ -4851,11 +5419,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 49461,
-                "token_input_estimate": 448,
-                "token_output_estimate": 2607,
-                "token_total_estimate": 3055,
-                "usd_cost_estimate": 0.00163
+                "time_ms": 49481,
+                "token_input_estimate": 451,
+                "token_output_estimate": 2512,
+                "token_total_estimate": 2963,
+                "usd_cost_estimate": 0.00157
               },
               "output": {
                 "specialist_findings": 4,
@@ -4907,11 +5475,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 13566,
-                "token_input_estimate": 2681,
-                "token_output_estimate": 694,
-                "token_total_estimate": 3375,
-                "usd_cost_estimate": 0.00082
+                "time_ms": 12484,
+                "token_input_estimate": 2586,
+                "token_output_estimate": 822,
+                "token_total_estimate": 3408,
+                "usd_cost_estimate": 0.00088
               },
               "output": {
                 "reviewer_action": "reject_handoff",
@@ -4956,11 +5524,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 6846,
-                "token_input_estimate": 165,
-                "token_output_estimate": 372,
-                "token_total_estimate": 537,
-                "usd_cost_estimate": 0.00025
+                "time_ms": 10442,
+                "token_input_estimate": 166,
+                "token_output_estimate": 353,
+                "token_total_estimate": 519,
+                "usd_cost_estimate": 0.00024
               },
               "output": {
                 "draft_answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
@@ -5004,11 +5572,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 6701,
-                "token_input_estimate": 149,
-                "token_output_estimate": 407,
-                "token_total_estimate": 556,
-                "usd_cost_estimate": 0.00027
+                "time_ms": 6710,
+                "token_input_estimate": 144,
+                "token_output_estimate": 382,
+                "token_total_estimate": 526,
+                "usd_cost_estimate": 0.00025
               },
               "output": {
                 "answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
@@ -5018,6 +5586,292 @@
                   "sharing"
                 ],
                 "confidence": 0.81
+              }
+            }
+          }
+        },
+        "claude-agent-sdk": {
+          "stages": {
+            "intake": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal"
+              ],
+              "active_links": [
+                "principal-compliance",
+                "principal-security"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-compliance",
+                  "message": "Claude session opened \u00b7 rights"
+                },
+                {
+                  "link_id": "principal-security",
+                  "message": "Claude session opened \u00b7 rights"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "What rights do users in the EEA, UK, and some US states have over their personal data under this policy?",
+                "clauses": [
+                  "rights",
+                  "retention",
+                  "sharing"
+                ],
+                "stage": "intake",
+                "framework": "claude-agent-sdk",
+                "loaded": {
+                  "policy_text": true,
+                  "question_bank": true
+                },
+                "principal_packet": {
+                  "question_id": "What rights do users in ",
+                  "needs_review": true
+                }
+              },
+              "metrics": {
+                "time_ms": 12360,
+                "token_input_estimate": 20756,
+                "token_output_estimate": 572,
+                "token_total_estimate": 21328,
+                "usd_cost_estimate": 0.03666
+              },
+              "output": {
+                "status": "case_opened",
+                "runtime": "python-harness:claude-session"
+              }
+            },
+            "review": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "compliance",
+                "security",
+                "legal",
+                "finance"
+              ],
+              "active_links": [
+                "principal-compliance",
+                "principal-security",
+                "principal-legal",
+                "principal-finance"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-compliance",
+                  "message": "session streams specialist findings \u00b7 rights"
+                },
+                {
+                  "link_id": "principal-security",
+                  "message": "session streams specialist findings \u00b7 rights"
+                },
+                {
+                  "link_id": "principal-legal",
+                  "message": "session streams specialist findings \u00b7 rights"
+                },
+                {
+                  "link_id": "principal-finance",
+                  "message": "session streams specialist findings \u00b7 rights"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "What rights do users in the EEA, UK, and some US states have over their personal data under this policy?",
+                "clauses": [
+                  "rights",
+                  "retention",
+                  "sharing"
+                ],
+                "stage": "review",
+                "framework": "claude-agent-sdk",
+                "findings": {
+                  "compliance": "rights clause extracted",
+                  "security": "exception path checked",
+                  "legal": "wording and caveats extracted",
+                  "data_ops": "retention lifecycle implications added"
+                }
+              },
+              "metrics": {
+                "time_ms": 13454,
+                "token_input_estimate": 20924,
+                "token_output_estimate": 527,
+                "token_total_estimate": 21451,
+                "usd_cost_estimate": 0.03658
+              },
+              "output": {
+                "specialist_findings": 5,
+                "status": "review_complete",
+                "review_shape": "claude_session"
+              }
+            },
+            "challenge": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "compliance",
+                "security",
+                "legal",
+                "finance",
+                "reviewer"
+              ],
+              "active_links": [
+                "compliance-reviewer",
+                "security-reviewer",
+                "legal-reviewer",
+                "finance-reviewer"
+              ],
+              "messages": [
+                {
+                  "link_id": "compliance-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 rights"
+                },
+                {
+                  "link_id": "security-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 rights"
+                },
+                {
+                  "link_id": "legal-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 rights"
+                },
+                {
+                  "link_id": "finance-reviewer",
+                  "message": "reviewer turn checks evidence \u00b7 rights"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "What rights do users in the EEA, UK, and some US states have over their personal data under this policy?",
+                "clauses": [
+                  "rights",
+                  "retention",
+                  "sharing"
+                ],
+                "stage": "challenge",
+                "framework": "claude-agent-sdk",
+                "reviewer_notes": [
+                  "remove overclaim",
+                  "preserve conditional wording"
+                ],
+                "open_questions": [
+                  "how long retained",
+                  "which exceptions apply"
+                ]
+              },
+              "metrics": {
+                "time_ms": 16095,
+                "token_input_estimate": 21054,
+                "token_output_estimate": 858,
+                "token_total_estimate": 21912,
+                "usd_cost_estimate": 0.04567
+              },
+              "output": {
+                "reviewer_action": "continue_session_with_review",
+                "notes": [
+                  "final response needs clause ids",
+                  "preserve narrow policy wording"
+                ]
+              }
+            },
+            "synthesis": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "reviewer",
+                "security",
+                "legal"
+              ],
+              "active_links": [
+                "reviewer-principal"
+              ],
+              "messages": [
+                {
+                  "link_id": "reviewer-principal",
+                  "message": "principal turn compacts context \u00b7 rights"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "What rights do users in the EEA, UK, and some US states have over their personal data under this policy?",
+                "clauses": [
+                  "rights",
+                  "retention",
+                  "sharing"
+                ],
+                "stage": "synthesis",
+                "framework": "claude-agent-sdk",
+                "draft_answer": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",
+                "reviewer_notes": [
+                  "keep rights visible in the live session",
+                  "final ResultMessage must preserve reviewer caveat"
+                ]
+              },
+              "metrics": {
+                "time_ms": 8833,
+                "token_input_estimate": 20794,
+                "token_output_estimate": 480,
+                "token_total_estimate": 21274,
+                "usd_cost_estimate": 0.03459
+              },
+              "output": {
+                "draft_answer": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",
+                "status": "ready_for_verdict",
+                "merge_style": "claude-session"
+              }
+            },
+            "verdict": {
+              "runtime": "claude-session",
+              "execution_mode": "real-sdk-calls",
+              "active_agents": [
+                "principal",
+                "reviewer",
+                "decision"
+              ],
+              "active_links": [
+                "principal-decision"
+              ],
+              "messages": [
+                {
+                  "link_id": "principal-decision",
+                  "message": "ResultMessage closes run \u00b7 rights"
+                }
+              ],
+              "state": {
+                "state_container": "claude_session",
+                "question": "What rights do users in the EEA, UK, and some US states have over their personal data under this policy?",
+                "clauses": [
+                  "rights",
+                  "retention",
+                  "sharing"
+                ],
+                "stage": "verdict",
+                "framework": "claude-agent-sdk",
+                "final_answer": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",
+                "confidence": 0.87,
+                "citations": [
+                  "rights",
+                  "retention",
+                  "sharing"
+                ]
+              },
+              "metrics": {
+                "time_ms": 11653,
+                "token_input_estimate": 20622,
+                "token_output_estimate": 307,
+                "token_total_estimate": 20929,
+                "usd_cost_estimate": 0.02919
+              },
+              "output": {
+                "answer": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",
+                "citations": [
+                  "rights",
+                  "retention",
+                  "sharing"
+                ],
+                "confidence": 0.87
               }
             }
           }
@@ -5064,7 +5918,7 @@
                 }
               },
               "metrics": {
-                "time_ms": 4053,
+                "time_ms": 4132,
                 "token_input_estimate": 402,
                 "token_output_estimate": 200,
                 "token_total_estimate": 602,
@@ -5127,11 +5981,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 11901,
-                "token_input_estimate": 484,
-                "token_output_estimate": 481,
-                "token_total_estimate": 965,
-                "usd_cost_estimate": 0.00036
+                "time_ms": 11457,
+                "token_input_estimate": 482,
+                "token_output_estimate": 530,
+                "token_total_estimate": 1012,
+                "usd_cost_estimate": 0.00039
               },
               "output": {
                 "specialist_findings": 4,
@@ -5193,11 +6047,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 11761,
-                "token_input_estimate": 745,
+                "time_ms": 9229,
+                "token_input_estimate": 795,
                 "token_output_estimate": 480,
-                "token_total_estimate": 1225,
-                "usd_cost_estimate": 0.0004
+                "token_total_estimate": 1275,
+                "usd_cost_estimate": 0.00041
               },
               "output": {
                 "reviewer_action": "stop_debate_and_ground",
@@ -5252,11 +6106,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4964,
-                "token_input_estimate": 194,
-                "token_output_estimate": 241,
-                "token_total_estimate": 435,
-                "usd_cost_estimate": 0.00017
+                "time_ms": 5424,
+                "token_input_estimate": 199,
+                "token_output_estimate": 250,
+                "token_total_estimate": 449,
+                "usd_cost_estimate": 0.00018
               },
               "output": {
                 "draft_answer": "The team converged on a qualified rights answer: access, correction, deletion in some cases, objection, consent withdrawal, portability, and some state-specific rights exist, but they depend on jurisdiction.",
@@ -5304,10 +6158,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4625,
-                "token_input_estimate": 150,
+                "time_ms": 3283,
+                "token_input_estimate": 151,
                 "token_output_estimate": 200,
-                "token_total_estimate": 350,
+                "token_total_estimate": 351,
                 "usd_cost_estimate": 0.00014
               },
               "output": {
@@ -5363,11 +6217,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 320,
-                "token_input_estimate": 410,
-                "token_output_estimate": 58,
-                "token_total_estimate": 468,
-                "usd_cost_estimate": 0.00145
+                "time_ms": 6182,
+                "token_input_estimate": 481,
+                "token_output_estimate": 68,
+                "token_total_estimate": 549,
+                "usd_cost_estimate": 0.0017
               },
               "output": {
                 "status": "case_opened",
@@ -5426,11 +6280,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1280,
-                "token_input_estimate": 1240,
-                "token_output_estimate": 210,
-                "token_total_estimate": 1450,
-                "usd_cost_estimate": 0.00449
+                "time_ms": 27105,
+                "token_input_estimate": 1315,
+                "token_output_estimate": 223,
+                "token_total_estimate": 1538,
+                "usd_cost_estimate": 0.00477
               },
               "output": {
                 "specialist_findings": 5,
@@ -5492,11 +6346,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 760,
-                "token_input_estimate": 780,
-                "token_output_estimate": 150,
-                "token_total_estimate": 930,
-                "usd_cost_estimate": 0.00288
+                "time_ms": 13268,
+                "token_input_estimate": 925,
+                "token_output_estimate": 171,
+                "token_total_estimate": 1096,
+                "usd_cost_estimate": 0.0034
               },
               "output": {
                 "reviewer_action": "return_task_bundle",
@@ -5541,11 +6395,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 470,
-                "token_input_estimate": 560,
-                "token_output_estimate": 185,
-                "token_total_estimate": 745,
-                "usd_cost_estimate": 0.00231
+                "time_ms": 5518,
+                "token_input_estimate": 645,
+                "token_output_estimate": 205,
+                "token_total_estimate": 850,
+                "usd_cost_estimate": 0.00263
               },
               "output": {
                 "draft_answer": "Crew outputs identify access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights that vary with applicable law.",
@@ -5589,11 +6443,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 250,
-                "token_input_estimate": 310,
-                "token_output_estimate": 160,
-                "token_total_estimate": 470,
-                "usd_cost_estimate": 0.00146
+                "time_ms": 4271,
+                "token_input_estimate": 325,
+                "token_output_estimate": 186,
+                "token_total_estimate": 511,
+                "usd_cost_estimate": 0.00158
               },
               "output": {
                 "answer": "Crew outputs identify access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights that vary with applicable law.",
@@ -5649,11 +6503,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 360,
-                "token_input_estimate": 430,
-                "token_output_estimate": 62,
-                "token_total_estimate": 492,
-                "usd_cost_estimate": 0.00172
+                "time_ms": 5763,
+                "token_input_estimate": 466,
+                "token_output_estimate": 71,
+                "token_total_estimate": 537,
+                "usd_cost_estimate": 0.00188
               },
               "output": {
                 "status": "case_opened",
@@ -5712,11 +6566,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 1360,
-                "token_input_estimate": 1280,
-                "token_output_estimate": 220,
-                "token_total_estimate": 1500,
-                "usd_cost_estimate": 0.00525
+                "time_ms": 17410,
+                "token_input_estimate": 1401,
+                "token_output_estimate": 254,
+                "token_total_estimate": 1655,
+                "usd_cost_estimate": 0.00579
               },
               "output": {
                 "specialist_findings": 4,
@@ -5768,11 +6622,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 710,
-                "token_input_estimate": 640,
-                "token_output_estimate": 140,
-                "token_total_estimate": 780,
-                "usd_cost_estimate": 0.00273
+                "time_ms": 8077,
+                "token_input_estimate": 722,
+                "token_output_estimate": 160,
+                "token_total_estimate": 882,
+                "usd_cost_estimate": 0.00309
               },
               "output": {
                 "reviewer_action": "fail_governance_gate",
@@ -5817,11 +6671,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 500,
-                "token_input_estimate": 590,
-                "token_output_estimate": 180,
-                "token_total_estimate": 770,
-                "usd_cost_estimate": 0.00269
+                "time_ms": 4799,
+                "token_input_estimate": 713,
+                "token_output_estimate": 185,
+                "token_total_estimate": 898,
+                "usd_cost_estimate": 0.00314
               },
               "output": {
                 "draft_answer": "The governed answer distinguishes baseline privacy rights from region-specific rights, including access, correction, deletion in some cases, objection, consent withdrawal, portability, and appeal pathways.",
@@ -5865,11 +6719,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 270,
-                "token_input_estimate": 300,
-                "token_output_estimate": 155,
-                "token_total_estimate": 455,
-                "usd_cost_estimate": 0.00159
+                "time_ms": 3943,
+                "token_input_estimate": 342,
+                "token_output_estimate": 174,
+                "token_total_estimate": 516,
+                "usd_cost_estimate": 0.00181
               },
               "output": {
                 "answer": "The governed answer distinguishes baseline privacy rights from region-specific rights, including access, correction, deletion in some cases, objection, consent withdrawal, portability, and appeal pathways.",
@@ -5920,11 +6774,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 3639,
+                "time_ms": 4174,
                 "token_input_estimate": 405,
-                "token_output_estimate": 200,
-                "token_total_estimate": 605,
-                "usd_cost_estimate": 0.00018
+                "token_output_estimate": 189,
+                "token_total_estimate": 594,
+                "usd_cost_estimate": 0.00017
               },
               "output": {
                 "status": "case_opened",
@@ -5983,11 +6837,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 3073,
-                "token_input_estimate": 532,
-                "token_output_estimate": 470,
-                "token_total_estimate": 1002,
-                "usd_cost_estimate": 0.00036
+                "time_ms": 2260,
+                "token_input_estimate": 540,
+                "token_output_estimate": 435,
+                "token_total_estimate": 975,
+                "usd_cost_estimate": 0.00034
               },
               "output": {
                 "specialist_findings": 4,
@@ -6039,10 +6893,10 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4169,
-                "token_input_estimate": 554,
+                "time_ms": 3739,
+                "token_input_estimate": 518,
                 "token_output_estimate": 200,
-                "token_total_estimate": 754,
+                "token_total_estimate": 718,
                 "usd_cost_estimate": 0.0002
               },
               "output": {
@@ -6088,11 +6942,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 9474,
-                "token_input_estimate": 171,
-                "token_output_estimate": 206,
-                "token_total_estimate": 377,
-                "usd_cost_estimate": 0.00015
+                "time_ms": 3421,
+                "token_input_estimate": 164,
+                "token_output_estimate": 175,
+                "token_total_estimate": 339,
+                "usd_cost_estimate": 0.00013
               },
               "output": {
                 "draft_answer": "Aggregated evidence points to access, correction, deletion or erasure in some contexts, objection, consent withdrawal, portability, and jurisdiction-dependent rights in the EEA, UK, and some US states.",
@@ -6136,11 +6990,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 4322,
-                "token_input_estimate": 150,
-                "token_output_estimate": 180,
-                "token_total_estimate": 330,
-                "usd_cost_estimate": 0.00013
+                "time_ms": 3448,
+                "token_input_estimate": 151,
+                "token_output_estimate": 200,
+                "token_total_estimate": 351,
+                "usd_cost_estimate": 0.00014
               },
               "output": {
                 "answer": "Aggregated evidence points to access, correction, deletion or erasure in some contexts, objection, consent withdrawal, portability, and jurisdiction-dependent rights in the EEA, UK, and some US states.",
@@ -6472,11 +7326,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 10046,
+                "time_ms": 8320,
                 "token_input_estimate": 400,
-                "token_output_estimate": 559,
-                "token_total_estimate": 959,
-                "usd_cost_estimate": 0.0004
+                "token_output_estimate": 509,
+                "token_total_estimate": 909,
+                "usd_cost_estimate": 0.00037
               },
               "output": {
                 "status": "case_opened",
@@ -6535,11 +7389,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 37644,
-                "token_input_estimate": 516,
-                "token_output_estimate": 2049,
-                "token_total_estimate": 2565,
-                "usd_cost_estimate": 0.00131
+                "time_ms": 27560,
+                "token_input_estimate": 548,
+                "token_output_estimate": 1563,
+                "token_total_estimate": 2111,
+                "usd_cost_estimate": 0.00102
               },
               "output": {
                 "specialist_findings": 4,
@@ -6596,11 +7450,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 13533,
-                "token_input_estimate": 2131,
-                "token_output_estimate": 630,
-                "token_total_estimate": 2761,
-                "usd_cost_estimate": 0.0007
+                "time_ms": 6354,
+                "token_input_estimate": 1645,
+                "token_output_estimate": 471,
+                "token_total_estimate": 2116,
+                "usd_cost_estimate": 0.00053
               },
               "output": {
                 "reviewer_action": "model_validation_reject",
@@ -6645,11 +7499,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 6200,
-                "token_input_estimate": 164,
-                "token_output_estimate": 344,
-                "token_total_estimate": 508,
-                "usd_cost_estimate": 0.00023
+                "time_ms": 1816,
+                "token_input_estimate": 169,
+                "token_output_estimate": 108,
+                "token_total_estimate": 277,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
                 "draft_answer": "The validated answer model preserves both the core rights and the qualifier: access, correction, deletion in some cases, objection, consent withdrawal, portability, and region-specific rights depend on applicable law.",
@@ -6693,11 +7547,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 7009,
-                "token_input_estimate": 150,
-                "token_output_estimate": 391,
-                "token_total_estimate": 541,
-                "usd_cost_estimate": 0.00026
+                "time_ms": 3411,
+                "token_input_estimate": 148,
+                "token_output_estimate": 234,
+                "token_total_estimate": 382,
+                "usd_cost_estimate": 0.00016
               },
               "output": {
                 "answer": "The validated answer model preserves both the core rights and the qualifier: access, correction, deletion in some cases, objection, consent withdrawal, portability, and region-specific rights depend on applicable law.",

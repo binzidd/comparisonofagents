@@ -3,7 +3,7 @@
 Run real multi-agent policy compliance harnesses for installed frameworks.
 Captures actual timing + token metrics per stage.
 
-Real runs  : langgraph, openai-agents, ag2, llamaindex, pydanticai
+Real runs  : langgraph, openai-agents, claude-agent-sdk, ag2, llamaindex, pydanticai
 Simulated  : crewai, semantic-kernel, mastra (not installed / TypeScript)
 
 Output: traces/real_metrics.json
@@ -12,6 +12,8 @@ Output: traces/real_metrics.json
 import asyncio
 import json
 import os
+import shutil
+import subprocess
 import time
 from pathlib import Path
 from openai import AsyncOpenAI
@@ -25,6 +27,7 @@ from llama_index.core.workflow import (
 load_dotenv()
 
 MODEL = "gpt-4o-mini"
+CLAUDE_MODEL = os.getenv("CLAUDE_AGENT_MODEL", "sonnet")
 ROOT = Path(__file__).resolve().parent.parent
 REAL_METRICS_PATH = ROOT / "traces" / "real_metrics.json"
 
@@ -273,6 +276,154 @@ async def run_openai_agents(question: str) -> dict:
         "verdict", PRINCIPAL_SYS,
         f"Question: {question}\n\nDraft: {synthesis_out[:400]}\n\nFinalise the answer with citations.",
     )
+    return _m
+
+
+# ── CLAUDE AGENT SDK ─────────────────────────────────────────────────────────
+def _claude_cli_path() -> str | None:
+    cli_path = shutil.which("claude")
+    if cli_path:
+        return cli_path
+    local_cli = ROOT / "node_modules" / ".bin" / "claude"
+    if local_cli.exists():
+        return str(local_cli)
+    return None
+
+
+def _ensure_claude_cli_ready() -> str:
+    cli_path = _claude_cli_path()
+    if not cli_path:
+        raise RuntimeError(
+            "Claude Code CLI not found. Install @anthropic-ai/claude-code before running claude-agent-sdk."
+        )
+
+    probe = subprocess.run(
+        [cli_path, "-p", "Say ok", "--output-format", "json"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    combined = "\n".join(part for part in [probe.stdout, probe.stderr] if part)
+    if "Not logged in" in combined:
+        raise RuntimeError("Claude Code CLI is installed but not logged in; run `claude /login`.")
+    if probe.returncode != 0:
+        raise RuntimeError(f"Claude Code CLI preflight failed: {combined.strip() or probe.returncode}")
+    return cli_path
+
+
+def _claude_usage_counts(usage: object) -> tuple[int, int]:
+    """Best-effort extraction from Claude SDK usage/model_usage payloads."""
+    if not isinstance(usage, dict):
+        return 0, 0
+
+    tokens_in = 0
+    tokens_out = 0
+    for key, value in usage.items():
+        if isinstance(value, dict):
+            nested_in, nested_out = _claude_usage_counts(value)
+            tokens_in += nested_in
+            tokens_out += nested_out
+            continue
+        if not isinstance(value, int):
+            continue
+        if key in {
+            "input_tokens",
+            "inputTokens",
+            "cache_creation_input_tokens",
+            "cache_read_input_tokens",
+            "cacheCreationInputTokens",
+            "cacheReadInputTokens",
+        }:
+            tokens_in += value
+        elif key in {"output_tokens", "outputTokens"}:
+            tokens_out += value
+    return tokens_in, tokens_out
+
+
+async def run_claude_agent_sdk(question: str) -> dict:
+    _m: dict = {}
+    outputs: dict[str, str] = {}
+    cli_path = _ensure_claude_cli_ready()
+
+    async def stage(name: str, prompt: str) -> str:
+        # Bounded real Claude Code call. The Claude Agent SDK uses this same CLI
+        # runtime, but its streaming transport can hang on long prompts in this
+        # local environment; JSON mode keeps the harness measurable and honest.
+        t = time.perf_counter()
+        completed = await asyncio.to_thread(
+            subprocess.run,
+            [
+                cli_path,
+                "-p",
+                prompt,
+                "--output-format",
+                "json",
+                "--model",
+                CLAUDE_MODEL,
+                "--max-turns",
+                "1",
+                "--permission-mode",
+                "dontAsk",
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=180,
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise RuntimeError((completed.stderr or completed.stdout or str(completed.returncode)).strip())
+
+        result = json.loads(completed.stdout)
+        if result.get("is_error"):
+            raise RuntimeError(result.get("result") or "Claude Code returned an error result")
+
+        usage = result.get("usage") or result.get("modelUsage") or {}
+        ti, to = _claude_usage_counts(usage)
+        elapsed = result.get("duration_ms") or int((time.perf_counter() - t) * 1000)
+        _m[name] = {
+            "time_ms": elapsed,
+            "tokens_in": ti,
+            "tokens_out": to,
+        }
+        if result.get("total_cost_usd") is not None:
+            _m[name]["usd"] = round(result["total_cost_usd"], 7)
+        outputs[name] = (result.get("result") or "").strip()
+        return outputs[name]
+
+    intake_out = await stage(
+        "intake",
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+        "Identify the relevant clauses and assign compliance, security, legal, and finance specialist review tasks.",
+    )
+
+    review_out = await stage(
+        "review",
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\nIntake context: {intake_out[:600]}\n\n"
+        "Act as compliance, security, legal, and finance specialists. Return one compact finding per specialist with clause ids.",
+    )
+
+    challenge_out = await stage(
+        "challenge",
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\nSpecialist findings:\n{review_out[:1200]}\n\n"
+        "Reviewer: challenge unsupported claims, missing qualifiers, or missing clause citations.",
+    )
+
+    synthesis_out = await stage(
+        "synthesis",
+        f"Question: {question}\n\nFindings:\n{review_out[:900]}\n\n"
+        f"Reviewer notes:\n{challenge_out[:600]}\n\n"
+        "Principal: draft a concise answer that preserves caveats and cites clauses.",
+    )
+
+    await stage(
+        "verdict",
+        f"Question: {question}\n\nDraft answer:\n{synthesis_out[:900]}\n\n"
+        "Return the final answer with cited policy clauses and confidence.",
+    )
+
     return _m
 
 
@@ -545,6 +696,7 @@ async def run_pydanticai(question: str) -> dict:
 HARNESSES: dict[str, object] = {
     "langgraph": run_langgraph,
     "openai-agents": run_openai_agents,
+    "claude-agent-sdk": run_claude_agent_sdk,
     "ag2": run_ag2,
     "llamaindex": run_llamaindex,
     "pydanticai": run_pydanticai,
@@ -566,7 +718,7 @@ def fmt(metrics: dict) -> dict:
             "time_ms": m.get("time_ms", 0),
             "tokens_in": ti,
             "tokens_out": to,
-            "usd": usd(ti, to),
+            "usd": m.get("usd", usd(ti, to)),
         }
     return out
 
@@ -579,7 +731,7 @@ async def run_framework(fw_id: str, fn, question_id: str, question: str) -> dict
         return fmt(metrics)
     except Exception as exc:  # noqa: BLE001
         print(f"FAILED: {exc}")
-        return {}
+        return {"__error__": str(exc)}
 
 
 async def main(only: list[str] | None = None) -> None:
@@ -591,7 +743,9 @@ async def main(only: list[str] | None = None) -> None:
     payload: dict = {
         "execution_mode": "real-sdk-calls",
         "model": MODEL,
+        "models": {"openai": MODEL, "claude-agent-sdk": CLAUDE_MODEL},
         "questions": existing.get("questions", {}),
+        "failures": existing.get("failures", {}),
     }
 
     for q_id, question in QUESTIONS.items():
@@ -601,8 +755,11 @@ async def main(only: list[str] | None = None) -> None:
         for fw_id in run_set:
             fn = HARNESSES[fw_id]
             result = await run_framework(fw_id, fn, q_id, question)
-            if result:  # only overwrite on success
+            if result and "__error__" in result:
+                payload["failures"].setdefault(q_id, {})[fw_id] = result["__error__"]
+            elif result:  # only overwrite on success
                 payload["questions"][q_id]["frameworks"][fw_id] = result
+                payload["failures"].setdefault(q_id, {}).pop(fw_id, None)
 
     REAL_METRICS_PATH.parent.mkdir(exist_ok=True)
     REAL_METRICS_PATH.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")

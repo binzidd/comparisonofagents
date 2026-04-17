@@ -40,6 +40,26 @@ const catalogItems = [
     source: "https://platform.openai.com/docs/guides/agents"
   },
   {
+    id: "claude-agent-sdk",
+    name: "Claude Agent SDK",
+    kind: "framework",
+    color: "#5f735a",
+    tagline: "Claude Code agent loop as an SDK",
+    summary: "Programmable Claude Code sessions with tools, hooks, permissions, and streaming progress.",
+    pattern: "claude-agent-loop",
+    pros: [
+      "Strong autonomous tool-use loop",
+      "Streaming session control and hooks",
+      "Good fit for file and command-heavy agents"
+    ],
+    cons: [
+      "Depends on Claude Code CLI availability",
+      "Needs explicit permission and sandbox design",
+      "Less neutral as a cross-vendor orchestration layer"
+    ],
+    source: "https://docs.claude.com/en/docs/agent-sdk/python"
+  },
+  {
     id: "ag2",
     name: "AG2",
     kind: "framework",
@@ -344,6 +364,7 @@ const PATTERN_LABELS = {
   "graph-branches": "Parallel Fan-out",
   "sequential-handoffs": "Sequential Chain",
   "conversation-mesh": "Mesh Network",
+  "claude-agent-loop": "Agent Loop",
   "manager-review": "Manager Review",
   "enterprise-gated": "Enterprise Gated",
   "event-pipeline": "Event Pipeline",
@@ -354,6 +375,7 @@ const PATTERN_LABELS = {
 const STATE_CONTAINER_LABELS = {
   shared_graph_state: "Shared graph state",
   run_context: "Run context",
+  claude_session: "Claude session",
   chat_transcript: "Chat transcript",
   task_outputs: "Task bundle",
   governed_case: "Governed case packet",
@@ -440,6 +462,15 @@ const graphLayouts = {
     reviewer: { x: 50, y: 46, labelX: 50, labelY: 57 },
     decision: { x: 50, y: 92, labelX: 50, labelY: 99 }
   },
+  "claude-agent-loop": {
+    principal: { x: 50, y: 10, labelX: 50, labelY: 20 },
+    compliance: { x: 20, y: 36, labelX: 20, labelY: 47 },
+    security: { x: 40, y: 36, labelX: 40, labelY: 47 },
+    legal: { x: 60, y: 36, labelX: 60, labelY: 47 },
+    finance: { x: 80, y: 36, labelX: 80, labelY: 47 },
+    reviewer: { x: 50, y: 62, labelX: 50, labelY: 73 },
+    decision: { x: 50, y: 90, labelX: 50, labelY: 99 }
+  },
   "manager-review": {
     principal: { x: 50, y: 10, labelX: 50, labelY: 20 },
     compliance: { x: 14, y: 34, labelX: 14, labelY: 45 },
@@ -516,6 +547,7 @@ const TIME_REASONS = {
   "graph-branches": "Specialists run as parallel graph branches; stage time equals the slowest single specialist, not the sum of all four. That keeps per-stage times low even with 4 concurrent domain checks.",
   "sequential-handoffs": "Each specialist is a separate agent handoff: 4 specialists = 4 serial LLM round-trips. The review and challenge stages stack those latencies, which is why you see high per-stage times (e.g. 17–35 s). It is the architectural trade-off of the handoff model.",
   "conversation-mesh": "Specialists engage in conversational turns. Multi-turn exchanges on contested claims add latency beyond a single LLM call per specialist; each back-and-forth round adds an API call.",
+  "claude-agent-loop": "Claude Agent SDK keeps a live Claude Code session and streams progress through the SDK. Latency reflects real assistant turns plus session/tool orchestration rather than a fabricated local stub.",
   "manager-review": "The manager routes tasks sequentially; stage time scales with the number of specialists called and any re-routing decisions the manager makes.",
   "enterprise-gated": "Approval gate checkpoints add deliberate synchronous pauses; each gate waits for the previous stage to fully complete and be approved before the next begins.",
   "event-pipeline": "Events are dispatched to specialist handlers that each await their LLM response before emitting the next event. High stage times reflect chained awaits across multiple sequential specialist calls.",
@@ -534,8 +566,8 @@ const METRIC_DEFINITIONS = {
   "Parallelism": "Native support for running multiple agents concurrently rather than sequentially.",
   "Testability": "Ease of writing deterministic unit tests, mocking LLM calls, and isolating agent behavior.",
   "Type Safety": "Degree of structured output validation, schema enforcement, and typed agent interfaces.",
-  "Time Cost": "Measured wall-clock time for the verdict stage of this real SDK pipeline run. Per-stage times vary; hover the info icon on any stage's time display to see why.",
-  "Token Cost": "Total tokens consumed at the verdict stage across all agent calls."
+  "Time Cost": "Measured wall-clock time for the currently selected stage. Verdict view also shows total run metrics.",
+  "Token Cost": "Total tokens consumed by the currently selected stage across all agent calls."
 };
 
 const NODE_DESCRIPTIONS = {
@@ -668,6 +700,38 @@ const frameworkPatterns = {
       messages: ["Closing turn publishes the recommendation."],
       business: "The verdict closes a shared discussion.",
       technical: "The final answer is emitted from the closing turn."
+    }
+  },
+  "claude-agent-loop": {
+    intake: {
+      links: ["principal-compliance", "principal-security"],
+      messages: ["Claude session starts with a policy brief."],
+      business: "The agent opens with a live session and visible progress.",
+      technical: "ClaudeSDKClient creates a session with bounded tools and permissions."
+    },
+    review: {
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Claude streams specialist findings from the session."],
+      business: "Specialist work stays inside one agent loop instead of scattered helper calls.",
+      technical: "AgentDefinition entries and session context carry specialist instructions."
+    },
+    challenge: {
+      links: ["compliance-reviewer", "security-reviewer", "legal-reviewer", "finance-reviewer"],
+      messages: ["Reviewer prompt challenges the live session context."],
+      business: "Review can react to the exact evidence accumulated so far.",
+      technical: "Hooks and permission controls can observe tool use before the reviewer step completes."
+    },
+    synthesis: {
+      links: ["reviewer-principal"],
+      messages: ["Principal prompt compacts reviewed findings."],
+      business: "The answer owner receives one grounded session transcript.",
+      technical: "Session continuity preserves previous turns while synthesis asks for a compact answer."
+    },
+    verdict: {
+      links: ["principal-decision"],
+      messages: ["Result message closes the Claude session."],
+      business: "The verdict exits a real streamed agent run.",
+      technical: "The SDK returns a ResultMessage with duration, cost, and usage metadata when available."
     }
   },
   "manager-review": {
@@ -1210,6 +1274,38 @@ replay_if_clause_coverage_fails()`
 assert no_required_clause_dropped(ctx)
 reviewer.must_reject_if_support_missing()`
     },
+    "claude-agent-loop": {
+      intro: "Claude Agent SDK exposes the Claude Code agent loop as an application SDK: streamed sessions, tool permissions, hooks, and programmable agent definitions. It is strongest when the workflow needs real file, shell, or long-running agent behavior under tight permission controls.",
+      cards: [
+        { label: "Execution", value: "Continuous Claude Code session with programmable agent definitions" },
+        { label: "Performance", value: "Session startup and streamed turns add overhead, but context continuity reduces handoff glue" },
+        { label: "Evals", value: "Best with hook-level checks, permission policies, and final result validation" },
+        { label: "Context Risk", value: "Medium to low because the session keeps previous turns, but compaction can still hide details" },
+        { label: "Challenge", value: "Production readiness depends on local Claude Code CLI/auth and a clear permission model" },
+        { label: "Tools", value: "Built-in file, shell, and MCP-style tool surfaces are the main differentiator" }
+      ],
+      scorecard: [
+        { label: "Latency", value: 3, reason: "A real Claude Code session has startup and streaming overhead, but avoids rebuilding context for every specialist turn." },
+        { label: "Observability", value: 5, reason: "Streaming messages, tool events, hooks, and result metadata make live progress easy to inspect." },
+        { label: "Replayability", value: 4, reason: "Session ids and persisted project settings support continuation, though full deterministic replay still needs saved inputs and tool results." },
+        { label: "Human Review", value: 5, reason: "Permission modes, can_use_tool callbacks, and hooks provide strong human and policy review points." },
+        { label: "Context Loss", value: 2, reason: "The live session carries context across turns; the main risk is compaction or loose synthesis prompts." },
+        { label: "Unsupported Answer Risk", value: 2, reason: "Reviewer prompts and hooks can block uncited answers before the final ResultMessage is accepted." },
+        { label: "Error Recovery", value: 4, reason: "The client can interrupt, continue, or resume sessions, but CLI/auth failures remain external dependencies." },
+        { label: "Parallelism", value: 3, reason: "A single session is naturally conversational; independent sessions can run concurrently when the app orchestrates them." },
+        { label: "Testability", value: 3, reason: "SDK boundaries are inspectable, but real CLI-backed agent behavior is harder to unit-test without integration runs." },
+        { label: "Type Safety", value: 3, reason: "Output formats can be requested, but schema validation is not as central as typed Python frameworks." }
+      ],
+      arrowA: "session",
+      arrowB: "hook",
+      arrowC: "result",
+      evalCode: `options = ClaudeAgentOptions(
+  allowed_tools=["Read"],
+  permission_mode="dontAsk",
+)
+assert citations_present(final_text)
+assert result_message.subtype == "success"`
+    },
     "conversation-mesh": {
       intro: "AG2 enables dynamic multi-agent debates where specialists challenge each other directly. Highly flexible for exploratory analysis, but requires firm stopping rules to prevent conversation sprawl.",
       cards: [
@@ -1437,16 +1533,16 @@ function scoreState(label, value) {
 }
 
 function scoreFromTimeMs(timeMs) {
-  if (timeMs <= 260) {
+  if (timeMs <= 3000) {
     return 5;
   }
-  if (timeMs <= 360) {
+  if (timeMs <= 5000) {
     return 4;
   }
-  if (timeMs <= 520) {
+  if (timeMs <= 9000) {
     return 3;
   }
-  if (timeMs <= 700) {
+  if (timeMs <= 15000) {
     return 2;
   }
   return 1;
@@ -1468,24 +1564,29 @@ function scoreFromTokens(tokens) {
   return 1;
 }
 
-function traceScoreRows(framework) {
-  const verdictTrace = framework ? getTraceStage(framework.id, "verdict") : null;
-  if (!verdictTrace?.metrics) {
+function stageLabel(stageId) {
+  return stages.find((stage) => stage.id === stageId)?.label || "Stage";
+}
+
+function traceScoreRows(framework, stageId = "verdict") {
+  const traceStage = framework ? getTraceStage(framework.id, stageId) : null;
+  if (!traceStage?.metrics) {
     return [];
   }
   const timeReason = framework?.pattern ? (TIME_REASONS[framework.pattern] || "") : "";
+  const selectedStageLabel = stageLabel(stageId);
 
   return [
     {
       label: "Time Cost",
-      value: scoreFromTimeMs(verdictTrace.metrics.time_ms),
-      detail: formatMs(verdictTrace.metrics.time_ms),
-      reason: timeReason
+      value: scoreFromTimeMs(traceStage.metrics.time_ms),
+      detail: `${selectedStageLabel}: ${formatMs(traceStage.metrics.time_ms)}`,
+      reason: timeReason ? `${selectedStageLabel} stage: ${timeReason}` : ""
     },
     {
       label: "Token Cost",
-      value: scoreFromTokens(verdictTrace.metrics.token_total_estimate),
-      detail: `${verdictTrace.metrics.token_total_estimate} tok`
+      value: scoreFromTokens(traceStage.metrics.token_total_estimate),
+      detail: `${selectedStageLabel}: ${traceStage.metrics.token_total_estimate} tok`
     }
   ];
 }
@@ -1524,6 +1625,18 @@ function frameworkBaseLinks(framework) {
       "reviewer-security",
       "reviewer-legal",
       "reviewer-finance",
+      "principal-decision"
+    ],
+    "claude-agent-loop": [
+      "principal-compliance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "compliance-reviewer",
+      "security-reviewer",
+      "legal-reviewer",
+      "finance-reviewer",
+      "reviewer-principal",
       "principal-decision"
     ],
     "manager-review": [
@@ -1621,6 +1734,13 @@ function stageImplementationCode(framework, stageId) {
       challenge: `reviewer.challenge(chat.transcript)`,
       synthesis: `principal.summarize(chat.transcript)`,
       verdict: `chat.close(with_result=True)`
+    },
+    "claude-agent-loop": {
+      intake: `client = ClaudeSDKClient(options)\nawait client.query(policy_case)`,
+      review: `await client.query("run specialist reviews")`,
+      challenge: `await client.query("challenge unsupported claims")`,
+      synthesis: `await client.query("compose grounded draft")`,
+      verdict: `async for msg in client.receive_response():\n  capture_result(msg)`
     },
     "manager-review": {
       intake: `manager.create_tasks(policy_case)`,
@@ -1844,6 +1964,77 @@ manager = GroupChatManager(groupchat=chat)
 principal.initiate_chat(manager, message="Produce a final cited answer with caveats.")
 # [verdict]
 print(chat.messages[-1]["content"])`,
+    "claude-agent-loop": `${helpers}
+
+from claude_agent_sdk import (
+    AgentDefinition,
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ClaudeSDKClient,
+    ResultMessage,
+    TextBlock,
+)
+
+POLICY_CASE = {
+    "question": "${question.prompt}",
+    "required_clauses": [${clauseString}],
+}
+
+def text_from(message):
+    if not isinstance(message, AssistantMessage):
+        return ""
+    return "\\n".join(
+        block.text for block in message.content
+        if isinstance(block, TextBlock)
+    )
+
+options = ClaudeAgentOptions(
+    cwd=".",
+    allowed_tools=[],
+    permission_mode="dontAsk",
+    agents={
+        "compliance": AgentDefinition(
+            description="Use for privacy and retention compliance findings.",
+            prompt="Return cited policy findings and preserve all caveats.",
+        ),
+        "reviewer": AgentDefinition(
+            description="Use before final answers.",
+            prompt="Reject unsupported claims and require clause ids.",
+        ),
+    },
+)
+
+async with ClaudeSDKClient(options=options) as client:
+    # [intake]
+    await client.query(f"Open this GitHub policy case: {POLICY_CASE}")
+    async for _ in client.receive_response():
+        pass
+
+    # [review]
+    await client.query("Have compliance, security, legal, and data ops review the case.")
+    review_parts = []
+    async for message in client.receive_response():
+        review_parts.append(text_from(message))
+
+    # [challenge]
+    await client.query("Reviewer: challenge missing citations or overclaims.")
+    reviewer_notes = []
+    async for message in client.receive_response():
+        reviewer_notes.append(text_from(message))
+
+    # [synthesis]
+    await client.query("Principal: compose a concise grounded draft with caveats.")
+    draft_parts = []
+    async for message in client.receive_response():
+        draft_parts.append(text_from(message))
+
+    # [verdict]
+    await client.query("Return the final answer with clause ids and confidence.")
+    async for message in client.receive_response():
+        if isinstance(message, ResultMessage):
+            print(message.subtype)
+        else:
+            print(text_from(message))`,
     "manager-review": `${helpers}
 
 from crewai import Agent, Task, Crew, Process
@@ -2200,6 +2391,30 @@ function graphMessageMap(framework, stageId) {
         "reviewer-decision": "challenge notes"
       }
     },
+    "claude-agent-loop": {
+      intake: {
+        "principal-compliance": "session start",
+        "principal-security": "scope"
+      },
+      review: {
+        "principal-compliance": "agent turn",
+        "principal-security": "agent turn",
+        "principal-legal": "agent turn",
+        "principal-finance": "agent turn"
+      },
+      challenge: {
+        "compliance-reviewer": "review prompt",
+        "security-reviewer": "review prompt",
+        "legal-reviewer": "review prompt",
+        "finance-reviewer": "review prompt"
+      },
+      synthesis: {
+        "reviewer-principal": "session context"
+      },
+      verdict: {
+        "principal-decision": "result message"
+      }
+    },
     "manager-review": {
       intake: {
         "principal-compliance": "assign",
@@ -2436,10 +2651,10 @@ function traceMessageSummary(traceStage, highlights) {
   return highlights?.messages?.join(" / ") || "Execution signal unavailable";
 }
 
-function buildOrderedScoreRows(framework) {
+function buildOrderedScoreRows(framework, stageId = "verdict") {
   const profile = frameworkTechProfile(framework);
   const byLabel = new Map(
-    [...traceScoreRows(framework), ...profile.scorecard].map((item) => [item.label, item])
+    [...traceScoreRows(framework, stageId), ...profile.scorecard].map((item) => [item.label, item])
   );
 
   return SCORECARD_ORDER
@@ -2562,13 +2777,13 @@ function renderExecutionSnapshot(framework, stageId) {
   `;
 }
 
-function renderFrameworkScorecard(framework) {
-  const rows = buildOrderedScoreRows(framework);
+function renderFrameworkScorecard(framework, stageId) {
+  const rows = buildOrderedScoreRows(framework, stageId);
   return `
     <section class="framework-scorecard">
       <div class="framework-scorecard-head">
         <h4>Framework Scoreboard</h4>
-        <span>1 low · 5 high</span>
+        <span>${stageLabel(stageId)} stage · 1 low · 5 high</span>
       </div>
       <div class="framework-score-grid">
         ${rows
@@ -2893,6 +3108,7 @@ function renderFrameworkAnalysis(framework) {
 
 function renderScoreRationale() {
   const frameworks = compareIds.map((id) => getFramework(id));
+  const stageId = getStage().id;
   scoreRationale.innerHTML = `
     <div class="section-heading">
       <p class="eyebrow">Score Rationale</p>
@@ -2902,7 +3118,7 @@ function renderScoreRationale() {
       ${frameworks
         .map((framework) => {
           const profile = frameworkTechProfile(framework);
-          const rows = [...traceScoreRows(framework), ...profile.scorecard];
+          const rows = [...traceScoreRows(framework, stageId), ...profile.scorecard];
           const flagged = rows.filter((item) => {
             const state = scoreState(item.label, item.value);
             return state.tone !== "safe";
@@ -2936,9 +3152,9 @@ function renderScoreRationale() {
   `;
 }
 
-function renderExecutiveSummary(framework) {
+function renderExecutiveSummary(framework, stageId) {
   const profile = frameworkTechProfile(framework);
-  const rows = [...traceScoreRows(framework), ...profile.scorecard];
+  const rows = [...traceScoreRows(framework, stageId), ...profile.scorecard];
 
   const annotated = rows.map((item) => {
     const isRisk = riskMetricLabels.has(item.label);
@@ -3004,7 +3220,7 @@ function laneMarkup(frameworkId, laneIndex) {
       </div>
 
       <p class="lane-intro">${profile.intro}</p>
-      ${renderExecutiveSummary(framework)}
+      ${renderExecutiveSummary(framework, stage.id)}
       ${renderFrameworkTechStrip(framework)}
 
       ${renderStepTrail()}
@@ -3020,7 +3236,7 @@ function laneMarkup(frameworkId, laneIndex) {
 
       ${renderExecutionSnapshot(framework, stage.id)}
 
-      ${renderFrameworkScorecard(framework)}
+      ${renderFrameworkScorecard(framework, stage.id)}
 
       ${renderCodeHint(framework, stage.id)}
 
