@@ -242,23 +242,31 @@ async def run_openai_agents(question: str) -> dict:
         "Identify relevant clauses and outline specialist tasks.",
     )
 
-    # Sequential handoffs: each specialist processes the previous one's output
-    prev = intake_out[:300]
-    review_parts: dict[str, str] = {}
-    t_review = time.perf_counter()
-    ti_total = to_total = 0
-    for role, sys_p in SPECIALIST_ROLES.items():
+    async def specialist_review(role: str, sys_p: str) -> tuple[str, str, int, int]:
         agent = Agent(name=role, model=MODEL, instructions=sys_p)
         result = await Runner.run(
             agent,
-            input=f"Previous context: {prev}\n\nQuestion: {question}\n\nGive your specialist assessment.",
+            input=(
+                f"Intake context: {intake_out[:300]}\n\n"
+                f"Question: {question}\n\n"
+                "Give your specialist assessment in 2-3 sentences with relevant clause ids."
+            ),
         )
-        review_parts[role] = result.final_output
-        ti_total += sum(getattr(r.usage, "input_tokens", 0) for r in result.raw_responses)
-        to_total += sum(getattr(r.usage, "output_tokens", 0) for r in result.raw_responses)
-        prev = result.final_output[:200]
+        ti = sum(getattr(r.usage, "input_tokens", 0) for r in result.raw_responses)
+        to = sum(getattr(r.usage, "output_tokens", 0) for r in result.raw_responses)
+        return role, result.final_output, ti, to
+
+    t_review = time.perf_counter()
+    specialist_results = await asyncio.gather(
+        *[
+            specialist_review(role, sys_p)
+            for role, sys_p in SPECIALIST_ROLES.items()
+        ]
+    )
+    review_parts = {role: text for role, text, _ti, _to in specialist_results}
     _m["review"] = {"time_ms": int((time.perf_counter() - t_review) * 1000),
-                    "tokens_in": ti_total, "tokens_out": to_total}
+                    "tokens_in": sum(ti for _role, _text, ti, _to in specialist_results),
+                    "tokens_out": sum(to for _role, _text, _ti, to in specialist_results)}
 
     findings_text = "\n".join(f"{k}: {v}" for k, v in review_parts.items())
     challenge_out = await stage(

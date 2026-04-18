@@ -329,11 +329,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 8767,
+                "time_ms": 7670,
                 "token_input_estimate": 393,
-                "token_output_estimate": 422,
-                "token_total_estimate": 815,
-                "usd_cost_estimate": 0.00031
+                "token_output_estimate": 401,
+                "token_total_estimate": 794,
+                "usd_cost_estimate": 0.0003
               },
               "output": {
                 "status": "case_opened",
@@ -352,26 +352,26 @@
               ],
               "active_links": [
                 "principal-compliance",
-                "compliance-security",
-                "security-legal",
-                "legal-finance"
+                "principal-security",
+                "principal-legal",
+                "principal-finance"
               ],
               "messages": [
                 {
                   "link_id": "principal-compliance",
-                  "message": "handoff passes findings \u00b7 retention"
+                  "message": "parallel specialists return findings \u00b7 retention"
                 },
                 {
-                  "link_id": "compliance-security",
-                  "message": "handoff passes findings \u00b7 retention"
+                  "link_id": "principal-security",
+                  "message": "parallel specialists return findings \u00b7 retention"
                 },
                 {
-                  "link_id": "security-legal",
-                  "message": "handoff passes findings \u00b7 retention"
+                  "link_id": "principal-legal",
+                  "message": "parallel specialists return findings \u00b7 retention"
                 },
                 {
-                  "link_id": "legal-finance",
-                  "message": "handoff passes findings \u00b7 retention"
+                  "link_id": "principal-finance",
+                  "message": "parallel specialists return findings \u00b7 retention"
                 }
               ],
               "state": {
@@ -391,11 +391,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 88152,
-                "token_input_estimate": 410,
-                "token_output_estimate": 1733,
-                "token_total_estimate": 2143,
-                "usd_cost_estimate": 0.0011
+                "time_ms": 4649,
+                "token_input_estimate": 532,
+                "token_output_estimate": 282,
+                "token_total_estimate": 814,
+                "usd_cost_estimate": 0.00025
               },
               "output": {
                 "specialist_findings": 3,
@@ -414,17 +414,27 @@
                 "reviewer"
               ],
               "active_links": [
-                "finance-reviewer",
-                "legal-reviewer"
+                "compliance-reviewer",
+                "security-reviewer",
+                "legal-reviewer",
+                "finance-reviewer"
               ],
               "messages": [
                 {
-                  "link_id": "finance-reviewer",
-                  "message": "reviewer handoff blocks \u00b7 retention"
+                  "link_id": "compliance-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 retention"
+                },
+                {
+                  "link_id": "security-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 retention"
                 },
                 {
                   "link_id": "legal-reviewer",
-                  "message": "reviewer handoff blocks \u00b7 retention"
+                  "message": "reviewer blocks unsupported claims \u00b7 retention"
+                },
+                {
+                  "link_id": "finance-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 retention"
                 }
               ],
               "state": {
@@ -446,16 +456,16 @@
                 ]
               },
               "metrics": {
-                "time_ms": 14233,
-                "token_input_estimate": 1800,
-                "token_output_estimate": 550,
-                "token_total_estimate": 2350,
-                "usd_cost_estimate": 0.0006
+                "time_ms": 9082,
+                "token_input_estimate": 349,
+                "token_output_estimate": 462,
+                "token_total_estimate": 811,
+                "usd_cost_estimate": 0.00033
               },
               "output": {
-                "reviewer_action": "reject_handoff",
+                "reviewer_action": "reject_parallel_review",
                 "notes": [
-                  "summary compressed legal caveat",
+                  "legal caveat needs source wording",
                   "rehydrate retention limits"
                 ]
               }
@@ -487,21 +497,21 @@
                 ],
                 "stage": "synthesis",
                 "framework": "openai-agents",
-                "draft_answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
+                "draft_answer": "Yes. The parallel specialist run preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
                 "reviewer_notes": [
-                  "carry retention citation through handoff",
+                  "carry retention citation through parallel reviews",
                   "do not drop reviewer caveat"
                 ]
               },
               "metrics": {
-                "time_ms": 3869,
-                "token_input_estimate": 153,
-                "token_output_estimate": 141,
-                "token_total_estimate": 294,
-                "usd_cost_estimate": 0.00011
+                "time_ms": 2261,
+                "token_input_estimate": 157,
+                "token_output_estimate": 93,
+                "token_total_estimate": 250,
+                "usd_cost_estimate": 8e-05
               },
               "output": {
-                "draft_answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
+                "draft_answer": "Yes. The parallel specialist run preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
                 "status": "ready_for_verdict",
                 "merge_style": "handoff"
               }
@@ -532,7 +542,7 @@
                 ],
                 "stage": "verdict",
                 "framework": "openai-agents",
-                "final_answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
+                "final_answer": "Yes. The parallel specialist run preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
                 "confidence": 0.81,
                 "citations": [
                   "retention",
@@ -540,14 +550,14 @@
                 ]
               },
               "metrics": {
-                "time_ms": 3045,
-                "token_input_estimate": 133,
-                "token_output_estimate": 153,
-                "token_total_estimate": 286,
-                "usd_cost_estimate": 0.00011
+                "time_ms": 2753,
+                "token_input_estimate": 131,
+                "token_output_estimate": 120,
+                "token_total_estimate": 251,
+                "usd_cost_estimate": 9e-05
               },
               "output": {
-                "answer": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
+                "answer": "Yes. The parallel specialist run preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
                 "citations": [
                   "retention",
                   "rights"
@@ -2814,11 +2824,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 8674,
+                "time_ms": 9741,
                 "token_input_estimate": 393,
-                "token_output_estimate": 411,
-                "token_total_estimate": 804,
-                "usd_cost_estimate": 0.00031
+                "token_output_estimate": 471,
+                "token_total_estimate": 864,
+                "usd_cost_estimate": 0.00034
               },
               "output": {
                 "status": "case_opened",
@@ -2837,26 +2847,26 @@
               ],
               "active_links": [
                 "principal-compliance",
-                "compliance-security",
-                "security-legal",
-                "legal-finance"
+                "principal-security",
+                "principal-legal",
+                "principal-finance"
               ],
               "messages": [
                 {
                   "link_id": "principal-compliance",
-                  "message": "handoff passes findings \u00b7 sharing"
+                  "message": "parallel specialists return findings \u00b7 sharing"
                 },
                 {
-                  "link_id": "compliance-security",
-                  "message": "handoff passes findings \u00b7 sharing"
+                  "link_id": "principal-security",
+                  "message": "parallel specialists return findings \u00b7 sharing"
                 },
                 {
-                  "link_id": "security-legal",
-                  "message": "handoff passes findings \u00b7 sharing"
+                  "link_id": "principal-legal",
+                  "message": "parallel specialists return findings \u00b7 sharing"
                 },
                 {
-                  "link_id": "legal-finance",
-                  "message": "handoff passes findings \u00b7 sharing"
+                  "link_id": "principal-finance",
+                  "message": "parallel specialists return findings \u00b7 sharing"
                 }
               ],
               "state": {
@@ -2877,11 +2887,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 40812,
-                "token_input_estimate": 413,
-                "token_output_estimate": 1842,
-                "token_total_estimate": 2255,
-                "usd_cost_estimate": 0.00117
+                "time_ms": 29519,
+                "token_input_estimate": 532,
+                "token_output_estimate": 333,
+                "token_total_estimate": 865,
+                "usd_cost_estimate": 0.00028
               },
               "output": {
                 "specialist_findings": 4,
@@ -2900,17 +2910,27 @@
                 "reviewer"
               ],
               "active_links": [
-                "finance-reviewer",
-                "legal-reviewer"
+                "compliance-reviewer",
+                "security-reviewer",
+                "legal-reviewer",
+                "finance-reviewer"
               ],
               "messages": [
                 {
-                  "link_id": "finance-reviewer",
-                  "message": "reviewer handoff blocks \u00b7 sharing"
+                  "link_id": "compliance-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 sharing"
+                },
+                {
+                  "link_id": "security-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 sharing"
                 },
                 {
                   "link_id": "legal-reviewer",
-                  "message": "reviewer handoff blocks \u00b7 sharing"
+                  "message": "reviewer blocks unsupported claims \u00b7 sharing"
+                },
+                {
+                  "link_id": "finance-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 sharing"
                 }
               ],
               "state": {
@@ -2933,16 +2953,16 @@
                 ]
               },
               "metrics": {
-                "time_ms": 22994,
-                "token_input_estimate": 1909,
-                "token_output_estimate": 633,
-                "token_total_estimate": 2542,
-                "usd_cost_estimate": 0.00067
+                "time_ms": 10516,
+                "token_input_estimate": 400,
+                "token_output_estimate": 502,
+                "token_total_estimate": 902,
+                "usd_cost_estimate": 0.00036
               },
               "output": {
-                "reviewer_action": "reject_handoff",
+                "reviewer_action": "reject_parallel_review",
                 "notes": [
-                  "summary compressed legal caveat",
+                  "legal caveat needs source wording",
                   "rehydrate retention limits"
                 ]
               }
@@ -2977,16 +2997,16 @@
                 "framework": "openai-agents",
                 "draft_answer": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
                 "reviewer_notes": [
-                  "carry sharing citation through handoff",
+                  "carry sharing citation through parallel reviews",
                   "do not drop reviewer caveat"
                 ]
               },
               "metrics": {
-                "time_ms": 5979,
+                "time_ms": 4094,
                 "token_input_estimate": 152,
-                "token_output_estimate": 198,
-                "token_total_estimate": 350,
-                "usd_cost_estimate": 0.00014
+                "token_output_estimate": 131,
+                "token_total_estimate": 283,
+                "usd_cost_estimate": 0.0001
               },
               "output": {
                 "draft_answer": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
@@ -3030,11 +3050,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 6461,
-                "token_input_estimate": 135,
-                "token_output_estimate": 256,
-                "token_total_estimate": 391,
-                "usd_cost_estimate": 0.00017
+                "time_ms": 5120,
+                "token_input_estimate": 130,
+                "token_output_estimate": 277,
+                "token_total_estimate": 407,
+                "usd_cost_estimate": 0.00019
               },
               "output": {
                 "answer": "The run concludes that sharing is allowed in several buckets: affiliates, organization accounts, lawful authorities, abuse-prevention actors, and user-authorized third-party apps.",
@@ -5356,11 +5376,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 8780,
+                "time_ms": 7234,
                 "token_input_estimate": 400,
-                "token_output_estimate": 491,
-                "token_total_estimate": 891,
-                "usd_cost_estimate": 0.00035
+                "token_output_estimate": 440,
+                "token_total_estimate": 840,
+                "usd_cost_estimate": 0.00032
               },
               "output": {
                 "status": "case_opened",
@@ -5379,26 +5399,26 @@
               ],
               "active_links": [
                 "principal-compliance",
-                "compliance-security",
-                "security-legal",
-                "legal-finance"
+                "principal-security",
+                "principal-legal",
+                "principal-finance"
               ],
               "messages": [
                 {
                   "link_id": "principal-compliance",
-                  "message": "handoff passes findings \u00b7 rights"
+                  "message": "parallel specialists return findings \u00b7 rights"
                 },
                 {
-                  "link_id": "compliance-security",
-                  "message": "handoff passes findings \u00b7 rights"
+                  "link_id": "principal-security",
+                  "message": "parallel specialists return findings \u00b7 rights"
                 },
                 {
-                  "link_id": "security-legal",
-                  "message": "handoff passes findings \u00b7 rights"
+                  "link_id": "principal-legal",
+                  "message": "parallel specialists return findings \u00b7 rights"
                 },
                 {
-                  "link_id": "legal-finance",
-                  "message": "handoff passes findings \u00b7 rights"
+                  "link_id": "principal-finance",
+                  "message": "parallel specialists return findings \u00b7 rights"
                 }
               ],
               "state": {
@@ -5419,11 +5439,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 49481,
-                "token_input_estimate": 451,
-                "token_output_estimate": 2512,
-                "token_total_estimate": 2963,
-                "usd_cost_estimate": 0.00157
+                "time_ms": 3371,
+                "token_input_estimate": 580,
+                "token_output_estimate": 366,
+                "token_total_estimate": 946,
+                "usd_cost_estimate": 0.00031
               },
               "output": {
                 "specialist_findings": 4,
@@ -5442,17 +5462,27 @@
                 "reviewer"
               ],
               "active_links": [
-                "finance-reviewer",
-                "legal-reviewer"
+                "compliance-reviewer",
+                "security-reviewer",
+                "legal-reviewer",
+                "finance-reviewer"
               ],
               "messages": [
                 {
-                  "link_id": "finance-reviewer",
-                  "message": "reviewer handoff blocks \u00b7 rights"
+                  "link_id": "compliance-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 rights"
+                },
+                {
+                  "link_id": "security-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 rights"
                 },
                 {
                   "link_id": "legal-reviewer",
-                  "message": "reviewer handoff blocks \u00b7 rights"
+                  "message": "reviewer blocks unsupported claims \u00b7 rights"
+                },
+                {
+                  "link_id": "finance-reviewer",
+                  "message": "reviewer blocks unsupported claims \u00b7 rights"
                 }
               ],
               "state": {
@@ -5475,16 +5505,16 @@
                 ]
               },
               "metrics": {
-                "time_ms": 12484,
-                "token_input_estimate": 2586,
-                "token_output_estimate": 822,
-                "token_total_estimate": 3408,
-                "usd_cost_estimate": 0.00088
+                "time_ms": 7989,
+                "token_input_estimate": 440,
+                "token_output_estimate": 469,
+                "token_total_estimate": 909,
+                "usd_cost_estimate": 0.00035
               },
               "output": {
-                "reviewer_action": "reject_handoff",
+                "reviewer_action": "reject_parallel_review",
                 "notes": [
-                  "summary compressed legal caveat",
+                  "legal caveat needs source wording",
                   "rehydrate retention limits"
                 ]
               }
@@ -5517,21 +5547,21 @@
                 ],
                 "stage": "synthesis",
                 "framework": "openai-agents",
-                "draft_answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
+                "draft_answer": "The parallel specialist result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
                 "reviewer_notes": [
-                  "carry rights citation through handoff",
+                  "carry rights citation through parallel reviews",
                   "do not drop reviewer caveat"
                 ]
               },
               "metrics": {
-                "time_ms": 10442,
-                "token_input_estimate": 166,
-                "token_output_estimate": 353,
-                "token_total_estimate": 519,
-                "usd_cost_estimate": 0.00024
+                "time_ms": 4362,
+                "token_input_estimate": 164,
+                "token_output_estimate": 231,
+                "token_total_estimate": 395,
+                "usd_cost_estimate": 0.00016
               },
               "output": {
-                "draft_answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
+                "draft_answer": "The parallel specialist result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
                 "status": "ready_for_verdict",
                 "merge_style": "handoff"
               }
@@ -5563,7 +5593,7 @@
                 ],
                 "stage": "verdict",
                 "framework": "openai-agents",
-                "final_answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
+                "final_answer": "The parallel specialist result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
                 "confidence": 0.81,
                 "citations": [
                   "rights",
@@ -5572,14 +5602,14 @@
                 ]
               },
               "metrics": {
-                "time_ms": 6710,
-                "token_input_estimate": 144,
-                "token_output_estimate": 382,
-                "token_total_estimate": 526,
-                "usd_cost_estimate": 0.00025
+                "time_ms": 11038,
+                "token_input_estimate": 153,
+                "token_output_estimate": 352,
+                "token_total_estimate": 505,
+                "usd_cost_estimate": 0.00023
               },
               "output": {
-                "answer": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
+                "answer": "The parallel specialist result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
                 "citations": [
                   "rights",
                   "retention",

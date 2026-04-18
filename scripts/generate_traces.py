@@ -80,8 +80,8 @@ FRAMEWORKS = {
         "state_container": "run_context",
         "links": {
             "intake": ["principal-compliance"],
-            "review": ["principal-compliance", "compliance-security", "security-legal", "legal-finance"],
-            "challenge": ["finance-reviewer", "legal-reviewer"],
+            "review": ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+            "challenge": ["compliance-reviewer", "security-reviewer", "legal-reviewer", "finance-reviewer"],
             "synthesis": ["reviewer-principal"],
             "verdict": ["principal-decision"],
         },
@@ -241,8 +241,8 @@ STAGE_MESSAGE_TEMPLATES = {
     },
     "openai-agents": {
         "intake": "run context opened",
-        "review": "handoff passes findings",
-        "challenge": "reviewer handoff blocks",
+        "review": "parallel specialists return findings",
+        "challenge": "reviewer blocks unsupported claims",
         "synthesis": "reviewed context returns",
         "verdict": "final agent responds",
     },
@@ -395,7 +395,7 @@ def stage_state(question: dict, framework_id: str, stage_id: str, container: str
 def reviewer_notes(framework_id: str, lead_clause: str) -> list[str]:
     by_framework = {
         "langgraph": [f"cite {lead_clause} clause explicitly", "retain conditional wording"],
-        "openai-agents": [f"carry {lead_clause} citation through handoff", "do not drop reviewer caveat"],
+        "openai-agents": [f"carry {lead_clause} citation through parallel reviews", "do not drop reviewer caveat"],
         "claude-agent-sdk": [f"keep {lead_clause} visible in the live session", "final ResultMessage must preserve reviewer caveat"],
         "ag2": [f"trim unsupported debate around {lead_clause}", "pin the final claim to policy text"],
         "crewai": [f"manager must keep {lead_clause} evidence attached", "check task summaries for drift"],
@@ -420,7 +420,7 @@ def verdict_answer(question: dict, framework_id: str) -> str:
     answers = {
         "retention": {
             "langgraph": "Yes, but only under the retention exceptions the graph gathered: GitHub can keep personal data for contracts, legal duties, disputes, and agreement enforcement, and the period depends on purpose.",
-            "openai-agents": "Yes. The handoff chain preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
+            "openai-agents": "Yes. The parallel specialist run preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
             "claude-agent-sdk": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
             "ag2": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
             "crewai": "Yes. The manager summary says data retention may continue where contracts, legal obligations, disputes, or agreement enforcement require it, with duration tied to purpose.",
@@ -442,7 +442,7 @@ def verdict_answer(question: dict, framework_id: str) -> str:
         },
         "rights": {
             "langgraph": "Users may have access, correction, erasure in some cases, objection, consent-withdrawal, portability, and region-specific rights; the graph also preserves that some rights depend on applicable law.",
-            "openai-agents": "The handoff result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
+            "openai-agents": "The parallel specialist result keeps the answer conditional: users may have access, correction, deletion or erasure in some cases, portability, objection, and appeal-style rights depending on region and law.",
             "claude-agent-sdk": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",
             "ag2": "The team converged on a qualified rights answer: access, correction, deletion in some cases, objection, consent withdrawal, portability, and some state-specific rights exist, but they depend on jurisdiction.",
             "crewai": "Crew outputs identify access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights that vary with applicable law.",
@@ -478,7 +478,7 @@ def stage_output(question: dict, framework_id: str, stage_id: str) -> dict:
     if stage_id == "challenge":
         by_framework = {
             "langgraph": {"reviewer_action": "branch_to_revision", "notes": ["missing conditional caveat", "add explicit clause citation"]},
-            "openai-agents": {"reviewer_action": "reject_handoff", "notes": ["summary compressed legal caveat", "rehydrate retention limits"]},
+            "openai-agents": {"reviewer_action": "reject_parallel_review", "notes": ["legal caveat needs source wording", "rehydrate retention limits"]},
             "claude-agent-sdk": {"reviewer_action": "continue_session_with_review", "notes": ["final response needs clause ids", "preserve narrow policy wording"]},
             "ag2": {"reviewer_action": "stop_debate_and_ground", "notes": ["debate drift detected", "anchor final answer to source clause"]},
             "crewai": {"reviewer_action": "return_task_bundle", "notes": ["manager summary needs source wording", "task outputs disagree on scope"]},

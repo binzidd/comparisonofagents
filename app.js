@@ -24,8 +24,8 @@ const catalogItems = [
     name: "OpenAI Agents SDK",
     kind: "framework",
     color: "#6b4bc2",
-    tagline: "Handoffs, tools, and traces",
-    summary: "Clear specialist handoffs inside one runtime with tool calls and guardrails.",
+    tagline: "Parallel specialists, tools, and traces",
+    summary: "Independent specialist agents can run concurrently, then converge through reviewer and verdict agents.",
     pattern: "sequential-handoffs",
     pros: [
       "Very clear handoff model",
@@ -362,7 +362,7 @@ const stageTheme = {
 
 const PATTERN_LABELS = {
   "graph-branches": "Parallel Fan-out",
-  "sequential-handoffs": "Sequential Chain",
+  "sequential-handoffs": "Parallel Specialists",
   "conversation-mesh": "Mesh Network",
   "claude-agent-loop": "Agent Loop",
   "manager-review": "Manager Review",
@@ -545,7 +545,7 @@ const graphLabelOffsets = {
 
 const TIME_REASONS = {
   "graph-branches": "Specialists run as parallel graph branches; stage time equals the slowest single specialist, not the sum of all four. That keeps per-stage times low even with 4 concurrent domain checks.",
-  "sequential-handoffs": "Each specialist is a separate agent handoff: 4 specialists = 4 serial LLM round-trips. The review and challenge stages stack those latencies, which is why you see high per-stage times (e.g. 17–35 s). It is the architectural trade-off of the handoff model.",
+  "sequential-handoffs": "Specialist agents can run concurrently with asyncio.gather, so review-stage time is bounded by the slowest specialist rather than the sum of all four. Reviewer, synthesis, and verdict still stay sequential because they depend on the gathered findings.",
   "conversation-mesh": "Specialists engage in conversational turns. Multi-turn exchanges on contested claims add latency beyond a single LLM call per specialist; each back-and-forth round adds an API call.",
   "claude-agent-loop": "Claude Agent SDK keeps a live Claude Code session and streams progress through the SDK. Latency reflects real assistant turns plus session/tool orchestration rather than a fabricated local stub.",
   "manager-review": "The manager routes tasks sequentially; stage time scales with the number of specialists called and any re-routing decisions the manager makes.",
@@ -646,16 +646,16 @@ const frameworkPatterns = {
       technical: "The run begins with the first specialist handoff."
     },
     review: {
-      links: ["principal-compliance", "compliance-security", "security-legal", "legal-finance"],
-      messages: ["State is handed forward specialist by specialist."],
-      business: "Each expert owns a turn in sequence.",
-      technical: "Structured state moves through handoffs."
+      links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
+      messages: ["Specialists run concurrently and return findings."],
+      business: "Each expert owns an independent review lane.",
+      technical: "Runner.run calls are gathered in parallel before review."
     },
     challenge: {
-      links: ["finance-reviewer", "legal-reviewer"],
-      messages: ["Reviewer handoff blocks early completion."],
+      links: ["compliance-reviewer", "security-reviewer", "legal-reviewer", "finance-reviewer"],
+      messages: ["Reviewer checks the gathered findings before completion."],
       business: "The reviewer is a clear gate before shipping.",
-      technical: "Reviewer handoff inspects intermediate output."
+      technical: "Reviewer agent inspects the merged specialist packet."
     },
     synthesis: {
       links: ["reviewer-principal"],
@@ -1246,28 +1246,28 @@ checkpoint("before_reviewer")
 replay_if_clause_coverage_fails()`
     },
     "sequential-handoffs": {
-      intro: "OpenAI Agents SDK offers the clearest specialist handoff model with strong built-in tracing, but its serial execution means stage latency stacks with each agent in the chain.",
+      intro: "OpenAI Agents SDK offers clear specialist agents with strong built-in tracing. Independent review agents can run concurrently, while reviewer, synthesis, and verdict remain explicit gated steps.",
       cards: [
-        { label: "Execution", value: "Linear baton-pass handoffs inside one run context" },
-        { label: "Performance", value: "Simple to reason about, but latency stacks if specialists are sequential" },
+        { label: "Execution", value: "Parallel specialist runs followed by reviewer and verdict agents" },
+        { label: "Performance", value: "Specialist review can run concurrently; dependent gates still stack" },
         { label: "Evals", value: "Guardrails fit naturally at handoff boundaries and before final return" },
-        { label: "Context Risk", value: "Medium because each handoff can compress or reshape prior findings" },
-        { label: "Challenge", value: "Long policy chains can lose nuance if each agent summarizes too aggressively" },
+        { label: "Context Risk", value: "Medium because merged specialist summaries can still compress prior findings" },
+        { label: "Challenge", value: "Parallel findings need a disciplined merge packet before reviewer checks" },
         { label: "Tools", value: "Agent-local tools stay clean, but cross-agent evidence stitching matters" }
       ],
       scorecard: [
-        { label: "Latency", value: 2, reason: "Every specialist handoff is sequential; total latency is the sum of all individual agent calls." },
-        { label: "Observability", value: 4, reason: "SDK tracing captures handoff boundaries and tool calls but no per-node state diffs." },
-        { label: "Replayability", value: 4, reason: "Run context is serializable but replay requires re-triggering the full handoff chain from scratch." },
-        { label: "Human Review", value: 4, reason: "Input and output guardrails provide review hooks at each handoff boundary." },
-        { label: "Context Loss", value: 3, reason: "Each agent receives prior output but aggressive summarization can compress clause detail." },
+        { label: "Latency", value: 3, reason: "Independent specialist agents can run in parallel, though reviewer and final synthesis still add sequential latency." },
+        { label: "Observability", value: 4, reason: "SDK tracing captures agent runs, guardrails, and tool calls but no per-node state diffs." },
+        { label: "Replayability", value: 4, reason: "Run context is serializable but replay requires re-triggering the relevant agent runs." },
+        { label: "Human Review", value: 4, reason: "Input and output guardrails provide review hooks around each agent boundary." },
+        { label: "Context Loss", value: 3, reason: "Parallel findings are explicit, but the merge step can compress clause detail." },
         { label: "Unsupported Answer Risk", value: 3, reason: "Reviewer agent can block but no automatic citation check enforces answer grounding." },
         { label: "Error Recovery", value: 3, reason: "SDK handles basic retries but no checkpoint rollback if a mid-chain failure occurs." },
-        { label: "Parallelism", value: 2, reason: "Handoffs are inherently linear; no native fan-out exists for concurrent specialist execution." },
+        { label: "Parallelism", value: 4, reason: "Independent Runner.run calls can be gathered concurrently for specialist fan-out." },
         { label: "Testability", value: 3, reason: "Agents can be tested individually with mock runners but there is no built-in deterministic test mode." },
         { label: "Type Safety", value: 4, reason: "Tool function JSON schemas are enforced; structured_output constrains the final response type." }
       ],
-      arrowA: "handoff",
+      arrowA: "fan-out",
       arrowB: "review",
       arrowC: "return",
       evalCode: `on_handoff(validate_schema)
@@ -1607,9 +1607,12 @@ function frameworkBaseLinks(framework) {
     ],
     "sequential-handoffs": [
       "principal-compliance",
-      "compliance-security",
-      "security-legal",
-      "legal-finance",
+      "principal-security",
+      "principal-legal",
+      "principal-finance",
+      "compliance-reviewer",
+      "security-reviewer",
+      "legal-reviewer",
       "finance-reviewer",
       "reviewer-principal",
       "principal-decision"
@@ -1723,8 +1726,13 @@ function stageImplementationCode(framework, stageId) {
     },
     "sequential-handoffs": {
       intake: `ctx = start_run(policy_doc)\nhandoff(principal, compliance)`,
-      review: `handoff(compliance, security)\nhandoff(security, legal)\nhandoff(legal, finance)`,
-      challenge: `handoff(finance, reviewer)`,
+      review: `await gather(
+  Runner.run(compliance, ctx),
+  Runner.run(security, ctx),
+  Runner.run(legal, ctx),
+  Runner.run(finance, ctx),
+)`,
+      challenge: `Runner.run(reviewer, findings)`,
       synthesis: `handoff(reviewer, principal)\nprincipal.compose(ctx)`,
       verdict: `return principal.final(ctx)`
     },
@@ -1882,6 +1890,7 @@ result = graph.compile().invoke({
 print(result["answer"])`,
     "sequential-handoffs": `${helpers}
 
+import asyncio
 from agents import Agent, Runner
 
 # [intake]
@@ -1924,13 +1933,29 @@ reviewer = Agent(
 # [synthesis]
 principal = Agent(
     name="Principal",
-    instructions="Own the final policy answer and include confidence plus citations. Use compose_answer once findings are returned.",
-    handoffs=[compliance, security, legal, finance, reviewer],
+    instructions="Own the final policy answer and include confidence plus citations.",
 )
 
 # [verdict]
-result = Runner.run_sync(principal, input=policy_case)
-print(result.final_output)`,
+async def run_case():
+    specialist_prompt = f"Policy case: {policy_case}"
+    findings = await asyncio.gather(
+        Runner.run(compliance, input=specialist_prompt),
+        Runner.run(security, input=specialist_prompt),
+        Runner.run(legal, input=specialist_prompt),
+        Runner.run(finance, input=specialist_prompt),
+    )
+    review = await Runner.run(
+        reviewer,
+        input="Challenge these findings: " + "\\n".join(item.final_output for item in findings),
+    )
+    result = await Runner.run(
+        principal,
+        input=f"Case={policy_case}\\nFindings={findings}\\nReviewer={review.final_output}",
+    )
+    return result.final_output
+
+print(asyncio.run(run_case()))`,
     "conversation-mesh": `${helpers}
 
 from autogen import AssistantAgent, GroupChat, GroupChatManager
@@ -2349,13 +2374,15 @@ function graphMessageMap(framework, stageId) {
       },
       review: {
         "principal-compliance": "policy task",
-        "compliance-security": "controls",
-        "security-legal": "risk notes",
-        "legal-finance": "cost flags"
+        "principal-security": "controls",
+        "principal-legal": "risk notes",
+        "principal-finance": "cost flags"
       },
       challenge: {
-        "finance-reviewer": "concerns",
-        "legal-reviewer": "exceptions"
+        "compliance-reviewer": "support check",
+        "security-reviewer": "risk proof",
+        "legal-reviewer": "exceptions",
+        "finance-reviewer": "concerns"
       },
       synthesis: {
         "reviewer-principal": "reviewed run"

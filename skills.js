@@ -105,20 +105,20 @@ const frameworks = [
     name: "OpenAI Agents SDK",
     color: "#6b4bc2",
     runtime: "python",
-    pattern: "Sequential Chain",
-    executionModel: "Linear baton-pass handoffs inside one run context",
+    pattern: "Parallel Specialists",
+    executionModel: "Independent specialist agents gathered concurrently before reviewer and verdict",
     withoutSkill: {
-      capabilityUnit: "Specialist agent plus handoff-specific prompt bundle",
-      headline: "Handoffs are clean, but every specialist still carries repeated evidence and review instructions.",
-      resultPacket: "Run context shaped by each handoff",
+      capabilityUnit: "Specialist agent plus shared prompt bundle",
+      headline: "Parallel review is faster, but every specialist still carries repeated evidence and review instructions.",
+      resultPacket: "Parallel findings merged into reviewer context",
       promptGlue: "High: repeated grounding rules live across multiple agent prompts",
       reuse: "Reuse is mostly prompt copying across agents"
     },
     withSkill: {
       skillName: "Claude Policy Grounding Skill",
-      capabilityUnit: "Specialist handoff plus reusable Claude skill bundle",
-      headline: "The SDK still owns specialist handoffs, while the skill packages the evidence contract every specialist can reuse.",
-      resultPacket: "Shared skill packet attached to the handoff chain",
+      capabilityUnit: "Specialist agent plus reusable Claude skill bundle",
+      headline: "The SDK still owns parallel specialist execution, while the skill packages the evidence contract every specialist can reuse.",
+      resultPacket: "Shared skill packet merged after parallel review",
       promptGlue: "Lower: specialists call the same skill instead of restating the grounding policy",
       reuse: "Reuse means the same skill can sit behind multiple specialists and tasks"
     },
@@ -129,10 +129,10 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 3, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Creates the run context for the GitHub privacy question and selects the first specialist handoff.", skill: "Injects one shared grounding brief covering the exact clauses the chain should look for before any specialist starts." },
-      { stage: "Review", framework: "Hands the case from retrieval specialist to analyst to reviewer inside one chain.", skill: "Makes each specialist return a normalized packet with GitHub quote, citation id, and answer impact instead of free-form notes." },
-      { stage: "Challenge", framework: "Uses the reviewer handoff when the draft answer sounds risky.", skill: "Applies the same review test every run: check missing citations, challenge unsupported claims, and add caveats where GitHub's wording is narrow." },
-      { stage: "Verdict", framework: "Returns the final guarded answer from the last specialist.", skill: "Ensures the handoff chain cannot finish without a cited verdict, caveat line, and confidence score." }
+      { stage: "Intake", framework: "Creates the run context for the GitHub privacy question and prepares the specialist fan-out.", skill: "Injects one shared grounding brief covering the exact clauses every parallel specialist should look for." },
+      { stage: "Review", framework: "Runs compliance, security, legal, and data-ops agents concurrently, then merges their findings.", skill: "Makes each specialist return a normalized packet with GitHub quote, citation id, and answer impact instead of free-form notes." },
+      { stage: "Challenge", framework: "Runs the reviewer after the parallel findings are gathered.", skill: "Applies the same review test every run: check missing citations, challenge unsupported claims, and add caveats where GitHub's wording is narrow." },
+      { stage: "Verdict", framework: "Returns the final guarded answer after reviewer and synthesis steps.", skill: "Ensures the run cannot finish without a cited verdict, caveat line, and confidence score." }
     ]
   },
   {

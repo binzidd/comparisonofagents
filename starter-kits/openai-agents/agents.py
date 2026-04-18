@@ -10,7 +10,7 @@ import os
 import asyncio
 from dotenv import load_dotenv
 
-from agents import Agent, Runner, handoff
+from agents import Agent, Runner
 
 load_dotenv()
 
