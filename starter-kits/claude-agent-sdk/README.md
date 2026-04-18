@@ -2,7 +2,7 @@
 
 A multi-stage policy review pipeline built with **Claude Agent SDK**.
 
-Five stages run through one live Claude session: **Intake -> Specialists -> Reviewer -> Synthesis -> Verdict**. The SDK owns the session, streaming response loop, custom agent definitions, and permission boundary.
+Five stages run through live Claude Agent SDK calls: **Intake -> Specialists -> Reviewer -> Synthesis -> Verdict**. The specialist reviews run concurrently with `asyncio.gather`; reviewer, synthesis, and verdict stay sequential because they depend on the specialist outputs.
 
 ## Setup
 

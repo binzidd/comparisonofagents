@@ -598,11 +598,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 15034,
-                "token_input_estimate": 20747,
-                "token_output_estimate": 626,
-                "token_total_estimate": 21373,
-                "usd_cost_estimate": 0.03795
+                "time_ms": 17065,
+                "token_input_estimate": 20709,
+                "token_output_estimate": 689,
+                "token_total_estimate": 21398,
+                "usd_cost_estimate": 0.03929
               },
               "output": {
                 "status": "case_opened",
@@ -660,11 +660,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 14528,
-                "token_input_estimate": 20896,
-                "token_output_estimate": 492,
-                "token_total_estimate": 21388,
-                "usd_cost_estimate": 0.03553
+                "time_ms": 13185,
+                "token_input_estimate": 83422,
+                "token_output_estimate": 1554,
+                "token_total_estimate": 84976,
+                "usd_cost_estimate": 0.13077
               },
               "output": {
                 "specialist_findings": 4,
@@ -725,11 +725,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 16099,
-                "token_input_estimate": 21007,
-                "token_output_estimate": 909,
-                "token_total_estimate": 21916,
-                "usd_cost_estimate": 0.04665
+                "time_ms": 22409,
+                "token_input_estimate": 20992,
+                "token_output_estimate": 1199,
+                "token_total_estimate": 22191,
+                "usd_cost_estimate": 0.05381
               },
               "output": {
                 "reviewer_action": "continue_session_with_review",
@@ -773,11 +773,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 12854,
-                "token_input_estimate": 20719,
-                "token_output_estimate": 616,
-                "token_total_estimate": 21335,
-                "usd_cost_estimate": 0.03753
+                "time_ms": 10279,
+                "token_input_estimate": 20702,
+                "token_output_estimate": 454,
+                "token_total_estimate": 21156,
+                "usd_cost_estimate": 0.03337
               },
               "output": {
                 "draft_answer": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
@@ -819,11 +819,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 18188,
-                "token_input_estimate": 20583,
-                "token_output_estimate": 788,
-                "token_total_estimate": 21371,
-                "usd_cost_estimate": 0.04098
+                "time_ms": 8392,
+                "token_input_estimate": 20565,
+                "token_output_estimate": 429,
+                "token_total_estimate": 20994,
+                "usd_cost_estimate": 0.03189
               },
               "output": {
                 "answer": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
@@ -3090,11 +3090,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 11736,
-                "token_input_estimate": 20748,
-                "token_output_estimate": 550,
-                "token_total_estimate": 21298,
-                "usd_cost_estimate": 0.03606
+                "time_ms": 12854,
+                "token_input_estimate": 20710,
+                "token_output_estimate": 589,
+                "token_total_estimate": 21299,
+                "usd_cost_estimate": 0.03679
               },
               "output": {
                 "status": "case_opened",
@@ -3153,11 +3153,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 9358,
-                "token_input_estimate": 20899,
-                "token_output_estimate": 351,
-                "token_total_estimate": 21250,
-                "usd_cost_estimate": 0.03203
+                "time_ms": 16434,
+                "token_input_estimate": 83474,
+                "token_output_estimate": 1943,
+                "token_total_estimate": 85417,
+                "usd_cost_estimate": 0.14082
               },
               "output": {
                 "specialist_findings": 5,
@@ -3219,11 +3219,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 27204,
-                "token_input_estimate": 21009,
-                "token_output_estimate": 1537,
-                "token_total_estimate": 22546,
-                "usd_cost_estimate": 0.06236
+                "time_ms": 14215,
+                "token_input_estimate": 20985,
+                "token_output_estimate": 627,
+                "token_total_estimate": 21612,
+                "usd_cost_estimate": 0.03946
               },
               "output": {
                 "reviewer_action": "continue_session_with_review",
@@ -3268,11 +3268,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 7327,
-                "token_input_estimate": 20736,
-                "token_output_estimate": 385,
-                "token_total_estimate": 21121,
-                "usd_cost_estimate": 0.03186
+                "time_ms": 9969,
+                "token_input_estimate": 20703,
+                "token_output_estimate": 434,
+                "token_total_estimate": 21137,
+                "usd_cost_estimate": 0.03288
               },
               "output": {
                 "draft_answer": "The Claude agent loop keeps sharing scoped to affiliates, organization accounts, lawful authorities, abuse-prevention entities, and user-directed third-party applications.",
@@ -3317,11 +3317,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 12077,
-                "token_input_estimate": 20580,
-                "token_output_estimate": 572,
-                "token_total_estimate": 21152,
-                "usd_cost_estimate": 0.03556
+                "time_ms": 5760,
+                "token_input_estimate": 20553,
+                "token_output_estimate": 339,
+                "token_total_estimate": 20892,
+                "usd_cost_estimate": 0.02956
               },
               "output": {
                 "answer": "The Claude agent loop keeps sharing scoped to affiliates, organization accounts, lawful authorities, abuse-prevention entities, and user-directed third-party applications.",
@@ -5632,11 +5632,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 12360,
-                "token_input_estimate": 20756,
-                "token_output_estimate": 572,
-                "token_total_estimate": 21328,
-                "usd_cost_estimate": 0.03666
+                "time_ms": 12454,
+                "token_input_estimate": 20718,
+                "token_output_estimate": 611,
+                "token_total_estimate": 21329,
+                "usd_cost_estimate": 0.03739
               },
               "output": {
                 "status": "case_opened",
@@ -5695,11 +5695,11 @@
                 }
               },
               "metrics": {
-                "time_ms": 13454,
-                "token_input_estimate": 20924,
-                "token_output_estimate": 527,
-                "token_total_estimate": 21451,
-                "usd_cost_estimate": 0.03658
+                "time_ms": 17394,
+                "token_input_estimate": 83566,
+                "token_output_estimate": 2241,
+                "token_total_estimate": 85807,
+                "usd_cost_estimate": 0.14884
               },
               "output": {
                 "specialist_findings": 5,
@@ -5761,11 +5761,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 16095,
-                "token_input_estimate": 21054,
-                "token_output_estimate": 858,
-                "token_total_estimate": 21912,
-                "usd_cost_estimate": 0.04567
+                "time_ms": 15500,
+                "token_input_estimate": 21025,
+                "token_output_estimate": 789,
+                "token_total_estimate": 21814,
+                "usd_cost_estimate": 0.04376
               },
               "output": {
                 "reviewer_action": "continue_session_with_review",
@@ -5810,11 +5810,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 8833,
-                "token_input_estimate": 20794,
-                "token_output_estimate": 480,
-                "token_total_estimate": 21274,
-                "usd_cost_estimate": 0.03459
+                "time_ms": 8968,
+                "token_input_estimate": 20734,
+                "token_output_estimate": 517,
+                "token_total_estimate": 21251,
+                "usd_cost_estimate": 0.03514
               },
               "output": {
                 "draft_answer": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",
@@ -5858,11 +5858,11 @@
                 ]
               },
               "metrics": {
-                "time_ms": 11653,
-                "token_input_estimate": 20622,
-                "token_output_estimate": 307,
-                "token_total_estimate": 20929,
-                "usd_cost_estimate": 0.02919
+                "time_ms": 7022,
+                "token_input_estimate": 20576,
+                "token_output_estimate": 263,
+                "token_total_estimate": 20839,
+                "usd_cost_estimate": 0.02781
               },
               "output": {
                 "answer": "The streamed verdict keeps the jurisdiction caveat: users may have access, correction, deletion or erasure in some cases, objection, consent withdrawal, portability, and region-specific rights.",

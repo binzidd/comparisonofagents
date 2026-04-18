@@ -170,34 +170,34 @@
         },
         "claude-agent-sdk": {
           "intake": {
-            "time_ms": 15034,
-            "tokens_in": 20747,
-            "tokens_out": 626,
-            "usd": 0.037951
+            "time_ms": 17065,
+            "tokens_in": 20709,
+            "tokens_out": 689,
+            "usd": 0.0392885
           },
           "review": {
-            "time_ms": 14528,
-            "tokens_in": 20896,
-            "tokens_out": 492,
-            "usd": 0.0355323
+            "time_ms": 13185,
+            "tokens_in": 83422,
+            "tokens_out": 1554,
+            "usd": 0.1307664
           },
           "challenge": {
-            "time_ms": 16099,
-            "tokens_in": 21007,
-            "tokens_out": 909,
-            "usd": 0.046651
+            "time_ms": 22409,
+            "tokens_in": 20992,
+            "tokens_out": 1199,
+            "usd": 0.0538073
           },
           "synthesis": {
-            "time_ms": 12854,
-            "tokens_in": 20719,
-            "tokens_out": 616,
-            "usd": 0.037526
+            "time_ms": 10279,
+            "tokens_in": 20702,
+            "tokens_out": 454,
+            "usd": 0.0333697
           },
           "verdict": {
-            "time_ms": 18188,
-            "tokens_in": 20583,
-            "tokens_out": 788,
-            "usd": 0.040976
+            "time_ms": 8392,
+            "tokens_in": 20565,
+            "tokens_out": 429,
+            "usd": 0.0318885
           }
         }
       }
@@ -366,34 +366,34 @@
         },
         "claude-agent-sdk": {
           "intake": {
-            "time_ms": 11736,
-            "tokens_in": 20748,
-            "tokens_out": 550,
-            "usd": 0.0360572
+            "time_ms": 12854,
+            "tokens_in": 20710,
+            "tokens_out": 589,
+            "usd": 0.0367948
           },
           "review": {
-            "time_ms": 9358,
-            "tokens_in": 20899,
-            "tokens_out": 351,
-            "usd": 0.032026
+            "time_ms": 16434,
+            "tokens_in": 83474,
+            "tokens_out": 1943,
+            "usd": 0.1408164
           },
           "challenge": {
-            "time_ms": 27204,
-            "tokens_in": 21009,
-            "tokens_out": 1537,
-            "usd": 0.0623635
+            "time_ms": 14215,
+            "tokens_in": 20985,
+            "tokens_out": 627,
+            "usd": 0.0394635
           },
           "synthesis": {
-            "time_ms": 7327,
-            "tokens_in": 20736,
-            "tokens_out": 385,
-            "usd": 0.0318572
+            "time_ms": 9969,
+            "tokens_in": 20703,
+            "tokens_out": 434,
+            "usd": 0.032876
           },
           "verdict": {
-            "time_ms": 12077,
-            "tokens_in": 20580,
-            "tokens_out": 572,
-            "usd": 0.0355572
+            "time_ms": 5760,
+            "tokens_in": 20553,
+            "tokens_out": 339,
+            "usd": 0.0295635
           }
         }
       }
@@ -562,34 +562,34 @@
         },
         "claude-agent-sdk": {
           "intake": {
-            "time_ms": 12360,
-            "tokens_in": 20756,
-            "tokens_out": 572,
-            "usd": 0.0366573
+            "time_ms": 12454,
+            "tokens_in": 20718,
+            "tokens_out": 611,
+            "usd": 0.0373948
           },
           "review": {
-            "time_ms": 13454,
-            "tokens_in": 20924,
-            "tokens_out": 527,
-            "usd": 0.0365823
+            "time_ms": 17394,
+            "tokens_in": 83566,
+            "tokens_out": 2241,
+            "usd": 0.1488416
           },
           "challenge": {
-            "time_ms": 16095,
-            "tokens_in": 21054,
-            "tokens_out": 858,
-            "usd": 0.0456698
+            "time_ms": 15500,
+            "tokens_in": 21025,
+            "tokens_out": 789,
+            "usd": 0.0437635
           },
           "synthesis": {
-            "time_ms": 8833,
-            "tokens_in": 20794,
-            "tokens_out": 480,
-            "usd": 0.0345948
+            "time_ms": 8968,
+            "tokens_in": 20734,
+            "tokens_out": 517,
+            "usd": 0.0351447
           },
           "verdict": {
-            "time_ms": 11653,
-            "tokens_in": 20622,
-            "tokens_out": 307,
-            "usd": 0.0291947
+            "time_ms": 7022,
+            "tokens_in": 20576,
+            "tokens_out": 263,
+            "usd": 0.0278073
           }
         }
       }

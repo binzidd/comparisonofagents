@@ -347,7 +347,7 @@ async def run_claude_agent_sdk(question: str) -> dict:
     outputs: dict[str, str] = {}
     cli_path = _ensure_claude_cli_ready()
 
-    async def stage(name: str, prompt: str) -> str:
+    async def claude_call(prompt: str) -> tuple[str, dict]:
         # Bounded real Claude Code call. The Claude Agent SDK uses this same CLI
         # runtime, but its streaming transport can hang on long prompts in this
         # local environment; JSON mode keeps the harness measurable and honest.
@@ -383,14 +383,19 @@ async def run_claude_agent_sdk(question: str) -> dict:
         usage = result.get("usage") or result.get("modelUsage") or {}
         ti, to = _claude_usage_counts(usage)
         elapsed = result.get("duration_ms") or int((time.perf_counter() - t) * 1000)
-        _m[name] = {
+        metrics = {
             "time_ms": elapsed,
             "tokens_in": ti,
             "tokens_out": to,
         }
         if result.get("total_cost_usd") is not None:
-            _m[name]["usd"] = round(result["total_cost_usd"], 7)
-        outputs[name] = (result.get("result") or "").strip()
+            metrics["usd"] = round(result["total_cost_usd"], 7)
+        return (result.get("result") or "").strip(), metrics
+
+    async def stage(name: str, prompt: str) -> str:
+        text, metrics = await claude_call(prompt)
+        _m[name] = metrics
+        outputs[name] = text
         return outputs[name]
 
     intake_out = await stage(
@@ -399,11 +404,31 @@ async def run_claude_agent_sdk(question: str) -> dict:
         "Identify the relevant clauses and assign compliance, security, legal, and finance specialist review tasks.",
     )
 
-    review_out = await stage(
-        "review",
-        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\nIntake context: {intake_out[:600]}\n\n"
-        "Act as compliance, security, legal, and finance specialists. Return one compact finding per specialist with clause ids.",
+    async def specialist_review(role: str, instructions: str) -> tuple[str, str, dict]:
+        text, metrics = await claude_call(
+            f"{instructions}\n\nQuestion: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+            f"Intake context: {intake_out[:600]}\n\n"
+            "Return one compact specialist finding with clause ids and a confidence note."
+        )
+        return role, text, metrics
+
+    t_review = time.perf_counter()
+    specialist_results = await asyncio.gather(
+        *[
+            specialist_review(role, instructions)
+            for role, instructions in SPECIALIST_ROLES.items()
+        ]
     )
+    review_out = "\n\n".join(f"{role}: {text}" for role, text, _metrics in specialist_results)
+    review_metrics = [metrics for _role, _text, metrics in specialist_results]
+    _m["review"] = {
+        "time_ms": int((time.perf_counter() - t_review) * 1000),
+        "tokens_in": sum(metric.get("tokens_in", 0) for metric in review_metrics),
+        "tokens_out": sum(metric.get("tokens_out", 0) for metric in review_metrics),
+    }
+    if all("usd" in metric for metric in review_metrics):
+        _m["review"]["usd"] = round(sum(metric["usd"] for metric in review_metrics), 7)
+    outputs["review"] = review_out
 
     challenge_out = await stage(
         "challenge",

@@ -2,19 +2,18 @@
 Claude Agent SDK policy checker.
 
 Runs a five-stage policy review inside one ClaudeSDKClient session:
-intake -> specialists -> reviewer -> synthesis -> verdict.
+intake -> parallel specialists -> reviewer -> synthesis -> verdict.
 """
 
 import asyncio
 import os
 
 from claude_agent_sdk import (
-    AgentDefinition,
     AssistantMessage,
     ClaudeAgentOptions,
-    ClaudeSDKClient,
     ResultMessage,
     TextBlock,
+    query,
 )
 from dotenv import load_dotenv
 
@@ -59,31 +58,12 @@ def _options() -> ClaudeAgentOptions:
             "You are the principal orchestration agent for a policy compliance "
             "analysis. Keep answers concise, grounded, and citation-led."
         ),
-        agents={
-            "compliance": AgentDefinition(
-                description="Use for regulatory and policy-obligation findings.",
-                prompt="Return concise compliance findings with clause ids.",
-            ),
-            "security": AgentDefinition(
-                description="Use for data-protection and access-control findings.",
-                prompt="Return concise security findings with clause ids.",
-            ),
-            "legal": AgentDefinition(
-                description="Use for legal caveats and jurisdictional limits.",
-                prompt="Preserve exact conditions and cite clause ids.",
-            ),
-            "reviewer": AgentDefinition(
-                description="Use before the final answer.",
-                prompt="Reject unsupported claims and missing caveats.",
-            ),
-        },
     )
 
 
-async def _ask(client: ClaudeSDKClient, prompt: str) -> str:
-    await client.query(prompt)
+async def _ask(prompt: str) -> str:
     parts: list[str] = []
-    async for message in client.receive_response():
+    async for message in query(prompt=prompt, options=_options()):
         text = _message_text(message)
         if text:
             parts.append(text)
@@ -92,34 +72,43 @@ async def _ask(client: ClaudeSDKClient, prompt: str) -> str:
 
 async def _run_pipeline_async(question: str) -> dict:
     outputs: dict[str, str] = {}
-    async with ClaudeSDKClient(options=_options()) as client:
-        outputs["intake"] = await _ask(
-            client,
-            f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
-            "Identify relevant clauses and assign specialist review tasks.",
-        )
-        outputs["specialists"] = await _ask(
-            client,
-            f"Question: {question}\n\nIntake:\n{outputs['intake']}\n\n"
-            "Run compliance, security, legal, and data operations reviews. "
-            "Return one finding per specialist with clause ids.",
-        )
-        outputs["reviewer"] = await _ask(
-            client,
-            f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
-            "Reviewer: challenge unsupported claims and missing caveats.",
-        )
-        outputs["synthesis"] = await _ask(
-            client,
-            f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
-            f"Reviewer notes:\n{outputs['reviewer']}\n\n"
-            "Draft the grounded answer.",
-        )
-        outputs["verdict"] = await _ask(
-            client,
-            f"Question: {question}\n\nDraft:\n{outputs['synthesis']}\n\n"
-            "Return the final answer with cited clause ids and confidence.",
-        )
+    outputs["intake"] = await _ask(
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+        "Identify relevant clauses and assign specialist review tasks.",
+    )
+
+    specialist_roles = {
+        "compliance": "Review regulatory and policy obligations.",
+        "security": "Review data-protection controls and access safeguards.",
+        "legal": "Review legal caveats, conditions, and jurisdictional limits.",
+        "data_ops": "Review data lifecycle, retention, and operational risk.",
+    }
+    specialist_outputs = await asyncio.gather(
+        *[
+            _ask(
+                f"{instructions}\n\nQuestion: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+                f"Intake:\n{outputs['intake']}\n\n"
+                "Return one compact finding with clause ids and a confidence note."
+            )
+            for instructions in specialist_roles.values()
+        ]
+    )
+    outputs["specialists"] = "\n\n".join(
+        f"{role}: {text}" for role, text in zip(specialist_roles, specialist_outputs)
+    )
+    outputs["reviewer"] = await _ask(
+        f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+        "Reviewer: challenge unsupported claims and missing caveats.",
+    )
+    outputs["synthesis"] = await _ask(
+        f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+        f"Reviewer notes:\n{outputs['reviewer']}\n\n"
+        "Draft the grounded answer.",
+    )
+    outputs["verdict"] = await _ask(
+        f"Question: {question}\n\nDraft:\n{outputs['synthesis']}\n\n"
+        "Return the final answer with cited clause ids and confidence.",
+    )
     return {"question": question, **outputs}
 
 
