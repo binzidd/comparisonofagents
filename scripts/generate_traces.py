@@ -94,8 +94,8 @@ FRAMEWORKS = {
         "cost_multiplier": 0.0000032,
     },
     "claude-agent-sdk": {
-        "runtime": "python-harness:claude-session",
-        "state_container": "claude_session",
+        "runtime": "python-harness:parallel-claude-calls",
+        "state_container": "parallel_claude_calls",
         "links": {
             "intake": ["principal-compliance", "principal-security"],
             "review": ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
@@ -247,8 +247,8 @@ STAGE_MESSAGE_TEMPLATES = {
         "verdict": "final agent responds",
     },
     "claude-agent-sdk": {
-        "intake": "Claude session opened",
-        "review": "session streams specialist findings",
+        "intake": "Claude case opened",
+        "review": "parallel Claude specialists return findings",
         "challenge": "reviewer turn checks evidence",
         "synthesis": "principal turn compacts context",
         "verdict": "ResultMessage closes run",
@@ -396,7 +396,7 @@ def reviewer_notes(framework_id: str, lead_clause: str) -> list[str]:
     by_framework = {
         "langgraph": [f"cite {lead_clause} clause explicitly", "retain conditional wording"],
         "openai-agents": [f"carry {lead_clause} citation through parallel reviews", "do not drop reviewer caveat"],
-        "claude-agent-sdk": [f"keep {lead_clause} visible in the live session", "final ResultMessage must preserve reviewer caveat"],
+        "claude-agent-sdk": [f"keep {lead_clause} visible across parallel specialist calls", "final ResultMessage must preserve reviewer caveat"],
         "ag2": [f"trim unsupported debate around {lead_clause}", "pin the final claim to policy text"],
         "crewai": [f"manager must keep {lead_clause} evidence attached", "check task summaries for drift"],
         "semantic-kernel": [f"governance gate requires {lead_clause}", "record explicit ambiguity note"],
@@ -421,7 +421,7 @@ def verdict_answer(question: dict, framework_id: str) -> str:
         "retention": {
             "langgraph": "Yes, but only under the retention exceptions the graph gathered: GitHub can keep personal data for contracts, legal duties, disputes, and agreement enforcement, and the period depends on purpose.",
             "openai-agents": "Yes. The parallel specialist run preserves the same bottom line: GitHub may continue retention after closure where contractual, legal, dispute, or enforcement needs apply.",
-            "claude-agent-sdk": "Yes. The Claude session preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
+            "claude-agent-sdk": "Yes. The parallel Claude specialist run preserves the caveat that retention after closure is allowed only for contract, legal, dispute, or enforcement needs, and duration stays purpose-bound.",
             "ag2": "The debate converged on a cautious yes: retention can continue after account closure when contractual, legal, or dispute needs still apply, but the policy does not promise a fixed deletion date.",
             "crewai": "Yes. The manager summary says data retention may continue where contracts, legal obligations, disputes, or agreement enforcement require it, with duration tied to purpose.",
             "semantic-kernel": "Yes, subject to the governed caveat that retention remains purpose-bound: GitHub may keep data for contracts, legal duties, disputes, and agreement enforcement.",
@@ -479,7 +479,7 @@ def stage_output(question: dict, framework_id: str, stage_id: str) -> dict:
         by_framework = {
             "langgraph": {"reviewer_action": "branch_to_revision", "notes": ["missing conditional caveat", "add explicit clause citation"]},
             "openai-agents": {"reviewer_action": "reject_parallel_review", "notes": ["legal caveat needs source wording", "rehydrate retention limits"]},
-            "claude-agent-sdk": {"reviewer_action": "continue_session_with_review", "notes": ["final response needs clause ids", "preserve narrow policy wording"]},
+            "claude-agent-sdk": {"reviewer_action": "review_merged_parallel_findings", "notes": ["final response needs clause ids", "preserve narrow policy wording"]},
             "ag2": {"reviewer_action": "stop_debate_and_ground", "notes": ["debate drift detected", "anchor final answer to source clause"]},
             "crewai": {"reviewer_action": "return_task_bundle", "notes": ["manager summary needs source wording", "task outputs disagree on scope"]},
             "semantic-kernel": {"reviewer_action": "fail_governance_gate", "notes": ["audit note missing", "ambiguity statement required"]},

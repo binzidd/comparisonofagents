@@ -1,7 +1,7 @@
 """
 Claude Agent SDK policy checker.
 
-Runs a five-stage policy review inside one ClaudeSDKClient session:
+Runs a five-stage policy review with Claude Agent SDK calls:
 intake -> parallel specialists -> reviewer -> synthesis -> verdict.
 """
 

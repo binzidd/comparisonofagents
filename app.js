@@ -376,6 +376,7 @@ const STATE_CONTAINER_LABELS = {
   shared_graph_state: "Shared graph state",
   run_context: "Run context",
   claude_session: "Claude session",
+  parallel_claude_calls: "Parallel Claude calls",
   chat_transcript: "Chat transcript",
   task_outputs: "Task bundle",
   governed_case: "Governed case packet",
@@ -547,7 +548,7 @@ const TIME_REASONS = {
   "graph-branches": "Specialists run as parallel graph branches; stage time equals the slowest single specialist, not the sum of all four. That keeps per-stage times low even with 4 concurrent domain checks.",
   "sequential-handoffs": "Specialist agents can run concurrently with asyncio.gather, so review-stage time is bounded by the slowest specialist rather than the sum of all four. Reviewer, synthesis, and verdict still stay sequential because they depend on the gathered findings.",
   "conversation-mesh": "Specialists engage in conversational turns. Multi-turn exchanges on contested claims add latency beyond a single LLM call per specialist; each back-and-forth round adds an API call.",
-  "claude-agent-loop": "Claude Agent SDK keeps a live Claude Code session and streams progress through the SDK. Latency reflects real assistant turns plus session/tool orchestration rather than a fabricated local stub.",
+  "claude-agent-loop": "Claude Agent SDK can run independent specialist sessions concurrently with asyncio.gather. Review latency is bounded by the slowest specialist call, while reviewer, synthesis, and verdict stay sequential because they depend on the gathered findings.",
   "manager-review": "The manager routes tasks sequentially; stage time scales with the number of specialists called and any re-routing decisions the manager makes.",
   "enterprise-gated": "Approval gate checkpoints add deliberate synchronous pauses; each gate waits for the previous stage to fully complete and be approved before the next begins.",
   "event-pipeline": "Events are dispatched to specialist handlers that each await their LLM response before emitting the next event. High stage times reflect chained awaits across multiple sequential specialist calls.",
@@ -705,33 +706,33 @@ const frameworkPatterns = {
   "claude-agent-loop": {
     intake: {
       links: ["principal-compliance", "principal-security"],
-      messages: ["Claude session starts with a policy brief."],
-      business: "The agent opens with a live session and visible progress.",
-      technical: "ClaudeSDKClient creates a session with bounded tools and permissions."
+      messages: ["Claude run starts with a policy brief."],
+      business: "The agent opens the case and prepares specialist fan-out.",
+      technical: "The SDK/Claude Code runtime starts from bounded options and permissions."
     },
     review: {
       links: ["principal-compliance", "principal-security", "principal-legal", "principal-finance"],
-      messages: ["Claude streams specialist findings from the session."],
-      business: "Specialist work stays inside one agent loop instead of scattered helper calls.",
-      technical: "AgentDefinition entries and session context carry specialist instructions."
+      messages: ["Claude specialist sessions return findings in parallel."],
+      business: "Specialists run concurrently, then merge into one review packet.",
+      technical: "Independent Claude Agent SDK calls are gathered with asyncio before review."
     },
     challenge: {
       links: ["compliance-reviewer", "security-reviewer", "legal-reviewer", "finance-reviewer"],
-      messages: ["Reviewer prompt challenges the live session context."],
-      business: "Review can react to the exact evidence accumulated so far.",
-      technical: "Hooks and permission controls can observe tool use before the reviewer step completes."
+      messages: ["Reviewer prompt challenges the merged findings."],
+      business: "Review reacts to the gathered specialist evidence.",
+      technical: "Reviewer runs after all parallel specialist calls resolve."
     },
     synthesis: {
       links: ["reviewer-principal"],
       messages: ["Principal prompt compacts reviewed findings."],
-      business: "The answer owner receives one grounded session transcript.",
-      technical: "Session continuity preserves previous turns while synthesis asks for a compact answer."
+      business: "The answer owner receives one grounded findings packet.",
+      technical: "Synthesis uses the merged specialist output and reviewer notes."
     },
     verdict: {
       links: ["principal-decision"],
-      messages: ["Result message closes the Claude session."],
-      business: "The verdict exits a real streamed agent run.",
-      technical: "The SDK returns a ResultMessage with duration, cost, and usage metadata when available."
+      messages: ["Final Claude call emits the verdict."],
+      business: "The verdict exits a real agent run.",
+      technical: "The run records duration, cost, and usage metadata when available."
     }
   },
   "manager-review": {
@@ -1275,28 +1276,28 @@ assert no_required_clause_dropped(ctx)
 reviewer.must_reject_if_support_missing()`
     },
     "claude-agent-loop": {
-      intro: "Claude Agent SDK exposes the Claude Code agent loop as an application SDK: streamed sessions, tool permissions, hooks, and programmable agent definitions. It is strongest when the workflow needs real file, shell, or long-running agent behavior under tight permission controls.",
+      intro: "Claude Agent SDK exposes Claude Code as an application SDK: streamed sessions, tool permissions, hooks, and programmable agent definitions. Independent specialist runs can be launched concurrently with asyncio, then merged for reviewer and verdict steps.",
       cards: [
-        { label: "Execution", value: "Continuous Claude Code session with programmable agent definitions" },
-        { label: "Performance", value: "Session startup and streamed turns add overhead, but context continuity reduces handoff glue" },
+        { label: "Execution", value: "Parallel Claude specialist sessions followed by reviewer and verdict calls" },
+        { label: "Performance", value: "Concurrent specialists reduce review latency; dependent gates still stack" },
         { label: "Evals", value: "Best with hook-level checks, permission policies, and final result validation" },
-        { label: "Context Risk", value: "Medium to low because the session keeps previous turns, but compaction can still hide details" },
+        { label: "Context Risk", value: "Medium to low because findings are explicit, but merge prompts can still compress detail" },
         { label: "Challenge", value: "Production readiness depends on local Claude Code CLI/auth and a clear permission model" },
         { label: "Tools", value: "Built-in file, shell, and MCP-style tool surfaces are the main differentiator" }
       ],
       scorecard: [
-        { label: "Latency", value: 3, reason: "A real Claude Code session has startup and streaming overhead, but avoids rebuilding context for every specialist turn." },
+        { label: "Latency", value: 3, reason: "Independent specialist calls can run in parallel, though each real Claude call still has startup and model latency." },
         { label: "Observability", value: 5, reason: "Streaming messages, tool events, hooks, and result metadata make live progress easy to inspect." },
         { label: "Replayability", value: 4, reason: "Session ids and persisted project settings support continuation, though full deterministic replay still needs saved inputs and tool results." },
         { label: "Human Review", value: 5, reason: "Permission modes, can_use_tool callbacks, and hooks provide strong human and policy review points." },
-        { label: "Context Loss", value: 2, reason: "The live session carries context across turns; the main risk is compaction or loose synthesis prompts." },
+        { label: "Context Loss", value: 2, reason: "Parallel findings are gathered explicitly; the main risk is compaction or loose synthesis prompts." },
         { label: "Unsupported Answer Risk", value: 2, reason: "Reviewer prompts and hooks can block uncited answers before the final ResultMessage is accepted." },
         { label: "Error Recovery", value: 4, reason: "The client can interrupt, continue, or resume sessions, but CLI/auth failures remain external dependencies." },
-        { label: "Parallelism", value: 3, reason: "A single session is naturally conversational; independent sessions can run concurrently when the app orchestrates them." },
+        { label: "Parallelism", value: 4, reason: "Independent Claude Agent SDK calls can be launched concurrently with asyncio.gather." },
         { label: "Testability", value: 3, reason: "SDK boundaries are inspectable, but real CLI-backed agent behavior is harder to unit-test without integration runs." },
         { label: "Type Safety", value: 3, reason: "Output formats can be requested, but schema validation is not as central as typed Python frameworks." }
       ],
-      arrowA: "session",
+      arrowA: "fan-out",
       arrowB: "hook",
       arrowC: "result",
       evalCode: `options = ClaudeAgentOptions(

@@ -141,21 +141,21 @@ const frameworks = [
     color: "#5f735a",
     runtime: "python",
     pattern: "Agent Loop",
-    executionModel: "Claude Code session with streaming messages, hooks, permissions, and custom agents",
+    executionModel: "Parallel Claude specialist sessions with reviewer and verdict gates",
     withoutSkill: {
-      capabilityUnit: "SDK session plus app-local prompt and hook policy",
-      headline: "The agent loop is powerful, but policy-grounding rules can still spread across prompts, hooks, and result parsing.",
-      resultPacket: "Streamed messages plus ResultMessage metadata",
-      promptGlue: "Moderate: session prompts and reviewer instructions still need shared structure",
-      reuse: "Reuse means reusing SDK options, agent definitions, and hook callbacks"
+      capabilityUnit: "SDK calls plus app-local prompt and hook policy",
+      headline: "Parallel Claude calls are powerful, but policy-grounding rules can still spread across prompts, hooks, and result parsing.",
+      resultPacket: "Parallel findings plus ResultMessage metadata",
+      promptGlue: "Moderate: specialist prompts and reviewer instructions still need shared structure",
+      reuse: "Reuse means reusing SDK options, role prompts, and hook callbacks"
     },
     withSkill: {
       skillName: "Claude Policy Grounding Skill",
-      capabilityUnit: "Claude session plus reusable skill contract",
-      headline: "The SDK keeps live tool/session control, while the skill packages the repeatable GitHub evidence behavior.",
-      resultPacket: "Session transcript plus skill-defined evidence and verdict packet",
+      capabilityUnit: "Claude specialist calls plus reusable skill contract",
+      headline: "The SDK keeps parallel specialist execution, while the skill packages the repeatable GitHub evidence behavior.",
+      resultPacket: "Merged specialist findings plus skill-defined evidence and verdict packet",
       promptGlue: "Lower: the same skill carries clause extraction, reviewer caveats, and final answer shape",
-      reuse: "Reuse means attaching the same skill contract to multiple Claude Agent SDK sessions"
+      reuse: "Reuse means attaching the same skill contract to multiple Claude Agent SDK calls"
     },
     metrics: [
       { label: "Prompt Glue", base: 3, skill: 2 },
@@ -164,9 +164,9 @@ const frameworks = [
       { label: "Reuse Across Tasks", base: 4, skill: 5 }
     ],
     stages: [
-      { stage: "Intake", framework: "Starts a ClaudeSDKClient session for the GitHub privacy case.", skill: "Loads the same policy intake brief and required clause fields before the session begins." },
-      { stage: "Review", framework: "Uses custom agent definitions or follow-up prompts for specialist review inside the live session.", skill: "Makes every specialist turn return the same clause quote, citation id, answer impact, and confidence fields." },
-      { stage: "Challenge", framework: "Runs the reviewer turn with hooks and permission policy available around tool use.", skill: "Applies the reusable unsupported-claim and missing-caveat checks before the session can finalize." },
+      { stage: "Intake", framework: "Starts the GitHub privacy case and prepares the specialist fan-out.", skill: "Loads the same policy intake brief and required clause fields before parallel review begins." },
+      { stage: "Review", framework: "Runs compliance, security, legal, and data-ops Claude calls concurrently, then merges their findings.", skill: "Makes every specialist return the same clause quote, citation id, answer impact, and confidence fields." },
+      { stage: "Challenge", framework: "Runs the reviewer after the parallel findings are gathered.", skill: "Applies the reusable unsupported-claim and missing-caveat checks before finalization." },
       { stage: "Verdict", framework: "Streams the final assistant response and records ResultMessage metadata.", skill: "Keeps the final answer in one reusable packet with GitHub citations, caveats, and confidence." }
     ]
   },
