@@ -168,38 +168,39 @@ async def run_langgraph(question: str) -> dict:
         _s["review"] = {k: r[0] for k, r in zip(SPECIALIST_ROLES, results)}
         return state
 
-    async def challenge(state: dict) -> dict:
-        t = time.perf_counter()
+    async def challenge_synthesis(state: dict) -> dict:
+        # Reviewer challenge and preliminary synthesis run in parallel — both
+        # depend only on specialist outputs, so neither needs to wait for the other.
         findings_text = "\n".join(f"{k}: {v}" for k, v in _s["review"].items())
-        text, ti, to = await _call(
-            client, REVIEWER_SYS,
-            f"Question: {question}\n\nSpecialist findings:\n{findings_text}\n\n"
-            "List any unsupported claims or missing qualifiers.",
-        )
-        _m["challenge"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
-        _s["challenge"] = text
-        return state
-
-    async def synthesis(state: dict) -> dict:
         t = time.perf_counter()
-        text, ti, to = await _call(
-            client, PRINCIPAL_SYS,
-            f"Question: {question}\n\n"
-            f"Findings: {json.dumps(_s['review'])[:400]}\n"
-            f"Reviewer notes: {_s['challenge'][:200]}\n\n"
-            "Draft a concise answer incorporating all evidence.",
-            250,
+        (challenge_text, c_ti, c_to), (synthesis_text, s_ti, s_to) = await asyncio.gather(
+            _call(
+                client, REVIEWER_SYS,
+                f"Question: {question}\n\nSpecialist findings:\n{findings_text}\n\n"
+                "List any unsupported claims or missing qualifiers.",
+            ),
+            _call(
+                client, PRINCIPAL_SYS,
+                f"Question: {question}\n\nFindings: {json.dumps(_s['review'])[:400]}\n\n"
+                "Draft a concise preliminary answer citing policy clauses.",
+                250,
+            ),
         )
-        _m["synthesis"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
-        _s["synthesis"] = text
+        elapsed = int((time.perf_counter() - t) * 1000)
+        _m["challenge"] = {"time_ms": elapsed, "tokens_in": c_ti, "tokens_out": c_to}
+        _m["synthesis"] = {"time_ms": elapsed, "tokens_in": s_ti, "tokens_out": s_to}
+        _s["challenge"] = challenge_text
+        _s["synthesis"] = synthesis_text
         return state
 
     async def verdict(state: dict) -> dict:
         t = time.perf_counter()
         text, ti, to = await _call(
             client, PRINCIPAL_SYS,
-            f"Question: {question}\n\nDraft answer: {_s['synthesis'][:400]}\n\n"
-            "Produce the final answer. Be precise, cite specific policy clauses.",
+            f"Question: {question}\n\n"
+            f"Preliminary answer: {_s['synthesis'][:400]}\n"
+            f"Reviewer notes: {_s['challenge'][:200]}\n\n"
+            "Produce the final answer addressing reviewer concerns. Cite specific policy clauses.",
             200,
         )
         _m["verdict"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
@@ -207,14 +208,13 @@ async def run_langgraph(question: str) -> dict:
         return state
 
     g = StateGraph(dict)
-    for name, fn in [("intake", intake), ("review", review), ("challenge", challenge),
-                     ("synthesis", synthesis), ("verdict", verdict)]:
+    for name, fn in [("intake", intake), ("review", review),
+                     ("challenge_synthesis", challenge_synthesis), ("verdict", verdict)]:
         g.add_node(name, fn)
     g.set_entry_point("intake")
     g.add_edge("intake", "review")
-    g.add_edge("review", "challenge")
-    g.add_edge("challenge", "synthesis")
-    g.add_edge("synthesis", "verdict")
+    g.add_edge("review", "challenge_synthesis")
+    g.add_edge("challenge_synthesis", "verdict")
     g.add_edge("verdict", END)
     await g.compile().ainvoke({})
     return _m
@@ -269,20 +269,36 @@ async def run_openai_agents(question: str) -> dict:
                     "tokens_out": sum(to for _role, _text, _ti, to in specialist_results)}
 
     findings_text = "\n".join(f"{k}: {v}" for k, v in review_parts.items())
-    challenge_out = await stage(
-        "challenge", REVIEWER_SYS,
-        f"Question: {question}\n\nFindings:\n{findings_text}\n\n"
-        "Challenge unsupported claims or missing qualifiers.",
-    )
-    synthesis_out = await stage(
-        "synthesis", PRINCIPAL_SYS,
-        f"Question: {question}\n\nFindings: {findings_text[:300]}\n"
-        f"Reviewer notes: {challenge_out[:200]}\n\nDraft the answer.",
-        250,
-    )
+
+    # Reviewer challenge and preliminary synthesis run in parallel.
+    async def _openai_parallel_challenge_synthesis():
+        t_cs = time.perf_counter()
+        challenge_res, synthesis_res = await asyncio.gather(
+            Runner.run(
+                Agent(name="challenge", model=MODEL, instructions=REVIEWER_SYS),
+                input=f"Question: {question}\n\nFindings:\n{findings_text}\n\nChallenge unsupported claims or missing qualifiers.",
+            ),
+            Runner.run(
+                Agent(name="synthesis", model=MODEL, instructions=PRINCIPAL_SYS),
+                input=f"Question: {question}\n\nFindings: {findings_text[:300]}\n\nDraft a preliminary answer citing policy clauses.",
+            ),
+        )
+        elapsed = int((time.perf_counter() - t_cs) * 1000)
+        c_ti = sum(getattr(r.usage, "input_tokens", 0) for r in challenge_res.raw_responses)
+        c_to = sum(getattr(r.usage, "output_tokens", 0) for r in challenge_res.raw_responses)
+        s_ti = sum(getattr(r.usage, "input_tokens", 0) for r in synthesis_res.raw_responses)
+        s_to = sum(getattr(r.usage, "output_tokens", 0) for r in synthesis_res.raw_responses)
+        _m["challenge"] = {"time_ms": elapsed, "tokens_in": c_ti, "tokens_out": c_to}
+        _m["synthesis"] = {"time_ms": elapsed, "tokens_in": s_ti, "tokens_out": s_to}
+        return challenge_res.final_output, synthesis_res.final_output
+
+    challenge_out, synthesis_out = await _openai_parallel_challenge_synthesis()
     await stage(
         "verdict", PRINCIPAL_SYS,
-        f"Question: {question}\n\nDraft: {synthesis_out[:400]}\n\nFinalise the answer with citations.",
+        f"Question: {question}\n\n"
+        f"Preliminary answer: {synthesis_out[:400]}\n"
+        f"Reviewer notes: {challenge_out[:200]}\n\n"
+        "Finalise the answer addressing reviewer concerns with citations.",
     )
     return _m
 
@@ -517,43 +533,35 @@ async def run_ag2(question: str) -> dict:
     _m["review"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                     "tokens_in": ti_total, "tokens_out": to_total}
 
-    # Challenge: reviewer injects rebuttal into conversation
-    t = time.perf_counter()
+    # Challenge and preliminary synthesis run in parallel — both depend only on
+    # specialist outputs, so neither needs to wait for the other.
     findings_text = "\n".join(f"{k}: {v}" for k, v in review_parts.items())
-    # Reviewer challenges each specialist
-    ti_total = to_total = 0
-    challenge_parts: list[str] = []
-    for role, finding in review_parts.items():
-        text, ti, to = await ag2_call(
-            REVIEWER_SYS,
-            f"Challenge this {role} finding: {finding}\n\n"
-            f"Question context: {question}",
-            120,
-        )
-        challenge_parts.append(text)
-        ti_total += ti
-        to_total += to
-    _m["challenge"] = {"time_ms": int((time.perf_counter() - t) * 1000),
-                       "tokens_in": ti_total, "tokens_out": to_total}
-
-    # Synthesis: specialists converge to principal
     t = time.perf_counter()
-    challenge_summary = " | ".join(challenge_parts)[:300]
-    synthesis_text, ti, to = await ag2_call(
-        PRINCIPAL_SYS,
-        f"Council has converged. Merge these findings:\n{findings_text[:300]}\n"
-        f"Reviewer challenges: {challenge_summary}\n\n"
-        f"Question: {question}\n\nSynthesize a draft answer.",
-        250,
+    (challenge_text, c_ti, c_to), (synthesis_text, s_ti, s_to) = await asyncio.gather(
+        ag2_call(
+            REVIEWER_SYS,
+            f"Question: {question}\n\nSpecialist findings:\n{findings_text}\n\n"
+            "Identify unsupported claims or missing qualifiers.",
+            150,
+        ),
+        ag2_call(
+            PRINCIPAL_SYS,
+            f"Council has converged. Merge these findings:\n{findings_text[:300]}\n\n"
+            f"Question: {question}\n\nDraft a preliminary answer.",
+            250,
+        ),
     )
-    _m["synthesis"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
+    elapsed = int((time.perf_counter() - t) * 1000)
+    _m["challenge"] = {"time_ms": elapsed, "tokens_in": c_ti, "tokens_out": c_to}
+    _m["synthesis"] = {"time_ms": elapsed, "tokens_in": s_ti, "tokens_out": s_to}
 
-    # Verdict: closing turn
+    # Verdict: closing turn reconciling synthesis + reviewer challenges
     t = time.perf_counter()
     verdict_text, ti, to = await ag2_call(
         PRINCIPAL_SYS,
-        f"Draft answer: {synthesis_text[:400]}\n\n"
-        f"Question: {question}\n\nPublish the final answer with citations.",
+        f"Preliminary answer: {synthesis_text[:400]}\n\n"
+        f"Reviewer notes: {challenge_text[:200]}\n\n"
+        f"Question: {question}\n\nPublish the final answer addressing reviewer concerns with citations.",
     )
     _m["verdict"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
 
@@ -617,44 +625,42 @@ async def run_llamaindex(question: str) -> dict:
             return _LIReviewEvent(review=review_data)
 
         @step
-        async def challenge(self, ctx: LIContext, ev: _LIReviewEvent) -> _LIChallengeEvent:
-            t = time.perf_counter()
+        async def challenge_synthesis(self, ctx: LIContext, ev: _LIReviewEvent) -> _LISynthesisEvent:
+            # Reviewer challenge and preliminary synthesis run in parallel — both
+            # depend only on specialist outputs, so neither needs to wait for the other.
             findings_text = "\n".join(f"{k}: {v}" for k, v in ev.review.items())
-            text, ti, to = await _call(
-                _state["client"], REVIEWER_SYS,
-                f"Follow-up event for question: {_state['question']}\n\n"
-                f"Evidence gathered:\n{findings_text}\n\n"
-                "Emit any gaps or unsupported payloads.",
-            )
-            _state["m"]["challenge"] = {"time_ms": int((time.perf_counter() - t) * 1000),
-                                        "tokens_in": ti, "tokens_out": to}
-            return _LIChallengeEvent(challenge=text)
-
-        @step
-        async def synthesis(self, ctx: LIContext, ev: _LIChallengeEvent) -> _LISynthesisEvent:
             t = time.perf_counter()
-            review_data = await ctx.store.get("review_data") or {}
-            findings_text = "\n".join(f"{k}: {v}" for k, v in review_data.items())
-            text, ti, to = await _call(
-                _state["client"], PRINCIPAL_SYS,
-                f"Aggregator event - Question: {_state['question']}\n\n"
-                f"Evidence: {findings_text[:300]}\n"
-                f"Reviewer gaps: {ev.challenge[:200]}\n\n"
-                "Aggregate and draft the answer.",
-                250,
+            (challenge_text, c_ti, c_to), (synthesis_text, s_ti, s_to) = await asyncio.gather(
+                _call(
+                    _state["client"], REVIEWER_SYS,
+                    f"Follow-up event for question: {_state['question']}\n\n"
+                    f"Evidence gathered:\n{findings_text}\n\n"
+                    "Emit any gaps or unsupported payloads.",
+                ),
+                _call(
+                    _state["client"], PRINCIPAL_SYS,
+                    f"Aggregator event - Question: {_state['question']}\n\n"
+                    f"Evidence: {findings_text[:300]}\n\n"
+                    "Draft a preliminary answer.",
+                    250,
+                ),
             )
-            _state["m"]["synthesis"] = {"time_ms": int((time.perf_counter() - t) * 1000),
-                                        "tokens_in": ti, "tokens_out": to}
-            return _LISynthesisEvent(synthesis=text)
+            elapsed = int((time.perf_counter() - t) * 1000)
+            _state["m"]["challenge"] = {"time_ms": elapsed, "tokens_in": c_ti, "tokens_out": c_to}
+            _state["m"]["synthesis"] = {"time_ms": elapsed, "tokens_in": s_ti, "tokens_out": s_to}
+            await ctx.store.set("challenge_text", challenge_text)
+            return _LISynthesisEvent(synthesis=synthesis_text)
 
         @step
         async def verdict(self, ctx: LIContext, ev: _LISynthesisEvent) -> StopEvent:
             t = time.perf_counter()
+            challenge_text = await ctx.store.get("challenge_text") or ""
             text, ti, to = await _call(
                 _state["client"], PRINCIPAL_SYS,
                 f"Terminal event - Question: {_state['question']}\n\n"
-                f"Draft: {ev.synthesis[:400]}\n\n"
-                "Emit final answer with citations.",
+                f"Preliminary answer: {ev.synthesis[:400]}\n"
+                f"Reviewer notes: {challenge_text[:200]}\n\n"
+                "Emit final answer addressing reviewer concerns with citations.",
             )
             _state["m"]["verdict"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                                       "tokens_in": ti, "tokens_out": to}
@@ -694,39 +700,61 @@ async def run_pydanticai(question: str) -> dict:
         "Identify relevant clauses and outline specialist tasks.",
     )
 
-    t = time.perf_counter()
-    ti_total = to_total = 0
-    review_parts: dict[str, str] = {}
-    for role, sys_p in SPECIALIST_ROLES.items():
+    # Specialists run concurrently via asyncio.gather
+    async def pai_specialist(role: str, sys_p: str) -> tuple[str, str, int, int]:
         model = OpenAIModel(MODEL, provider=provider)
         agent = Agent(model=model, system_prompt=sys_p)
         result = await agent.run(
             f"Intake context: {intake_out[:300]}\n\nQuestion: {question}\n\n"
             "Return your validated specialist finding.",
         )
-        review_parts[role] = result.output
         u = result.usage()
-        ti_total += u.input_tokens or 0
-        to_total += u.output_tokens or 0
-    _m["review"] = {"time_ms": int((time.perf_counter() - t) * 1000),
-                    "tokens_in": ti_total, "tokens_out": to_total}
+        return role, result.output, u.input_tokens or 0, u.output_tokens or 0
 
+    t = time.perf_counter()
+    specialist_results = await asyncio.gather(
+        *[pai_specialist(role, sys_p) for role, sys_p in SPECIALIST_ROLES.items()]
+    )
+    review_parts = {role: text for role, text, _ti, _to in specialist_results}
+    _m["review"] = {
+        "time_ms": int((time.perf_counter() - t) * 1000),
+        "tokens_in": sum(ti for _r, _t, ti, _to in specialist_results),
+        "tokens_out": sum(to for _r, _t, _ti, to in specialist_results),
+    }
+
+    # Reviewer challenge and preliminary synthesis run in parallel.
     findings_text = "\n".join(f"{k}: {v}" for k, v in review_parts.items())
-    challenge_out = await pai_stage(
-        "challenge", REVIEWER_SYS,
-        f"Question: {question}\n\nFindings:\n{findings_text}\n\n"
-        "Validate findings. Reject if any caveat is missing.",
-    )
-    synthesis_out = await pai_stage(
-        "synthesis", PRINCIPAL_SYS,
-        f"Question: {question}\n\nFindings: {findings_text[:300]}\n"
-        f"Reviewer notes: {challenge_out[:200]}\n\nCompose the validated draft answer.",
-        250,
-    )
+
+    async def pai_challenge_synthesis():
+        async def run_agent(name: str, sys_p: str, prompt: str, max_out: int = 200):
+            model = OpenAIModel(MODEL, provider=provider)
+            agent = Agent(model=model, system_prompt=sys_p)
+            t0 = time.perf_counter()
+            result = await agent.run(prompt)
+            elapsed = int((time.perf_counter() - t0) * 1000)
+            u = result.usage()
+            _m[name] = {"time_ms": elapsed, "tokens_in": u.input_tokens or 0, "tokens_out": u.output_tokens or 0}
+            return result.output
+
+        return await asyncio.gather(
+            run_agent(
+                "challenge", REVIEWER_SYS,
+                f"Question: {question}\n\nFindings:\n{findings_text}\n\nValidate findings. Flag missing caveats.",
+            ),
+            run_agent(
+                "synthesis", PRINCIPAL_SYS,
+                f"Question: {question}\n\nFindings: {findings_text[:300]}\n\nDraft a preliminary answer.",
+                250,
+            ),
+        )
+
+    challenge_out, synthesis_out = await pai_challenge_synthesis()
     await pai_stage(
         "verdict", PRINCIPAL_SYS,
-        f"Question: {question}\n\nDraft: {synthesis_out[:400]}\n\n"
-        "Emit final typed answer with citation fields.",
+        f"Question: {question}\n\n"
+        f"Preliminary answer: {synthesis_out[:400]}\n"
+        f"Reviewer notes: {challenge_out[:200]}\n\n"
+        "Emit final typed answer addressing reviewer concerns with citation fields.",
     )
     return _m
 

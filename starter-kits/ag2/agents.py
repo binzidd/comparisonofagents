@@ -1,13 +1,18 @@
 """
 AG2 (AutoGen v2) — Multi-Agent Policy Checker
-Five-stage pipeline: intake → specialists → reviewer → synthesis → verdict
+Four-stage pipeline: intake → specialists → reviewer+synthesis (parallel) → verdict
 
 Uses autogen AssistantAgent + UserProxyAgent + GroupChat.
 Each stage is run as a separate, focused chat to keep outputs clean.
+
+Optimisation: autogen's _single_turn() is blocking by design.  Wrapping calls
+in asyncio.to_thread() lets the reviewer challenge and the preliminary synthesis
+draft run concurrently — removing one sequential round-trip without touching the
+autogen framework itself.  The verdict stage reconciles both outputs.
 """
 
+import asyncio
 import os
-import re
 from dotenv import load_dotenv
 import autogen
 
@@ -45,14 +50,12 @@ def _single_turn(system_prompt: str, user_message: str) -> str:
         code_execution_config=False,
         default_auto_reply="",
     )
-    # Initiate chat; proxy sends the message, assistant replies once
     proxy.initiate_chat(
         assistant,
         message=user_message,
         silent=True,
         max_turns=1,
     )
-    # The last message in the conversation is the assistant's reply
     chat_history = proxy.chat_messages[assistant]
     for msg in reversed(chat_history):
         if msg.get("role") == "assistant":
@@ -134,7 +137,6 @@ def _run_specialists_groupchat(question: str, intake_text: str) -> dict:
     )
     proxy.initiate_chat(manager, message=init_message, silent=True)
 
-    # Extract each specialist's reply from the group chat messages
     results = {}
     domain_map = {
         "ComplianceAgent": "compliance",
@@ -147,7 +149,6 @@ def _run_specialists_groupchat(question: str, intake_text: str) -> dict:
         if agent_name in domain_map:
             domain_key = domain_map[agent_name]
             content = msg.get("content", "")
-            # Strip TERMINATE marker
             content = content.replace("TERMINATE", "").strip()
             results[domain_key] = content
 
@@ -155,7 +156,7 @@ def _run_specialists_groupchat(question: str, intake_text: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Pipeline stages
+# Pipeline stage helpers — sync (autogen requirement)
 # ---------------------------------------------------------------------------
 
 def _run_intake(question: str) -> str:
@@ -190,58 +191,66 @@ def _run_reviewer(question: str, intake_text: str, specialist_results: dict) -> 
     )
 
 
-def _run_synthesis(
-    question: str,
-    intake_text: str,
-    specialist_results: dict,
-    challenge_text: str,
-) -> str:
+def _run_synthesis_draft(question: str, intake_text: str, specialist_results: dict) -> str:
+    """Preliminary synthesis based on specialists only (runs parallel to reviewer)."""
     specialists_text = "\n\n".join(
         f"[{domain.upper()}]\n{result}"
         for domain, result in specialist_results.items()
     )
     return _single_turn(
         system_prompt=(
-            "You are a senior policy analyst. Synthesise the specialist assessments "
-            "and the reviewer's challenge into a coherent policy recommendation. "
-            "Address key tensions, acknowledge uncertainty where appropriate, and "
-            "produce a clear, balanced summary (150–250 words)."
+            "You are a senior policy analyst. Produce a clear preliminary policy "
+            "recommendation based on specialist assessments. Address key tensions and "
+            "acknowledge uncertainty where appropriate (150–250 words). This draft will "
+            "be refined by the verdict agent using reviewer challenges."
         ),
         user_message=(
             f"Policy question: {question}\n\n"
             f"Intake: {intake_text}\n\n"
             f"Specialist assessments:\n{specialists_text}\n\n"
-            f"Reviewer challenge:\n{challenge_text}"
+            "Draft your preliminary recommendation."
         ),
     )
 
 
-def _run_verdict(question: str, synthesis_text: str) -> str:
+def _run_verdict(question: str, synthesis_text: str, challenge_text: str) -> str:
     return _single_turn(
         system_prompt=(
-            "You are the final decision agent. Based on the synthesis provided, "
-            "issue a final verdict. Your response MUST start with exactly one of: "
+            "You are the final decision agent. You will receive a preliminary synthesis "
+            "and reviewer challenges. Your response MUST start with exactly one of: "
             "COMPLIANT, NON-COMPLIANT, or CONDITIONAL. Follow with a single sentence "
-            "explaining the decision (max 40 words)."
+            "that addresses the reviewer's main concerns (max 40 words)."
         ),
         user_message=(
             f"Policy question: {question}\n\n"
-            f"Synthesis:\n{synthesis_text}"
+            f"Preliminary synthesis:\n{synthesis_text}\n\n"
+            f"Reviewer challenges:\n{challenge_text}"
         ),
     )
 
 
 # ---------------------------------------------------------------------------
-# Public API
+# Async pipeline — wraps blocking autogen calls in threads
 # ---------------------------------------------------------------------------
 
-def run_pipeline(question: str) -> dict:
-    """Run the full policy pipeline and return all stage results."""
-    intake_text = _run_intake(question)
-    specialist_results = _run_specialists_groupchat(question, intake_text)
-    challenge_text = _run_reviewer(question, intake_text, specialist_results)
-    synthesis_text = _run_synthesis(question, intake_text, specialist_results, challenge_text)
-    verdict_text = _run_verdict(question, synthesis_text)
+async def _run_pipeline_async(question: str) -> dict:
+    # Stage 1: intake (blocking autogen call in thread)
+    intake_text = await asyncio.to_thread(_run_intake, question)
+
+    # Stage 2: specialists via GroupChat (blocking; sequential within GroupChat by design)
+    specialist_results = await asyncio.to_thread(
+        _run_specialists_groupchat, question, intake_text
+    )
+
+    # Stage 3: reviewer challenge and preliminary synthesis run in parallel threads.
+    # Both depend only on specialist outputs, so neither needs to wait for the other.
+    challenge_text, synthesis_text = await asyncio.gather(
+        asyncio.to_thread(_run_reviewer, question, intake_text, specialist_results),
+        asyncio.to_thread(_run_synthesis_draft, question, intake_text, specialist_results),
+    )
+
+    # Stage 4: verdict reconciles the synthesis draft with reviewer challenges.
+    verdict_text = await asyncio.to_thread(_run_verdict, question, synthesis_text, challenge_text)
 
     return {
         "question": question,
@@ -251,3 +260,12 @@ def run_pipeline(question: str) -> dict:
         "synthesis": synthesis_text,
         "verdict": verdict_text,
     }
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
+
+def run_pipeline(question: str) -> dict:
+    """Run the full policy pipeline and return all stage results."""
+    return asyncio.run(_run_pipeline_async(question))

@@ -14,6 +14,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["advanced", "enterprise", "reliability"],
+      "performance_technique": "Async ainvoke() on all nodes + parallel reviewer-synthesis node via asyncio.gather",
       "criteria_scores": {
         "Developer Experience": 3,
         "Agent Capabilities": 5,
@@ -51,6 +52,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["simple", "product", "speed"],
+      "performance_technique": "Parallel specialist fan-out + parallel reviewer-synthesis via asyncio.gather",
       "criteria_scores": {
         "Developer Experience": 4,
         "Agent Capabilities": 4,
@@ -88,6 +90,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["advanced", "product", "reliability"],
+      "performance_technique": "Module-level options cache + parallel reviewer-synthesis via asyncio.gather",
       "criteria_scores": {
         "Developer Experience": 4,
         "Agent Capabilities": 5,
@@ -125,6 +128,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["advanced", "product"],
+      "performance_technique": "Blocking autogen calls wrapped in asyncio.to_thread; reviewer-synthesis run in parallel threads",
       "criteria_scores": {
         "Developer Experience": 3,
         "Agent Capabilities": 4,
@@ -162,6 +166,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["moderate", "product"],
+      "performance_technique": "Manager-task pattern is inherently sequential; async kickoff available but not applied in this benchmark",
       "criteria_scores": {
         "Developer Experience": 4,
         "Agent Capabilities": 3,
@@ -199,6 +204,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["enterprise", "advanced", "reliability"],
+      "performance_technique": "Plugin-based process steps support async; parallel step dispatch available via ProcessBuilder but not applied in this benchmark",
       "criteria_scores": {
         "Developer Experience": 3,
         "Agent Capabilities": 4,
@@ -236,6 +242,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["moderate", "reliability"],
+      "performance_technique": "Parallel specialist fan-out via asyncio.gather + combined review-synthesis step removes one sequential event hop",
       "criteria_scores": {
         "Developer Experience": 3,
         "Agent Capabilities": 4,
@@ -273,6 +280,7 @@
       "runtime": "typescript",
       "builder": "code-first",
       "best_for": ["product", "speed", "moderate"],
+      "performance_technique": "TypeScript runtime — parallel step dispatch via Promise.all available; not applied in this Python benchmark",
       "criteria_scores": {
         "Developer Experience": 4,
         "Agent Capabilities": 4,
@@ -310,6 +318,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["reliability", "moderate", "speed"],
+      "performance_technique": "Parallel specialist fan-out + parallel reviewer-synthesis via asyncio.gather; typed Pydantic models preserved throughout",
       "criteria_scores": {
         "Developer Experience": 4,
         "Agent Capabilities": 3,

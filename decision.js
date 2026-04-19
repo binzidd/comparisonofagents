@@ -388,6 +388,23 @@ function renderDecisionRationale() {
         <p>${framework.security.tradeoff}</p>
       </div>
     </article>
+    ${framework.performance_technique ? `
+    <article class="metadata-card" style="--framework-color:${framework.color}">
+      <div class="capability-card-head">
+        <div>
+          <p class="eyebrow">Performance Technique</p>
+          <h3>How latency is reduced in this benchmark</h3>
+        </div>
+      </div>
+      <div class="decision-context-block">
+        <span>Optimisation applied</span>
+        <strong>${framework.performance_technique}</strong>
+        <p>The critical-path depth after specialist fan-out determines wall-clock time. Parallelising the reviewer challenge and preliminary synthesis removes one sequential LLM round-trip, and switching to async invocation allows the event loop to schedule concurrent work without blocking OS threads.</p>
+      </div>
+      <div class="metadata-chip-group">${listMarkup(framework.memory.strengths)}</div>
+      <p class="metadata-risk">Memory watchouts: ${framework.memory.risks.join("; ")}.</p>
+    </article>
+    ` : ""}
   `;
 }
 
