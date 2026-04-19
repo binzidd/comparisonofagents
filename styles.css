@@ -233,6 +233,40 @@ a {
   max-width: 60ch;
 }
 
+.hero-decision-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.hero-decision-strip article {
+  border: 1px solid rgba(126, 155, 196, 0.18);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  display: grid;
+  gap: 6px;
+}
+
+.hero-decision-strip span,
+.catalog-card-kicker,
+.catalog-card-meta span,
+.audience-readout span,
+.chip-stage-note {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.hero-decision-strip strong {
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
 .eyebrow {
   margin: 0 0 10px;
   text-transform: uppercase;
@@ -481,8 +515,46 @@ p {
   gap: 10px;
 }
 
+.catalog-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+}
+
+.catalog-card-pattern {
+  border: 1px solid rgba(126, 155, 196, 0.18);
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 0.75rem;
+  color: var(--secondary);
+  background: var(--bg-card-str);
+  white-space: nowrap;
+}
+
 .catalog-card h4 {
   font-size: 1.1rem;
+}
+
+.catalog-card-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.catalog-card-meta article {
+  border: 1px solid rgba(126, 155, 196, 0.14);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--bg-card-str);
+}
+
+.catalog-card-meta strong,
+.audience-readout strong {
+  display: block;
+  margin-top: 6px;
+  color: var(--text);
+  line-height: 1.45;
 }
 
 .page-nav {
@@ -1986,6 +2058,10 @@ p {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.policy-decision-strip {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .policy-answer-strip article,
 .policy-clause-card {
   border: 1px solid var(--line);
@@ -2051,8 +2127,9 @@ p {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 2px;
+  gap: 4px;
   text-align: left;
+  min-width: 220px;
 }
 
 .chip-persona {
@@ -2069,6 +2146,13 @@ p {
   text-transform: uppercase;
   letter-spacing: 0.07em;
   white-space: nowrap;
+}
+
+.chip-stage-note {
+  line-height: 1.45;
+  text-transform: none;
+  letter-spacing: 0.01em;
+  white-space: normal;
 }
 
 .chip.active {
@@ -2431,6 +2515,25 @@ select {
   gap: 10px;
 }
 
+.audience-readout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.audience-readout article {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg-card);
+  padding: 14px;
+}
+
+.audience-readout p {
+  margin-top: 6px;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
 .run-fact {
   display: grid;
   gap: 4px;
@@ -2755,6 +2858,41 @@ button.step-item:hover {
   border-radius: 18px;
   background: var(--code-bg);
   overflow: hidden;
+}
+
+.code-collapse summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+}
+
+.code-collapse summary::-webkit-details-marker {
+  display: none;
+}
+
+.code-collapse summary span {
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--secondary);
+  font-weight: 700;
+}
+
+.code-collapse summary small {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.code-collapse[open] summary {
+  border-bottom: 1px solid rgba(126, 155, 196, 0.14);
+}
+
+.code-collapse-body {
+  display: grid;
 }
 
 .code-hint-grid {
@@ -3457,8 +3595,11 @@ button.step-item:hover {
     grid-template-columns: 1fr;
   }
 
+  .hero-decision-strip,
+  .policy-decision-strip,
   .policy-answer-strip,
   .lane-analysis-grid,
+  .audience-readout,
   .run-facts,
   .framework-score-grid,
   .capability-board,
@@ -3513,7 +3654,8 @@ button.step-item:hover {
   }
 
   .catalog-head,
-  .lane-top {
+  .lane-top,
+  .catalog-card-top {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -3554,6 +3696,10 @@ button.step-item:hover {
 
   .policy-source-meta {
     grid-auto-flow: row;
+  }
+
+  .catalog-card-meta {
+    grid-template-columns: 1fr;
   }
 }
 

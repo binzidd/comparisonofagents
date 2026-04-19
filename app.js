@@ -1057,7 +1057,7 @@ function renderRunFacts(framework, stageId) {
 function renderDeeperDive(framework, stageId) {
   return `
     <details class="lane-details">
-      <summary>Deeper Dive</summary>
+      <summary>Technical Evidence</summary>
       <div class="lane-details-body">
         ${renderFrameworkTechStrip(framework)}
         ${renderFrameworkScorecard(framework, stageId)}
@@ -1069,11 +1069,30 @@ function renderDeeperDive(framework, stageId) {
 }
 
 function cardMarkup(item) {
+  const bestFit = item.pros?.[0] || item.summary;
+  const watchPoint = item.cons?.[0] || item.tagline;
+  const patternLabel = PATTERN_LABELS[item.pattern] || item.tagline;
   return `
     <article class="catalog-card ${item.kind}">
-      <h4>${item.name}</h4>
+      <div class="catalog-card-top">
+        <div>
+          <span class="catalog-card-kicker">Framework</span>
+          <h4>${item.name}</h4>
+        </div>
+        <span class="catalog-card-pattern">${patternLabel}</span>
+      </div>
       <p class="catalog-tagline">${item.tagline}</p>
       <p>${item.summary}</p>
+      <div class="catalog-card-meta">
+        <article>
+          <span>Best fit</span>
+          <strong>${bestFit}</strong>
+        </article>
+        <article>
+          <span>Watch for</span>
+          <strong>${watchPoint}</strong>
+        </article>
+      </div>
       <a href="${item.source}" target="_blank" rel="noreferrer">Official docs</a>
     </article>
   `;
@@ -1081,6 +1100,13 @@ function cardMarkup(item) {
 
 function renderCatalog() {
   frameworkCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "framework").map(cardMarkup).join("");
+}
+
+function clauseSummary(clauseIds) {
+  return clauseIds
+    .map((clauseId) => policyPack.clauses[clauseId]?.title)
+    .filter(Boolean)
+    .join(", ");
 }
 
 function renderPolicyCase() {
@@ -1111,14 +1137,22 @@ function renderPolicyCase() {
       </label>
     </div>
 
-    <div class="policy-answer-strip compact">
+    <div class="policy-answer-strip policy-decision-strip">
       <article>
-        <span>Question</span>
+        <span>Business question</span>
         <strong>${question.label}</strong>
       </article>
       <article>
         <span>Expected answer</span>
         <strong>${question.expectedAnswer}</strong>
+      </article>
+      <article>
+        <span>Evidence to cite</span>
+        <strong>${clauseSummary(question.relevantClauses)}</strong>
+      </article>
+      <article>
+        <span>Answer shape</span>
+        <strong>${question.answerShape}</strong>
       </article>
     </div>
   `;
@@ -1136,6 +1170,7 @@ function renderStageChips() {
         <button class="chip ${index === currentStage ? "active" : ""}" data-stage="${index}">
           <span class="chip-persona">${stage.persona}</span>
           <span class="chip-stage-label">${stage.label}</span>
+          <span class="chip-stage-note">${stage.caption}</span>
         </button>
       `
     )
@@ -1149,12 +1184,38 @@ function renderStageChips() {
   });
 }
 
+function renderAudienceReadout(framework, stageId) {
+  const questionTotals = getTraceTotalsForQuestion(framework.id, selectedQuestionId) || getTraceTotals(framework.id);
+  const traceStage = getTraceStage(framework.id, stageId);
+  const profile = frameworkTechProfile(framework);
+
+  return `
+    <section class="audience-readout">
+      <article>
+        <span>Business read</span>
+        <strong>${framework.pros[0]}</strong>
+        <p>${questionTotals ? `${formatMs(questionTotals.timeMs)} total runtime on this question. ${profile.cards[1].value}.` : profile.cards[1].value}</p>
+      </article>
+      <article>
+        <span>Technical read</span>
+        <strong>${traceStateCarrier(traceStage)}</strong>
+        <p>${profile.cards[2].value}</p>
+      </article>
+      <article>
+        <span>Watch point</span>
+        <strong>${framework.cons[0]}</strong>
+        <p>${profile.cards[4].value}</p>
+      </article>
+    </section>
+  `;
+}
+
 function renderSummary() {
   const stage = getStage();
   const question = getQuestion();
 
-  scenarioHeadline.textContent = "Public policy checker across frameworks";
-  scenarioSupport.textContent = `Click through one stage at a time to compare orchestration, eval, and risk handling for the same question: ${question.label}`;
+  scenarioHeadline.textContent = "Make the framework decision with live evidence";
+  scenarioSupport.textContent = `${question.label} is the shared business case. ${stage.label} shows where the workflow wins or breaks: speed, traceability, review pressure, and evidence quality all come from the same real run set.`;
   const questionLeaders = demoFrameworks
     .map((framework) => ({
       framework,
@@ -1169,12 +1230,12 @@ function renderSummary() {
 
     frameworkSummary.innerHTML = [
       {
-        label: "Fastest Total Run",
+        label: "Fastest to Answer",
         headline: `${fastest.framework.name} · ${formatMs(fastest.totals.timeMs)}`,
         detail: `${formatTokens(fastest.totals.tokens)} tok · $${fastest.totals.cost.toFixed(5)}`
       },
       {
-        label: "Leanest Token Run",
+        label: "Leanest Token Footprint",
         headline: `${leanest.framework.name} · ${formatTokens(leanest.totals.tokens)} tok`,
         detail: `${formatMs(leanest.totals.timeMs)} · $${leanest.totals.cost.toFixed(5)}`
       },
@@ -1197,7 +1258,7 @@ function renderSummary() {
 
     const frameworkCount = traceStore?.real_frameworks?.length || questionLeaders.length;
     const stageCaptureCount = questionLeaders.length * stages.length;
-    appStatus.textContent = `${frameworkCount} frameworks rerun for this lab. ${stageCaptureCount} real stage captures back the current question view, and every displayed row is from a real SDK trace.`;
+    appStatus.textContent = `${frameworkCount} frameworks were rerun for this lab. ${stageCaptureCount} real stage captures back the current question view, so the business summary and the technical drawers point to the same evidence set.`;
   } else {
     frameworkSummary.innerHTML = `
       <article class="summary-pill">
@@ -1208,7 +1269,7 @@ function renderSummary() {
     `;
     appStatus.textContent = "Framework Lab is waiting for a fresh trace store.";
   }
-  skeletonCaption.textContent = "Compare the selected frameworks by state carrier, reviewer stop signal, and emitted verdict artifact.";
+  skeletonCaption.textContent = "Use these cards to compare what each runtime carries forward, what can stop it, and what evidence is left behind when the answer is ready.";
 }
 
 function renderSkeletonMini() {
@@ -2956,7 +3017,7 @@ function renderCodeHint(framework, stageId) {
     ? `
       <div class="verdict-metric-row" aria-label="Verdict metrics">
         <span class="verdict-metric-chip">Total time: ${formatMs(traceTotals ? traceTotals.timeMs : traceStage.metrics.time_ms)}</span>
-        <span class="verdict-metric-chip">Total tokens: ${traceTotals ? traceTotals.tokens : traceStage.metrics.token_total_estimate}</span>
+        <span class="verdict-metric-chip">Total tokens: ${formatTokens(traceTotals ? traceTotals.tokens : traceStage.metrics.token_total_estimate)}</span>
         <span class="verdict-metric-chip">Total cost: $${traceTotals ? traceTotals.cost.toFixed(5) : traceStage.metrics.usd_cost_estimate}</span>
       </div>
     `
@@ -2967,30 +3028,39 @@ function renderCodeHint(framework, stageId) {
       ? `${framework.name}: metrics from a real ${traceStage.runtime} SDK run (gpt-4o-mini). Code example shows the framework API; provider model strings are not the orchestration framework.`
       : `${framework.name} example and ${traceStage?.runtime || framework.pattern} harness view. Provider strings in code examples are not the same thing as the orchestration framework.`
     : "Reference-only implementation view.";
+  const summaryMeta = traceStage?.metrics
+    ? `${formatMs(traceStage.metrics.time_ms)} · ${formatTokens(traceStage.metrics.token_total_estimate)} tok · $${traceStage.metrics.usd_cost_estimate}`
+    : "Reference implementation";
   return `
-    <section class="code-hint">
-      <div class="code-panel code-panel-wide">
-        <div class="code-hint-head">
-          <strong>Framework implementation for this policy checker</strong>
-          <a href="${codeSourceHref}" target="_blank" rel="noreferrer">${codeSourceLabel} docs</a>
-        </div>
-        <pre><code class="code-block-highlight">${highlightedImplementation}</code></pre>
-      </div>
-      ${traceStage ? `
+    <details class="code-hint code-collapse">
+      <summary>
+        <span>Implementation and run output</span>
+        <small>${summaryMeta}</small>
+      </summary>
+      <div class="code-collapse-body">
         <div class="code-panel code-panel-wide">
           <div class="code-hint-head">
-            <strong>${isRealRun ? "SDK run output" : "Python harness output"}</strong>
-            <span>${formatMs(traceStage.metrics.time_ms)} · ${traceStage.metrics.token_total_estimate} tok · $${traceStage.metrics.usd_cost_estimate}</span>
+            <strong>Framework implementation for this policy checker</strong>
+            <a href="${codeSourceHref}" target="_blank" rel="noreferrer">${codeSourceLabel} docs</a>
           </div>
-          ${verdictMetricChips}
-          <pre><code>${escapeHtml(JSON.stringify(traceStage.output, null, 2))}</code></pre>
-          <p class="trace-footnote">${frameworkNote}${isRealRun
-            ? " Executed using the official SDK runtime."
-            : " Executed by the repo’s Python comparison harness for this framework shape, not the official SDK runtime."
-          }</p>
+          <pre><code class="code-block-highlight">${highlightedImplementation}</code></pre>
         </div>
-      ` : ""}
-    </section>
+        ${traceStage ? `
+          <div class="code-panel code-panel-wide">
+            <div class="code-hint-head">
+              <strong>${isRealRun ? "SDK run output" : "Python harness output"}</strong>
+              <span>${formatMs(traceStage.metrics.time_ms)} · ${formatTokens(traceStage.metrics.token_total_estimate)} tok · $${traceStage.metrics.usd_cost_estimate}</span>
+            </div>
+            ${verdictMetricChips}
+            <pre><code>${escapeHtml(JSON.stringify(traceStage.output, null, 2))}</code></pre>
+            <p class="trace-footnote">${frameworkNote}${isRealRun
+              ? " Executed using the official SDK runtime."
+              : " Executed by the repo’s Python comparison harness for this framework shape, not the official SDK runtime."
+            }</p>
+          </div>
+        ` : ""}
+      </div>
+    </details>
   `;
 }
 
@@ -3354,6 +3424,7 @@ function laneMarkup(frameworkId, laneIndex) {
 
       <p class="lane-intro">${profile.intro}</p>
       ${renderRunFacts(framework, stage.id)}
+      ${renderAudienceReadout(framework, stage.id)}
       ${renderExecutiveSummary(framework, stage.id)}
 
       <div class="lane-role-box lane-role-box-top">
