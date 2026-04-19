@@ -1,9 +1,13 @@
 """
 OpenAI Agents SDK — Multi-Agent Policy Checker
-Five-stage pipeline: intake → specialists → reviewer → synthesis → verdict
+Four-stage pipeline: intake → specialists → reviewer+synthesis (parallel) → verdict
 
 Uses the `openai-agents` package (pip install openai-agents).
 Each stage is a discrete Agent run; results are threaded through as context.
+
+Optimisation: reviewer and preliminary synthesis both depend only on specialist
+outputs.  Running them with asyncio.gather removes one sequential round-trip vs
+the original five-stage linear chain.  The verdict stage reconciles both.
 """
 
 import os
@@ -20,7 +24,7 @@ load_dotenv()
 MODEL = "gpt-4o-mini"
 
 # ---------------------------------------------------------------------------
-# Agent definitions
+# Agent definitions — created once at module level
 # ---------------------------------------------------------------------------
 
 intake_agent = Agent(
@@ -93,10 +97,10 @@ synthesis_agent = Agent(
     name="SynthesisAgent",
     model=MODEL,
     instructions=(
-        "You are a senior policy analyst. Synthesise the specialist assessments and "
-        "the reviewer's challenge into a coherent policy recommendation. Address key "
-        "tensions, acknowledge uncertainty where appropriate, and produce a clear, "
-        "balanced summary (150–250 words)."
+        "You are a senior policy analyst. Produce a clear preliminary policy "
+        "recommendation based on specialist assessments. Address key tensions and "
+        "acknowledge uncertainty where appropriate (150–250 words). This draft will "
+        "be refined by the verdict agent using reviewer challenges."
     ),
 )
 
@@ -104,10 +108,10 @@ verdict_agent = Agent(
     name="VerdictAgent",
     model=MODEL,
     instructions=(
-        "You are the final decision agent. Based on the synthesis provided, issue a "
-        "final verdict. Your response MUST start with exactly one of: COMPLIANT, "
-        "NON-COMPLIANT, or CONDITIONAL. Follow with a single sentence explaining the "
-        "decision (max 40 words)."
+        "You are the final decision agent. You will receive a preliminary synthesis "
+        "and reviewer challenges. Your response MUST start with exactly one of: "
+        "COMPLIANT, NON-COMPLIANT, or CONDITIONAL. Follow with a single sentence "
+        "that addresses the reviewer's main concerns (max 40 words)."
     ),
 )
 
@@ -146,39 +150,43 @@ async def _run_pipeline_async(question: str) -> dict:
         "data_ops": data_ops_res.final_output,
     }
 
-    # Stage 3: Reviewer
     specialists_text = "\n\n".join(
         f"[{domain.upper()}]\n{result}"
         for domain, result in specialist_results.items()
     )
-    reviewer_result = await Runner.run(
-        reviewer_agent,
-        input=(
-            f"Policy question: {question}\n\n"
-            f"Specialist assessments:\n{specialists_text}\n\n"
-            "Provide your critical challenge."
+
+    # Stage 3: Reviewer and preliminary synthesis run in parallel.
+    # Both depend only on specialist outputs, so neither needs to wait for the
+    # other.  asyncio.gather removes one sequential round-trip.
+    reviewer_result, synthesis_result = await asyncio.gather(
+        Runner.run(
+            reviewer_agent,
+            input=(
+                f"Policy question: {question}\n\n"
+                f"Specialist assessments:\n{specialists_text}\n\n"
+                "Provide your critical challenge."
+            ),
+        ),
+        Runner.run(
+            synthesis_agent,
+            input=(
+                f"Policy question: {question}\n\n"
+                f"Intake: {intake_text}\n\n"
+                f"Specialist assessments:\n{specialists_text}\n\n"
+                "Draft your preliminary recommendation."
+            ),
         ),
     )
     challenge_text = reviewer_result.final_output
-
-    # Stage 4: Synthesis
-    synthesis_result = await Runner.run(
-        synthesis_agent,
-        input=(
-            f"Policy question: {question}\n\n"
-            f"Intake: {intake_text}\n\n"
-            f"Specialist assessments:\n{specialists_text}\n\n"
-            f"Reviewer challenge:\n{challenge_text}"
-        ),
-    )
     synthesis_text = synthesis_result.final_output
 
-    # Stage 5: Verdict
+    # Stage 4: Verdict reconciles the synthesis draft with reviewer challenges.
     verdict_result = await Runner.run(
         verdict_agent,
         input=(
             f"Policy question: {question}\n\n"
-            f"Synthesis:\n{synthesis_text}"
+            f"Preliminary synthesis:\n{synthesis_text}\n\n"
+            f"Reviewer challenges:\n{challenge_text}"
         ),
     )
     verdict_text = verdict_result.final_output

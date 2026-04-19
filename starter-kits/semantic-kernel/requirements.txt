@@ -1,0 +1,6 @@
+semantic-kernel>=1.0.0
+defusedxml>=0.7.1
+aiortc>=1.9.0
+azure-core>=1.30
+python-dotenv>=1.0.0
+streamlit>=1.35.0
