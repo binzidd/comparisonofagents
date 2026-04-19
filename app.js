@@ -1021,6 +1021,53 @@ function getTraceTotalsForQuestion(frameworkId, questionId) {
   );
 }
 
+function renderRunFacts(framework, stageId) {
+  const totals = getTraceTotals(framework.id);
+  const stageTrace = getTraceStage(framework.id, stageId);
+  if (!totals || !stageTrace) {
+    return "";
+  }
+
+  return `
+    <section class="run-facts">
+      <article class="run-fact">
+        <span>Total Run</span>
+        <strong>${formatMs(totals.timeMs)}</strong>
+        <small>${formatTokens(totals.tokens)} tok</small>
+      </article>
+      <article class="run-fact">
+        <span>Total Cost</span>
+        <strong>$${totals.cost.toFixed(5)}</strong>
+        <small>${framework.name} on ${getQuestion().label}</small>
+      </article>
+      <article class="run-fact">
+        <span>${stageLabel(stageId)} Stage</span>
+        <strong>${formatMs(stageTrace.metrics.time_ms)}</strong>
+        <small>${formatTokens(stageTrace.metrics.token_total_estimate)} tok</small>
+      </article>
+      <article class="run-fact">
+        <span>Runtime</span>
+        <strong>${formatSignalLabel(stageTrace.runtime)}</strong>
+        <small>real SDK trace</small>
+      </article>
+    </section>
+  `;
+}
+
+function renderDeeperDive(framework, stageId) {
+  return `
+    <details class="lane-details">
+      <summary>Deeper Dive</summary>
+      <div class="lane-details-body">
+        ${renderFrameworkTechStrip(framework)}
+        ${renderFrameworkScorecard(framework, stageId)}
+        ${renderCodeHint(framework, stageId)}
+        ${renderFrameworkAnalysis(framework)}
+      </div>
+    </details>
+  `;
+}
+
 function cardMarkup(item) {
   return `
     <article class="catalog-card ${item.kind}">
@@ -3156,12 +3203,12 @@ function renderBoard({ framework, color, activeAgents, activeTools, messages, st
 
 function renderSkeleton() {
   const selectedFrameworks = compareIds.map((id) => getFramework(id)).filter(Boolean);
-  skeletonCaption.textContent = "Each framework runs the same principal-specialist-reviewer loop, but the real differentiator is what gets passed between steps, how review interrupts the flow, and what artifact the runtime emits.";
+  skeletonCaption.textContent = "Each framework runs the same policy question, but they differ in what they pass between steps, how review interrupts the flow, and what the runtime leaves behind as evidence.";
   skeletonBoard.innerHTML = `
     <div class="skel-rationale signature-rationale">
-      <p class="skel-rationale-why">What actually differentiates the runs?</p>
-      <p class="skel-rationale-body">Not the shape of the routing diagram. What matters is the execution signature: shared state versus handoffs versus transcripts versus typed payloads, the exact reviewer stop signal, and the artifact each runtime leaves behind for debugging and audits.</p>
-      <p class="skel-conformance">These cards compare the selected frameworks by execution semantics, using the current question's real trace data rather than a generic topology sketch.</p>
+      <p class="skel-rationale-why">What changes between frameworks?</p>
+      <p class="skel-rationale-body">The main difference is not the drawing. It is what state gets carried forward, when the reviewer can stop the run, and what evidence the runtime leaves behind for debugging and audit.</p>
+      <p class="skel-conformance">These cards use the current question's real trace data, not a generic sketch.</p>
     </div>
     <div class="signature-board">
       ${selectedFrameworks.map((framework) => renderExecutionSignatureCard(framework)).join("")}
@@ -3197,45 +3244,44 @@ function renderScoreRationale() {
   const frameworks = compareIds.map((id) => getFramework(id));
   const stageId = getStage().id;
   scoreRationale.innerHTML = `
-    <div class="section-heading">
-      <p class="eyebrow">Score Rationale</p>
-      <h3>Why low or risky scores are low</h3>
-    </div>
-    <div class="lane-bottom lane-analysis-grid">
-      ${frameworks
-        .map((framework) => {
-          const profile = frameworkTechProfile(framework);
-          const rows = [...traceScoreRows(framework, stageId), ...profile.scorecard];
-          const flagged = rows.filter((item) => {
-            const state = scoreState(item.label, item.value);
-            return state.tone !== "safe";
-          });
-          return `
-            <article>
-              <h4>${framework.name}</h4>
-              <ul>
-                ${flagged
-                  .map((item) => {
-                    const reason =
-                      item.label === "Time Cost" || item.label === "Token Cost" || item.label === "Latency" || item.label === "Parallelism"
-                        ? profile.cards[1].value
-                        : item.label === "Observability" || item.label === "Replayability" || item.label === "Human Review" || item.label === "Testability"
-                          ? profile.cards[2].value
-                          : item.label === "Type Safety"
-                            ? profile.cards[5].value
-                            : item.label === "Error Recovery"
-                              ? profile.cards[0].value
-                              : profile.cards[3].value;
-                    const detail = item.detail ? ` Measured: ${item.detail}.` : "";
-                    return `<li><strong>${item.label}:</strong> ${reason}${detail} Score: ${item.value}/5.</li>`;
-                  })
-                  .join("")}
-              </ul>
-            </article>
-          `;
-        })
-        .join("")}
-    </div>
+    <details class="score-rationale-panel">
+      <summary>Why the weaker scores are weaker</summary>
+      <div class="lane-bottom lane-analysis-grid">
+        ${frameworks
+          .map((framework) => {
+            const profile = frameworkTechProfile(framework);
+            const rows = [...traceScoreRows(framework, stageId), ...profile.scorecard];
+            const flagged = rows.filter((item) => {
+              const state = scoreState(item.label, item.value);
+              return state.tone !== "safe";
+            });
+            return `
+              <article>
+                <h4>${framework.name}</h4>
+                <ul>
+                  ${flagged
+                    .map((item) => {
+                      const reason =
+                        item.label === "Time Cost" || item.label === "Token Cost" || item.label === "Latency" || item.label === "Parallelism"
+                          ? profile.cards[1].value
+                          : item.label === "Observability" || item.label === "Replayability" || item.label === "Human Review" || item.label === "Testability"
+                            ? profile.cards[2].value
+                            : item.label === "Type Safety"
+                              ? profile.cards[5].value
+                              : item.label === "Error Recovery"
+                                ? profile.cards[0].value
+                                : profile.cards[3].value;
+                      const detail = item.detail ? ` Measured: ${item.detail}.` : "";
+                      return `<li><strong>${item.label}:</strong> ${reason}${detail} Score: ${item.value}/5.</li>`;
+                    })
+                    .join("")}
+                </ul>
+              </article>
+            `;
+          })
+          .join("")}
+      </div>
+    </details>
   `;
 }
 
@@ -3307,10 +3353,8 @@ function laneMarkup(frameworkId, laneIndex) {
       </div>
 
       <p class="lane-intro">${profile.intro}</p>
+      ${renderRunFacts(framework, stage.id)}
       ${renderExecutiveSummary(framework, stage.id)}
-      ${renderFrameworkTechStrip(framework)}
-
-      ${renderStepTrail()}
 
       <div class="lane-role-box lane-role-box-top">
         <div class="lane-role-box-who">
@@ -3323,11 +3367,7 @@ function laneMarkup(frameworkId, laneIndex) {
 
       ${renderExecutionSnapshot(framework, stage.id)}
 
-      ${renderFrameworkScorecard(framework, stage.id)}
-
-      ${renderCodeHint(framework, stage.id)}
-
-      ${renderFrameworkAnalysis(framework)}
+      ${renderDeeperDive(framework, stage.id)}
     </article>
   `;
 }
