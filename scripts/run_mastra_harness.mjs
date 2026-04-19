@@ -107,6 +107,7 @@ async function runQuestion(question) {
     time_ms: Date.now() - t,
     tokens_in: intakeRes.tokensIn,
     tokens_out: intakeRes.tokensOut,
+    output: intakeRes.text,
   };
 
   // ── Stage 2: Review (workflow steps for each specialist) ─────────────────
@@ -126,6 +127,7 @@ async function runQuestion(question) {
     toTotal += res.tokensOut;
   }
   metrics.review = { time_ms: Date.now() - t, tokens_in: tiTotal, tokens_out: toTotal };
+  metrics.review.output = reviewParts;
 
   // ── Stage 3: Challenge (guardrail branch) ────────────────────────────────
   const reviewer = makeAgent(
@@ -143,6 +145,7 @@ async function runQuestion(question) {
     time_ms: Date.now() - t,
     tokens_in: challengeRes.tokensIn,
     tokens_out: challengeRes.tokensOut,
+    output: challengeRes.text,
   };
 
   // ── Stage 4: Synthesis (workflow resumes) ────────────────────────────────
@@ -159,6 +162,7 @@ async function runQuestion(question) {
     time_ms: Date.now() - t,
     tokens_in: synthRes.tokensIn,
     tokens_out: synthRes.tokensOut,
+    output: synthRes.text,
   };
 
   // ── Stage 5: Verdict (app workflow returns) ──────────────────────────────
@@ -172,6 +176,7 @@ async function runQuestion(question) {
     time_ms: Date.now() - t,
     tokens_in: verdictRes.tokensIn,
     tokens_out: verdictRes.tokensOut,
+    output: verdictRes.text,
   };
 
   return metrics;

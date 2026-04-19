@@ -3,8 +3,9 @@
 Run real multi-agent policy compliance harnesses for installed frameworks.
 Captures actual timing + token metrics per stage.
 
-Real runs  : langgraph, openai-agents, claude-agent-sdk, ag2, llamaindex, pydanticai
-Simulated  : crewai, semantic-kernel, mastra (not installed / TypeScript)
+Real runs  : langgraph, openai-agents, claude-agent-sdk, ag2, crewai,
+             semantic-kernel, llamaindex, pydanticai
+External   : mastra (TypeScript harness writes traces/mastra_metrics.json)
 
 Output: traces/real_metrics.json
 """
@@ -131,6 +132,26 @@ async def _call(
     return r.choices[0].message.content, r.usage.prompt_tokens, r.usage.completion_tokens
 
 
+def _usage_counts(usage: object) -> tuple[int, int]:
+    """Extract prompt/completion tokens from SDK usage objects or dicts."""
+    if usage is None:
+        return 0, 0
+    if isinstance(usage, dict):
+        return (
+            int(usage.get("prompt_tokens") or usage.get("input_tokens") or 0),
+            int(usage.get("completion_tokens") or usage.get("output_tokens") or 0),
+        )
+    return (
+        int(getattr(usage, "prompt_tokens", None) or getattr(usage, "input_tokens", None) or 0),
+        int(getattr(usage, "completion_tokens", None) or getattr(usage, "output_tokens", None) or 0),
+    )
+
+
+def _with_outputs(metrics: dict, outputs: dict) -> dict:
+    """Attach real stage outputs without changing the stage metric shape."""
+    return {**metrics, "__outputs__": outputs}
+
+
 # ── LANGGRAPH ─────────────────────────────────────────────────────────────────
 async def run_langgraph(question: str) -> dict:
     from langgraph.graph import StateGraph, END
@@ -217,7 +238,7 @@ async def run_langgraph(question: str) -> dict:
     g.add_edge("synthesis", "verdict")
     g.add_edge("verdict", END)
     await g.compile().ainvoke({})
-    return _m
+    return _with_outputs(_m, _s)
 
 
 # ── OPENAI AGENTS ─────────────────────────────────────────────────────────────
@@ -225,6 +246,7 @@ async def run_openai_agents(question: str) -> dict:
     from agents import Agent, Runner
 
     _m: dict = {}
+    _s: dict = {}
 
     async def stage(name: str, instructions: str, prompt: str, max_out: int = 200) -> str:
         agent = Agent(name=name, model=MODEL, instructions=instructions)
@@ -234,6 +256,7 @@ async def run_openai_agents(question: str) -> dict:
         ti = sum(getattr(r.usage, "input_tokens", 0) for r in result.raw_responses)
         to = sum(getattr(r.usage, "output_tokens", 0) for r in result.raw_responses)
         _m[name] = {"time_ms": elapsed, "tokens_in": ti, "tokens_out": to}
+        _s[name] = result.final_output
         return result.final_output
 
     intake_out = await stage(
@@ -264,6 +287,7 @@ async def run_openai_agents(question: str) -> dict:
         ]
     )
     review_parts = {role: text for role, text, _ti, _to in specialist_results}
+    _s["review"] = review_parts
     _m["review"] = {"time_ms": int((time.perf_counter() - t_review) * 1000),
                     "tokens_in": sum(ti for _role, _text, ti, _to in specialist_results),
                     "tokens_out": sum(to for _role, _text, _ti, to in specialist_results)}
@@ -284,7 +308,7 @@ async def run_openai_agents(question: str) -> dict:
         "verdict", PRINCIPAL_SYS,
         f"Question: {question}\n\nDraft: {synthesis_out[:400]}\n\nFinalise the answer with citations.",
     )
-    return _m
+    return _with_outputs(_m, _s)
 
 
 # ── CLAUDE AGENT SDK ─────────────────────────────────────────────────────────
@@ -359,46 +383,63 @@ async def run_claude_agent_sdk(question: str) -> dict:
         # Bounded real Claude Code call. The Claude Agent SDK uses this same CLI
         # runtime, but its streaming transport can hang on long prompts in this
         # local environment; JSON mode keeps the harness measurable and honest.
-        t = time.perf_counter()
-        completed = await asyncio.to_thread(
-            subprocess.run,
-            [
-                cli_path,
-                "-p",
-                prompt,
-                "--output-format",
-                "json",
-                "--model",
-                CLAUDE_MODEL,
-                "--max-turns",
-                "1",
-                "--permission-mode",
-                "dontAsk",
-            ],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            timeout=180,
-            check=False,
-        )
-        if completed.returncode != 0:
-            raise RuntimeError((completed.stderr or completed.stdout or str(completed.returncode)).strip())
+        metrics = {"time_ms": 0, "tokens_in": 0, "tokens_out": 0}
+        total_usd = 0.0
+        saw_usd = False
 
-        result = json.loads(completed.stdout)
-        if result.get("is_error"):
-            raise RuntimeError(result.get("result") or "Claude Code returned an error result")
+        for attempt in range(2):
+            stage_prompt = prompt
+            if attempt:
+                stage_prompt = (
+                    f"{prompt}\n\n"
+                    "The previous completed SDK call returned an empty text payload. "
+                    "Return a non-empty answer in concise prose."
+                )
+            t = time.perf_counter()
+            completed = await asyncio.to_thread(
+                subprocess.run,
+                [
+                    cli_path,
+                    "-p",
+                    stage_prompt,
+                    "--output-format",
+                    "json",
+                    "--model",
+                    CLAUDE_MODEL,
+                    "--max-turns",
+                    "1",
+                    "--permission-mode",
+                    "dontAsk",
+                ],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                timeout=180,
+                check=False,
+            )
+            if completed.returncode != 0:
+                raise RuntimeError((completed.stderr or completed.stdout or str(completed.returncode)).strip())
 
-        usage = result.get("usage") or result.get("modelUsage") or {}
-        ti, to = _claude_usage_counts(usage)
-        elapsed = result.get("duration_ms") or int((time.perf_counter() - t) * 1000)
-        metrics = {
-            "time_ms": elapsed,
-            "tokens_in": ti,
-            "tokens_out": to,
-        }
-        if result.get("total_cost_usd") is not None:
-            metrics["usd"] = round(result["total_cost_usd"], 7)
-        return (result.get("result") or "").strip(), metrics
+            result = json.loads(completed.stdout)
+            if result.get("is_error"):
+                raise RuntimeError(result.get("result") or "Claude Code returned an error result")
+
+            usage = result.get("usage") or result.get("modelUsage") or {}
+            ti, to = _claude_usage_counts(usage)
+            metrics["time_ms"] += result.get("duration_ms") or int((time.perf_counter() - t) * 1000)
+            metrics["tokens_in"] += ti
+            metrics["tokens_out"] += to
+            if result.get("total_cost_usd") is not None:
+                saw_usd = True
+                total_usd += result["total_cost_usd"]
+
+            text_out = (result.get("result") or "").strip()
+            if text_out or attempt == 1:
+                if saw_usd:
+                    metrics["usd"] = round(total_usd, 7)
+                return text_out, metrics
+
+        return "", metrics
 
     async def stage(name: str, prompt: str) -> str:
         text, metrics = await claude_call(prompt)
@@ -457,7 +498,7 @@ async def run_claude_agent_sdk(question: str) -> dict:
         "Return the final answer with cited policy clauses and confidence.",
     )
 
-    return _m
+    return _with_outputs(_m, outputs)
 
 
 # ── AG2 (autogen-agentchat) ───────────────────────────────────────────────────
@@ -468,6 +509,7 @@ async def run_ag2(question: str) -> dict:
 
     api_key = os.getenv("OPENAI_API_KEY", "")
     _m: dict = {}
+    _s: dict = {}
 
     model_client = OpenAIChatCompletionClient(model=MODEL, api_key=api_key)
 
@@ -491,6 +533,7 @@ async def run_ag2(question: str) -> dict:
         "Start the compliance analysis. Identify relevant clauses.",
     )
     _m["intake"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
+    _s["intake"] = intake_text
 
     # Review: specialists debate in a round-robin mesh
     t = time.perf_counter()
@@ -510,6 +553,7 @@ async def run_ag2(question: str) -> dict:
         context = text[:200]  # mesh: each agent builds on the last
     _m["review"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                     "tokens_in": ti_total, "tokens_out": to_total}
+    _s["review"] = review_parts
 
     # Challenge: reviewer injects rebuttal into conversation
     t = time.perf_counter()
@@ -529,6 +573,7 @@ async def run_ag2(question: str) -> dict:
         to_total += to
     _m["challenge"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                        "tokens_in": ti_total, "tokens_out": to_total}
+    _s["challenge"] = challenge_parts
 
     # Synthesis: specialists converge to principal
     t = time.perf_counter()
@@ -541,6 +586,7 @@ async def run_ag2(question: str) -> dict:
         250,
     )
     _m["synthesis"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
+    _s["synthesis"] = synthesis_text
 
     # Verdict: closing turn
     t = time.perf_counter()
@@ -550,9 +596,285 @@ async def run_ag2(question: str) -> dict:
         f"Question: {question}\n\nPublish the final answer with citations.",
     )
     _m["verdict"] = {"time_ms": int((time.perf_counter() - t) * 1000), "tokens_in": ti, "tokens_out": to}
+    _s["verdict"] = verdict_text
 
     await model_client.close()
-    return _m
+    return _with_outputs(_m, _s)
+
+
+# ── CREWAI ───────────────────────────────────────────────────────────────────
+async def run_crewai(question: str) -> dict:
+    from crewai import Agent, Crew, LLM, Process, Task
+
+    os.environ.setdefault("CREWAI_TRACING_ENABLED", "false")
+    _m: dict = {}
+    _s: dict = {}
+
+    async def crew_stage(
+        name: str,
+        role: str,
+        goal: str,
+        backstory: str,
+        description: str,
+        expected_output: str,
+        max_tokens: int = 200,
+    ) -> str:
+        llm = LLM(
+            model=f"openai/{MODEL}",
+            api_key=os.getenv("OPENAI_API_KEY"),
+            temperature=0,
+            max_tokens=max_tokens,
+        )
+        agent = Agent(
+            role=role,
+            goal=goal,
+            backstory=backstory,
+            llm=llm,
+            verbose=False,
+            allow_delegation=False,
+            max_iter=1,
+        )
+        task = Task(
+            description=description,
+            expected_output=expected_output,
+            agent=agent,
+        )
+        crew = Crew(
+            agents=[agent],
+            tasks=[task],
+            process=Process.sequential,
+            verbose=False,
+            tracing=False,
+        )
+
+        t = time.perf_counter()
+        output = await asyncio.to_thread(crew.kickoff)
+        elapsed = int((time.perf_counter() - t) * 1000)
+        usage = (
+            getattr(crew, "usage_metrics", None)
+            or getattr(crew, "token_usage", None)
+            or getattr(output, "token_usage", None)
+        )
+        ti, to = _usage_counts(usage)
+        _m[name] = {"time_ms": elapsed, "tokens_in": ti, "tokens_out": to}
+        text = str(output)
+        _s[name] = text
+        return text
+
+    intake_out = await crew_stage(
+        "intake",
+        "Principal policy orchestrator",
+        "Assign evidence-grounded specialist work for a policy compliance question.",
+        "You manage a compact CrewAI policy review and preserve clause evidence.",
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+        "Identify relevant clauses and assign compliance, security, legal, and finance review tasks.",
+        "Relevant clauses and four compact specialist task briefs.",
+    )
+
+    async def specialist_review(role: str, instructions: str) -> tuple[str, str, dict]:
+        text = await crew_stage(
+            f"review_{role}",
+            f"{role.title()} specialist",
+            "Return one evidence-grounded specialist finding.",
+            instructions,
+            f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+            f"Intake context: {intake_out[:600]}\n\n"
+            "Give one compact specialist finding with clause ids and caveats.",
+            "One specialist finding with clause ids.",
+            150,
+        )
+        metrics = _m.pop(f"review_{role}")
+        return role, text, metrics
+
+    t_review = time.perf_counter()
+    specialist_results = await asyncio.gather(
+        *[
+            specialist_review(role, instructions)
+            for role, instructions in SPECIALIST_ROLES.items()
+        ]
+    )
+    review_out = "\n\n".join(f"{role}: {text}" for role, text, _metrics in specialist_results)
+    review_metrics = [metrics for _role, _text, metrics in specialist_results]
+    _s["review"] = {role: text for role, text, _metrics in specialist_results}
+    _m["review"] = {
+        "time_ms": int((time.perf_counter() - t_review) * 1000),
+        "tokens_in": sum(metric.get("tokens_in", 0) for metric in review_metrics),
+        "tokens_out": sum(metric.get("tokens_out", 0) for metric in review_metrics),
+    }
+
+    challenge_out = await crew_stage(
+        "challenge",
+        "Reviewer checkpoint",
+        "Challenge unsupported or over-broad specialist conclusions.",
+        REVIEWER_SYS,
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\nSpecialist findings:\n{review_out[:1200]}\n\n"
+        "List unsupported claims, missing caveats, or missing clause citations.",
+        "Reviewer notes with required fixes.",
+    )
+
+    synthesis_out = await crew_stage(
+        "synthesis",
+        "Crew manager",
+        "Merge specialist findings and reviewer notes into a concise draft.",
+        PRINCIPAL_SYS,
+        f"Question: {question}\n\nFindings:\n{review_out[:900]}\n\n"
+        f"Reviewer notes:\n{challenge_out[:600]}\n\nDraft a concise answer.",
+        "Draft answer with caveats and citations.",
+        250,
+    )
+
+    await crew_stage(
+        "verdict",
+        "Principal decision agent",
+        "Publish the final policy answer.",
+        PRINCIPAL_SYS,
+        f"Question: {question}\n\nDraft answer:\n{synthesis_out[:900]}\n\n"
+        "Return the final answer with cited policy clauses and confidence.",
+        "Final answer with clause citations.",
+    )
+    return _with_outputs(_m, _s)
+
+
+# ── SEMANTIC KERNEL ───────────────────────────────────────────────────────────
+async def run_semantic_kernel(question: str) -> dict:
+    from pydantic import PrivateAttr
+    from semantic_kernel.agents import ChatCompletionAgent
+    from semantic_kernel.connectors.ai.chat_completion_client_base import ChatCompletionClientBase
+    from semantic_kernel.connectors.ai.prompt_execution_settings import PromptExecutionSettings
+    from semantic_kernel.contents import ChatMessageContent
+    from semantic_kernel.contents.utils.author_role import AuthorRole
+    from semantic_kernel.functions import KernelArguments
+
+    class OpenAIKernelChatService(ChatCompletionClientBase):
+        _client: AsyncOpenAI = PrivateAttr()
+        _max_tokens: int = PrivateAttr(default=200)
+        _last_usage: dict = PrivateAttr(default_factory=dict)
+
+        def __init__(self, *, max_tokens: int = 200) -> None:
+            super().__init__(ai_model_id=MODEL, service_id="openai-policy")
+            self._client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY", ""))
+            self._max_tokens = max_tokens
+            self._last_usage = {}
+
+        @property
+        def last_usage(self) -> dict:
+            return self._last_usage
+
+        async def _inner_get_chat_message_contents(
+            self,
+            chat_history,
+            settings: PromptExecutionSettings,
+        ) -> list[ChatMessageContent]:
+            messages = []
+            for message in chat_history.messages:
+                role = getattr(message.role, "value", str(message.role)).lower()
+                if role not in {"system", "user", "assistant"}:
+                    continue
+                content = message.content or ""
+                if content:
+                    messages.append({"role": role, "content": content})
+
+            result = await self._client.chat.completions.create(
+                model=self.ai_model_id,
+                messages=messages,
+                max_tokens=self._max_tokens,
+            )
+            content = result.choices[0].message.content or ""
+            self._last_usage = {
+                "prompt_tokens": result.usage.prompt_tokens if result.usage else 0,
+                "completion_tokens": result.usage.completion_tokens if result.usage else 0,
+            }
+            return [
+                ChatMessageContent(
+                    role=AuthorRole.ASSISTANT,
+                    content=content,
+                    metadata={"usage": self._last_usage},
+                    ai_model_id=self.ai_model_id,
+                )
+            ]
+
+    _m: dict = {}
+    _s: dict = {}
+
+    async def sk_stage(name: str, instructions: str, prompt: str, max_tokens: int = 200) -> str:
+        service = OpenAIKernelChatService(max_tokens=max_tokens)
+        agent = ChatCompletionAgent(
+            name=name.replace("-", "_"),
+            instructions=instructions,
+            service=service,
+        )
+        t = time.perf_counter()
+        response = await agent.get_response(
+            messages=prompt,
+            arguments=KernelArguments(
+                settings=PromptExecutionSettings(service_id="openai-policy")
+            ),
+        )
+        elapsed = int((time.perf_counter() - t) * 1000)
+        ti, to = _usage_counts(service.last_usage)
+        _m[name] = {"time_ms": elapsed, "tokens_in": ti, "tokens_out": to}
+        text = str(response.content or response)
+        _s[name] = text
+        return text
+
+    intake_out = await sk_stage(
+        "intake",
+        PRINCIPAL_SYS,
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+        "Open a governed Semantic Kernel case and identify relevant clauses plus specialist work.",
+    )
+
+    async def specialist_review(role: str, instructions: str) -> tuple[str, str, dict]:
+        text = await sk_stage(
+            f"review_{role}",
+            instructions,
+            f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+            f"Governed intake context: {intake_out[:600]}\n\n"
+            "Return one specialist finding with clause ids and a caveat.",
+            150,
+        )
+        metrics = _m.pop(f"review_{role}")
+        return role, text, metrics
+
+    t_review = time.perf_counter()
+    specialist_results = await asyncio.gather(
+        *[
+            specialist_review(role, instructions)
+            for role, instructions in SPECIALIST_ROLES.items()
+        ]
+    )
+    review_out = "\n\n".join(f"{role}: {text}" for role, text, _metrics in specialist_results)
+    review_metrics = [metrics for _role, _text, metrics in specialist_results]
+    _s["review"] = {role: text for role, text, _metrics in specialist_results}
+    _m["review"] = {
+        "time_ms": int((time.perf_counter() - t_review) * 1000),
+        "tokens_in": sum(metric.get("tokens_in", 0) for metric in review_metrics),
+        "tokens_out": sum(metric.get("tokens_out", 0) for metric in review_metrics),
+    }
+
+    challenge_out = await sk_stage(
+        "challenge",
+        REVIEWER_SYS,
+        f"Question: {question}\n\nSpecialist findings:\n{review_out[:1200]}\n\n"
+        "Run the governance gate: identify unsupported claims, missing caveats, or missing clause ids.",
+    )
+
+    synthesis_out = await sk_stage(
+        "synthesis",
+        PRINCIPAL_SYS,
+        f"Question: {question}\n\nFindings:\n{review_out[:900]}\n\n"
+        f"Governance notes:\n{challenge_out[:600]}\n\n"
+        "Assemble an approved draft answer.",
+        250,
+    )
+
+    await sk_stage(
+        "verdict",
+        PRINCIPAL_SYS,
+        f"Question: {question}\n\nApproved draft:\n{synthesis_out[:900]}\n\n"
+        "Return the final governed answer with cited policy clauses and confidence.",
+    )
+    return _with_outputs(_m, _s)
 
 
 # ── LlamaIndex event types at module level (required for @step annotation resolution) ──
@@ -575,7 +897,7 @@ async def run_llamaindex(question: str) -> dict:
     _m: dict = {}
 
     # Capture question/client in closures via a mutable container
-    _state: dict = {"question": question, "client": client, "m": _m}
+    _state: dict = {"question": question, "client": client, "m": _m, "s": {}}
 
     class PolicyWorkflow(Workflow):
         @step
@@ -588,6 +910,7 @@ async def run_llamaindex(question: str) -> dict:
             )
             _state["m"]["intake"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                                      "tokens_in": ti, "tokens_out": to}
+            _state["s"]["intake"] = text
             return _LIIntakeEvent(intake=text)
 
         @step
@@ -607,6 +930,7 @@ async def run_llamaindex(question: str) -> dict:
                 "tokens_out": sum(r[2] for r in results),
             }
             review_data = {k: r[0] for k, r in zip(SPECIALIST_ROLES, results)}
+            _state["s"]["review"] = review_data
             await ctx.store.set("review_data", review_data)
             return _LIReviewEvent(review=review_data)
 
@@ -622,6 +946,7 @@ async def run_llamaindex(question: str) -> dict:
             )
             _state["m"]["challenge"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                                         "tokens_in": ti, "tokens_out": to}
+            _state["s"]["challenge"] = text
             return _LIChallengeEvent(challenge=text)
 
         @step
@@ -639,6 +964,7 @@ async def run_llamaindex(question: str) -> dict:
             )
             _state["m"]["synthesis"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                                         "tokens_in": ti, "tokens_out": to}
+            _state["s"]["synthesis"] = text
             return _LISynthesisEvent(synthesis=text)
 
         @step
@@ -652,11 +978,12 @@ async def run_llamaindex(question: str) -> dict:
             )
             _state["m"]["verdict"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                                       "tokens_in": ti, "tokens_out": to}
+            _state["s"]["verdict"] = text
             return StopEvent(result=text)
 
     wf = PolicyWorkflow(timeout=120)
     await wf.run()
-    return _m
+    return _with_outputs(_m, _state["s"])
 
 
 # ── PYDANTIC AI ───────────────────────────────────────────────────────────────
@@ -667,6 +994,7 @@ async def run_pydanticai(question: str) -> dict:
 
     provider = OpenAIProvider(api_key=os.getenv("OPENAI_API_KEY", ""))
     _m: dict = {}
+    _s: dict = {}
 
     async def pai_stage(name: str, system: str, prompt: str, max_out: int = 200) -> str:
         model = OpenAIModel(MODEL, provider=provider)
@@ -680,6 +1008,7 @@ async def run_pydanticai(question: str) -> dict:
             "tokens_in": usage.input_tokens or 0,
             "tokens_out": usage.output_tokens or 0,
         }
+        _s[name] = result.output
         return result.output
 
     intake_out = await pai_stage(
@@ -702,6 +1031,7 @@ async def run_pydanticai(question: str) -> dict:
         u = result.usage()
         ti_total += u.input_tokens or 0
         to_total += u.output_tokens or 0
+    _s["review"] = review_parts
     _m["review"] = {"time_ms": int((time.perf_counter() - t) * 1000),
                     "tokens_in": ti_total, "tokens_out": to_total}
 
@@ -722,7 +1052,7 @@ async def run_pydanticai(question: str) -> dict:
         f"Question: {question}\n\nDraft: {synthesis_out[:400]}\n\n"
         "Emit final typed answer with citation fields.",
     )
-    return _m
+    return _with_outputs(_m, _s)
 
 
 # ── ORCHESTRATION ─────────────────────────────────────────────────────────────
@@ -731,6 +1061,8 @@ HARNESSES: dict[str, object] = {
     "openai-agents": run_openai_agents,
     "claude-agent-sdk": run_claude_agent_sdk,
     "ag2": run_ag2,
+    "crewai": run_crewai,
+    "semantic-kernel": run_semantic_kernel,
     "llamaindex": run_llamaindex,
     "pydanticai": run_pydanticai,
 }
@@ -741,6 +1073,7 @@ STAGES = ["intake", "review", "challenge", "synthesis", "verdict"]
 def fmt(metrics: dict) -> dict:
     """Normalise stage metrics into the generate_traces schema."""
     out: dict = {}
+    outputs = metrics.get("__outputs__", {}) if isinstance(metrics, dict) else {}
     for stage in STAGES:
         if stage not in metrics:
             out[stage] = {"time_ms": 0, "tokens_in": 0, "tokens_out": 0, "usd": 0.0}
@@ -753,6 +1086,8 @@ def fmt(metrics: dict) -> dict:
             "tokens_out": to,
             "usd": m.get("usd", usd(ti, to)),
         }
+        if stage in outputs:
+            out[stage]["output"] = outputs[stage]
     return out
 
 

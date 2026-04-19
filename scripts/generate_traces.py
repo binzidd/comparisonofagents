@@ -308,6 +308,15 @@ def _real_stage(framework_id: str, question_id: str, stage_id: str) -> dict | No
         return None
 
 
+def _framework_has_complete_real_run(framework_id: str) -> bool:
+    """True only when every displayed question/stage has captured SDK metrics."""
+    return all(
+        _real_stage(framework_id, question_id, stage_id)
+        for question_id in QUESTIONS
+        for stage_id in FRAMEWORKS[framework_id]["links"]
+    )
+
+
 def stable_jitter(*parts: str, spread: int = 17) -> float:
     seed = sum((index + 1) * ord(char) for index, char in enumerate(":".join(parts)))
     return 1 + ((seed % spread) - (spread // 2)) / 100
@@ -463,6 +472,9 @@ def question_key(question: dict) -> str:
 
 
 def stage_output(question: dict, framework_id: str, stage_id: str) -> dict:
+    real = _real_stage(framework_id, question_key(question), stage_id)
+    if real and "output" in real:
+        return {"sdk_output": real["output"]}
     if stage_id == "verdict":
         return {
             "answer": verdict_answer(question, framework_id),
@@ -511,23 +523,27 @@ def stage_messages(question: dict, framework_id: str, links: list[str], stage_id
 
 def build_trace_store() -> dict:
     real_frameworks = sorted({
-        fw
-        for q in _real.get("questions", {}).values()
-        for fw, stages in q.get("frameworks", {}).items()
-        if stages  # only include frameworks with actual stage data
+        framework_id
+        for framework_id in FRAMEWORKS
+        if _framework_has_complete_real_run(framework_id)
     })
+    fallback_frameworks = sorted(set(FRAMEWORKS) - set(real_frameworks))
     models = _real.get("models") or {"openai": _real.get("model", "gpt-4o-mini")}
     model_note = ", ".join(f"{name}: {model}" for name, model in models.items())
-    note = (
-        f"Metrics for {real_frameworks} are from real SDK runs (models: {model_note}). "
-        "All other metrics are deterministic, question-aware Python harness estimates."
-        if real_frameworks
-        else "These traces are deterministic, question-aware Python framework-shaped estimates, not official framework SDK runs."
-    )
+    if not fallback_frameworks:
+        note = f"All displayed framework metrics are from complete real SDK runs (models: {model_note})."
+    elif real_frameworks:
+        note = (
+            f"Metrics for {real_frameworks} are from complete real SDK runs (models: {model_note}). "
+            f"Fallback estimates remain for {fallback_frameworks}."
+        )
+    else:
+        note = "These traces are deterministic, question-aware Python framework-shaped estimates, not official framework SDK runs."
     payload = {
         "generated_by": "scripts/generate_traces.py",
-        "execution_mode": "mixed" if real_frameworks else "python-harness",
+        "execution_mode": "real-sdk-calls" if not fallback_frameworks else ("mixed" if real_frameworks else "python-harness"),
         "real_frameworks": real_frameworks,
+        "fallback_frameworks": fallback_frameworks,
         "note": note,
         "questions": {},
     }

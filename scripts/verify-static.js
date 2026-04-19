@@ -116,6 +116,29 @@ if (repeatedStageProfiles.length > 0) {
 }
 
 const questionIds = Object.keys(traceStore.questions || {});
+if (traceStore.execution_mode !== "real-sdk-calls") {
+  throw new Error(`Trace store is not fully real: ${traceStore.execution_mode}`);
+}
+
+if ((traceStore.fallback_frameworks || []).length > 0) {
+  throw new Error(`Fallback framework metrics are still present: ${traceStore.fallback_frameworks.join(", ")}`);
+}
+
+const nonRealStages = [];
+for (const [questionId, questionTrace] of Object.entries(traceStore.questions || {})) {
+  for (const [frameworkId, frameworkTrace] of Object.entries(questionTrace.frameworks || {})) {
+    for (const [stageId, stageTrace] of Object.entries(frameworkTrace.stages || {})) {
+      if (stageTrace.execution_mode !== "real-sdk-calls") {
+        nonRealStages.push(`${questionId}/${frameworkId}/${stageId}:${stageTrace.execution_mode}`);
+      }
+    }
+  }
+}
+
+if (nonRealStages.length > 0) {
+  throw new Error(`Non-real stage metrics are displayed: ${nonRealStages.join(", ")}`);
+}
+
 const firstQuestion = traceStore.questions?.[questionIds[0]];
 const staticQuestionProfiles = [];
 for (const frameworkId of Object.keys(firstQuestion?.frameworks || {})) {
