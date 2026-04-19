@@ -1,24 +1,29 @@
 """
-Claude API policy checker.
+Claude Agent SDK policy checker.
 
-Runs a five-stage policy review with direct Anthropic SDK calls:
-intake -> parallel specialists -> reviewer -> synthesis -> verdict.
+Runs a four-stage policy review with Claude Agent SDK calls:
+intake -> parallel specialists -> parallel(reviewer, synthesis_draft) -> verdict.
 
-Key performance improvements over the subprocess-based transport:
-- Single AsyncAnthropic client reused across all calls (HTTP connection pooling)
-- prompt caching on the stable system + policy prefix
-- Bounded max_tokens per stage to avoid over-generation
+The reviewer and preliminary synthesis run in parallel — both depend only on
+specialist outputs — removing one sequential subprocess round-trip vs the
+original five-stage version.
 """
 
 import asyncio
 import os
 
-import anthropic
+from claude_agent_sdk import (
+    AssistantMessage,
+    ClaudeAgentOptions,
+    ResultMessage,
+    TextBlock,
+    query,
+)
 from dotenv import load_dotenv
 
 load_dotenv()
 
-MODEL = os.getenv("CLAUDE_AGENT_MODEL", "claude-sonnet-4-6")
+MODEL = os.getenv("CLAUDE_AGENT_MODEL", "sonnet")
 
 POLICY_CORPUS = """\
 RETENTION CLAUSE: GitHub retains personal information as long as necessary for
@@ -35,52 +40,49 @@ access, correct, delete or erase in some cases, object, withdraw consent,
 receive portable data, and use state-specific appeal pathways.
 """
 
-_SYSTEM = (
-    "You are the principal orchestration agent for a policy compliance "
-    "analysis. Keep answers concise, grounded, and citation-led."
+# Cached at module level — options are identical for every call in the pipeline.
+_OPTIONS = ClaudeAgentOptions(
+    allowed_tools=[],
+    permission_mode="dontAsk",
+    max_turns=1,
+    model=MODEL,
+    system_prompt=(
+        "You are the principal orchestration agent for a policy compliance "
+        "analysis. Keep answers concise, grounded, and citation-led."
+    ),
 )
 
 
-async def _ask(client: anthropic.AsyncAnthropic, prompt: str, max_tokens: int = 250) -> str:
-    """Single API call with cached system + policy prefix."""
-    response = await client.messages.create(
-        model=MODEL,
-        max_tokens=max_tokens,
-        system=[
-            {
-                "type": "text",
-                "text": _SYSTEM,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ],
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Policy:\n{POLICY_CORPUS}",
-                        "cache_control": {"type": "ephemeral"},
-                    },
-                    {"type": "text", "text": prompt},
-                ],
-            }
-        ],
-    )
-    return response.content[0].text.strip() if response.content else ""
+def _message_text(message: object) -> str:
+    if isinstance(message, AssistantMessage):
+        return "\n".join(
+            block.text for block in message.content
+            if isinstance(block, TextBlock)
+        )
+    if isinstance(message, ResultMessage):
+        return message.result or ""
+    return ""
+
+
+async def _ask(prompt: str) -> str:
+    parts: list[str] = []
+    async for message in query(prompt=prompt, options=_OPTIONS):
+        text = _message_text(message)
+        if text:
+            parts.append(text)
+    return "\n".join(parts).strip()
 
 
 async def _run_pipeline_async(question: str) -> dict:
-    client = anthropic.AsyncAnthropic()
     outputs: dict[str, str] = {}
 
+    # Stage 1: intake
     outputs["intake"] = await _ask(
-        client,
-        f"Question: {question}\n\n"
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
         "Identify relevant clauses and assign specialist review tasks.",
-        max_tokens=150,
     )
 
+    # Stage 2: four specialists in parallel
     specialist_roles = {
         "compliance": "Review regulatory and policy obligations.",
         "security": "Review data-protection controls and access safeguards.",
@@ -90,11 +92,9 @@ async def _run_pipeline_async(question: str) -> dict:
     specialist_outputs = await asyncio.gather(
         *[
             _ask(
-                client,
-                f"{instructions}\n\nQuestion: {question}\n\n"
+                f"{instructions}\n\nQuestion: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
                 f"Intake:\n{outputs['intake']}\n\n"
-                "Return one compact finding with clause ids and a confidence note.",
-                max_tokens=150,
+                "Return one compact finding with clause ids and a confidence note."
             )
             for instructions in specialist_roles.values()
         ]
@@ -102,24 +102,25 @@ async def _run_pipeline_async(question: str) -> dict:
     outputs["specialists"] = "\n\n".join(
         f"{role}: {text}" for role, text in zip(specialist_roles, specialist_outputs)
     )
-    outputs["reviewer"] = await _ask(
-        client,
-        f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
-        "Reviewer: challenge unsupported claims and missing caveats.",
-        max_tokens=200,
+
+    # Stage 3: reviewer and preliminary synthesis run in parallel.
+    # Both depend only on specialist outputs, so neither needs to wait for the other.
+    outputs["reviewer"], outputs["synthesis"] = await asyncio.gather(
+        _ask(
+            f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+            "Reviewer: challenge unsupported claims and missing caveats.",
+        ),
+        _ask(
+            f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+            "Draft the grounded answer citing policy clauses.",
+        ),
     )
-    outputs["synthesis"] = await _ask(
-        client,
-        f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
-        f"Reviewer notes:\n{outputs['reviewer']}\n\n"
-        "Draft the grounded answer.",
-        max_tokens=250,
-    )
+
+    # Stage 4: verdict combines the draft and reviewer challenges.
     outputs["verdict"] = await _ask(
-        client,
         f"Question: {question}\n\nDraft:\n{outputs['synthesis']}\n\n"
-        "Return the final answer with cited clause ids and confidence.",
-        max_tokens=200,
+        f"Reviewer challenges:\n{outputs['reviewer']}\n\n"
+        "Return the final answer addressing reviewer concerns, with cited clause ids and confidence.",
     )
     return {"question": question, **outputs}
 

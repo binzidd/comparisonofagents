@@ -12,9 +12,10 @@ Output: traces/real_metrics.json
 import asyncio
 import json
 import os
+import shutil
+import subprocess
 import time
 from pathlib import Path
-from anthropic import AsyncAnthropic
 from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
@@ -26,20 +27,7 @@ from llama_index.core.workflow import (
 load_dotenv()
 
 MODEL = "gpt-4o-mini"
-CLAUDE_MODEL = os.getenv("CLAUDE_AGENT_MODEL", "claude-sonnet-4-6")
-
-# Claude Sonnet 4.6 pricing (per token)
-_CLAUDE_IN_RATE = 3.00 / 1_000_000
-_CLAUDE_OUT_RATE = 15.00 / 1_000_000
-_CLAUDE_CACHE_WRITE_RATE = 3.75 / 1_000_000  # 1.25× input for 5-min TTL cache writes
-_CLAUDE_CACHE_READ_RATE = 0.30 / 1_000_000   # 0.1× input for cache reads
-
-# Short model aliases accepted by the CLI but not by the direct API
-_CLAUDE_MODEL_ALIASES = {
-    "sonnet": "claude-sonnet-4-6",
-    "opus": "claude-opus-4-7",
-    "haiku": "claude-haiku-4-5",
-}
+CLAUDE_MODEL = os.getenv("CLAUDE_AGENT_MODEL", "sonnet")
 ROOT = Path(__file__).resolve().parent.parent
 REAL_METRICS_PATH = ROOT / "traces" / "real_metrics.json"
 
@@ -300,78 +288,135 @@ async def run_openai_agents(question: str) -> dict:
 
 
 # ── CLAUDE AGENT SDK ─────────────────────────────────────────────────────────
+def _claude_cli_path() -> str | None:
+    cli_path = shutil.which("claude")
+    if cli_path:
+        return cli_path
+    local_cli = ROOT / "node_modules" / ".bin" / "claude"
+    if local_cli.exists():
+        return str(local_cli)
+    return None
+
+
+def _ensure_claude_cli_ready() -> str:
+    cli_path = _claude_cli_path()
+    if not cli_path:
+        raise RuntimeError(
+            "Claude Code CLI not found. Install @anthropic-ai/claude-code before running claude-agent-sdk."
+        )
+
+    probe = subprocess.run(
+        [cli_path, "-p", "Say ok", "--output-format", "json"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=20,
+        check=False,
+    )
+    combined = "\n".join(part for part in [probe.stdout, probe.stderr] if part)
+    if "Not logged in" in combined:
+        raise RuntimeError("Claude Code CLI is installed but not logged in; run `claude /login`.")
+    if probe.returncode != 0:
+        raise RuntimeError(f"Claude Code CLI preflight failed: {combined.strip() or probe.returncode}")
+    return cli_path
+
+
+def _claude_usage_counts(usage: object) -> tuple[int, int]:
+    """Best-effort extraction from Claude SDK usage/model_usage payloads."""
+    if not isinstance(usage, dict):
+        return 0, 0
+
+    tokens_in = 0
+    tokens_out = 0
+    for key, value in usage.items():
+        if isinstance(value, dict):
+            nested_in, nested_out = _claude_usage_counts(value)
+            tokens_in += nested_in
+            tokens_out += nested_out
+            continue
+        if not isinstance(value, int):
+            continue
+        if key in {
+            "input_tokens",
+            "inputTokens",
+            "cache_creation_input_tokens",
+            "cache_read_input_tokens",
+            "cacheCreationInputTokens",
+            "cacheReadInputTokens",
+        }:
+            tokens_in += value
+        elif key in {"output_tokens", "outputTokens"}:
+            tokens_out += value
+    return tokens_in, tokens_out
+
+
 async def run_claude_agent_sdk(question: str) -> dict:
-    """Direct Anthropic SDK calls — no subprocess, HTTP connection pooling, prompt caching."""
-    model = _CLAUDE_MODEL_ALIASES.get(CLAUDE_MODEL, CLAUDE_MODEL)
     _m: dict = {}
     outputs: dict[str, str] = {}
-    client = AsyncAnthropic()
+    cli_path = _ensure_claude_cli_ready()
 
-    async def claude_call(prompt: str, max_tokens: int = 200) -> tuple[str, dict]:
+    async def claude_call(prompt: str) -> tuple[str, dict]:
+        # Bounded real Claude Code call. The Claude Agent SDK uses this same CLI
+        # runtime, but its streaming transport can hang on long prompts in this
+        # local environment; JSON mode keeps the harness measurable and honest.
         t = time.perf_counter()
-        response = await client.messages.create(
-            model=model,
-            max_tokens=max_tokens,
-            system=[
-                {
-                    "type": "text",
-                    "text": PRINCIPAL_SYS,
-                    "cache_control": {"type": "ephemeral"},
-                }
+        completed = await asyncio.to_thread(
+            subprocess.run,
+            [
+                cli_path,
+                "-p",
+                prompt,
+                "--output-format",
+                "json",
+                "--model",
+                CLAUDE_MODEL,
+                "--max-turns",
+                "1",
+                "--permission-mode",
+                "dontAsk",
             ],
-            messages=[
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": f"Policy:\n{POLICY_CORPUS}",
-                            "cache_control": {"type": "ephemeral"},
-                        },
-                        {"type": "text", "text": prompt},
-                    ],
-                }
-            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=180,
+            check=False,
         )
-        elapsed = int((time.perf_counter() - t) * 1000)
-        usage = response.usage
-        ti = usage.input_tokens
-        to = usage.output_tokens
-        cw = getattr(usage, "cache_creation_input_tokens", 0) or 0
-        cr = getattr(usage, "cache_read_input_tokens", 0) or 0
-        cost = round(
-            ti * _CLAUDE_IN_RATE + to * _CLAUDE_OUT_RATE
-            + cw * _CLAUDE_CACHE_WRITE_RATE + cr * _CLAUDE_CACHE_READ_RATE,
-            7,
-        )
+        if completed.returncode != 0:
+            raise RuntimeError((completed.stderr or completed.stdout or str(completed.returncode)).strip())
+
+        result = json.loads(completed.stdout)
+        if result.get("is_error"):
+            raise RuntimeError(result.get("result") or "Claude Code returned an error result")
+
+        usage = result.get("usage") or result.get("modelUsage") or {}
+        ti, to = _claude_usage_counts(usage)
+        elapsed = result.get("duration_ms") or int((time.perf_counter() - t) * 1000)
         metrics = {
             "time_ms": elapsed,
-            "tokens_in": ti + cw + cr,
+            "tokens_in": ti,
             "tokens_out": to,
-            "usd": cost,
         }
-        text = response.content[0].text if response.content else ""
-        return text.strip(), metrics
+        if result.get("total_cost_usd") is not None:
+            metrics["usd"] = round(result["total_cost_usd"], 7)
+        return (result.get("result") or "").strip(), metrics
 
-    async def stage(name: str, prompt: str, max_tokens: int = 200) -> str:
-        text, metrics = await claude_call(prompt, max_tokens)
+    async def stage(name: str, prompt: str) -> str:
+        text, metrics = await claude_call(prompt)
         _m[name] = metrics
         outputs[name] = text
-        return text
+        return outputs[name]
 
     intake_out = await stage(
         "intake",
-        f"Question: {question}\n\n"
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
         "Identify the relevant clauses and assign compliance, security, legal, and finance specialist review tasks.",
-        max_tokens=150,
     )
 
     async def specialist_review(role: str, instructions: str) -> tuple[str, str, dict]:
         text, metrics = await claude_call(
-            f"{instructions}\n\nQuestion: {question}\n\n"
+            f"{instructions}\n\nQuestion: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
             f"Intake context: {intake_out[:600]}\n\n"
-            "Return one compact specialist finding with clause ids and a confidence note.",
-            max_tokens=150,
+            "Return one compact specialist finding with clause ids and a confidence note."
         )
         return role, text, metrics
 
@@ -382,36 +427,40 @@ async def run_claude_agent_sdk(question: str) -> dict:
             for role, instructions in SPECIALIST_ROLES.items()
         ]
     )
-    review_out = "\n\n".join(f"{role}: {text}" for role, text, _ in specialist_results)
-    review_metrics = [m for _, _, m in specialist_results]
+    review_out = "\n\n".join(f"{role}: {text}" for role, text, _metrics in specialist_results)
+    review_metrics = [metrics for _role, _text, metrics in specialist_results]
     _m["review"] = {
         "time_ms": int((time.perf_counter() - t_review) * 1000),
-        "tokens_in": sum(m.get("tokens_in", 0) for m in review_metrics),
-        "tokens_out": sum(m.get("tokens_out", 0) for m in review_metrics),
-        "usd": round(sum(m.get("usd", 0) for m in review_metrics), 7),
+        "tokens_in": sum(metric.get("tokens_in", 0) for metric in review_metrics),
+        "tokens_out": sum(metric.get("tokens_out", 0) for metric in review_metrics),
     }
+    if all("usd" in metric for metric in review_metrics):
+        _m["review"]["usd"] = round(sum(metric["usd"] for metric in review_metrics), 7)
     outputs["review"] = review_out
 
-    challenge_out = await stage(
-        "challenge",
-        f"Question: {question}\n\nSpecialist findings:\n{review_out[:1200]}\n\n"
-        "Reviewer: challenge unsupported claims, missing qualifiers, or missing clause citations.",
-        max_tokens=200,
+    # Reviewer and preliminary synthesis run in parallel — both depend only on
+    # specialist outputs, so neither needs to wait for the other.
+    (challenge_out, challenge_m), (synthesis_out, synthesis_m) = await asyncio.gather(
+        claude_call(
+            f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+            f"Specialist findings:\n{review_out[:1200]}\n\n"
+            "Reviewer: challenge unsupported claims, missing qualifiers, or missing clause citations.",
+        ),
+        claude_call(
+            f"Question: {question}\n\nFindings:\n{review_out[:900]}\n\n"
+            "Principal: draft a concise answer that preserves caveats and cites clauses.",
+        ),
     )
-
-    synthesis_out = await stage(
-        "synthesis",
-        f"Question: {question}\n\nFindings:\n{review_out[:900]}\n\n"
-        f"Reviewer notes:\n{challenge_out[:600]}\n\n"
-        "Principal: draft a concise answer that preserves caveats and cites clauses.",
-        max_tokens=250,
-    )
+    _m["challenge"] = challenge_m
+    outputs["challenge"] = challenge_out
+    _m["synthesis"] = synthesis_m
+    outputs["synthesis"] = synthesis_out
 
     await stage(
         "verdict",
         f"Question: {question}\n\nDraft answer:\n{synthesis_out[:900]}\n\n"
-        "Return the final answer with cited policy clauses and confidence.",
-        max_tokens=200,
+        f"Reviewer challenges:\n{challenge_out[:600]}\n\n"
+        "Return the final answer addressing reviewer concerns, with cited policy clauses and confidence.",
     )
 
     return _m
