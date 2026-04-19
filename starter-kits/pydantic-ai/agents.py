@@ -1,9 +1,11 @@
 """
 PydanticAI — Multi-Agent Policy Checker
-Five-stage pipeline: intake → specialists (concurrent) → reviewer → synthesis → verdict
+Four-stage pipeline: intake → specialists (concurrent) → reviewer+synthesis (parallel) → verdict
 
 Each stage has a dedicated Agent with a typed Pydantic result_type.
-Specialists run concurrently via asyncio.gather.
+Specialists run concurrently via asyncio.gather (stage 2).
+Reviewer and preliminary synthesis also run concurrently via asyncio.gather (stage 3),
+removing one sequential round-trip vs the original five-stage chain.
 """
 
 import os
@@ -47,7 +49,7 @@ class ReviewResult(BaseModel):
 
 
 class SynthesisResult(BaseModel):
-    narrative: str = Field(description="150–250 word balanced policy recommendation")
+    narrative: str = Field(description="150–250 word preliminary policy recommendation")
     key_tensions: list[str] = Field(description="Key tensions identified")
     overall_lean: Literal["ALLOW", "DENY", "CONDITIONAL"] = Field(
         description="Overall lean before final verdict"
@@ -58,11 +60,11 @@ class VerdictResult(BaseModel):
     verdict: Literal["COMPLIANT", "NON-COMPLIANT", "CONDITIONAL"] = Field(
         description="Final verdict"
     )
-    rationale: str = Field(description="One-sentence rationale (max 40 words)")
+    rationale: str = Field(description="One-sentence rationale addressing reviewer concerns (max 40 words)")
 
 
 # ---------------------------------------------------------------------------
-# Agents
+# Agents — defined once at module level
 # ---------------------------------------------------------------------------
 
 intake_agent: Agent[None, IntakeResult] = Agent(
@@ -130,9 +132,10 @@ synthesis_agent: Agent[None, SynthesisResult] = Agent(
     MODEL,
     result_type=SynthesisResult,
     system_prompt=(
-        "You are a senior policy analyst. Synthesise the specialist assessments "
-        "and the reviewer's challenge into a coherent policy recommendation. "
-        "Address key tensions and acknowledge uncertainty where appropriate."
+        "You are a senior policy analyst. Produce a clear preliminary policy "
+        "recommendation based on specialist assessments. Address key tensions and "
+        "acknowledge uncertainty where appropriate. This draft will be refined by "
+        "the verdict agent using reviewer challenges."
     ),
 )
 
@@ -140,9 +143,9 @@ verdict_agent: Agent[None, VerdictResult] = Agent(
     MODEL,
     result_type=VerdictResult,
     system_prompt=(
-        "You are the final decision agent. Based on the synthesis provided, "
-        "issue a final verdict of COMPLIANT, NON-COMPLIANT, or CONDITIONAL "
-        "with a one-sentence rationale."
+        "You are the final decision agent. You will receive a preliminary synthesis "
+        "and reviewer challenges. Issue a final verdict of COMPLIANT, NON-COMPLIANT, "
+        "or CONDITIONAL with a one-sentence rationale that addresses reviewer concerns."
     ),
 )
 
@@ -202,38 +205,40 @@ async def _run_pipeline_async(question: str) -> dict:
         for domain, sr in specialist_objects.items()
     )
 
-    # Stage 3: Reviewer
-    reviewer_run = await reviewer_agent.run(
-        f"Policy question: {question}\n\n"
-        f"Specialist assessments:\n{specialists_text}\n\n"
-        "Provide your critical challenge."
+    # Stage 3: Reviewer and preliminary synthesis run in parallel.
+    # Both depend only on specialist outputs, so neither needs to wait for the other.
+    reviewer_run, synthesis_run = await asyncio.gather(
+        reviewer_agent.run(
+            f"Policy question: {question}\n\n"
+            f"Specialist assessments:\n{specialists_text}\n\n"
+            "Provide your critical challenge."
+        ),
+        synthesis_agent.run(
+            f"Policy question: {question}\n\n"
+            f"Intake: {intake_text}\n\n"
+            f"Specialist assessments:\n{specialists_text}\n\n"
+            "Draft your preliminary recommendation."
+        ),
     )
     review: ReviewResult = reviewer_run.data
-    challenge_text = _format_review(review)
-
-    # Stage 4: Synthesis
-    synthesis_run = await synthesis_agent.run(
-        f"Policy question: {question}\n\n"
-        f"Intake: {intake_text}\n\n"
-        f"Specialist assessments:\n{specialists_text}\n\n"
-        f"Reviewer challenge:\n{challenge_text}"
-    )
     synthesis: SynthesisResult = synthesis_run.data
+
+    challenge_text = _format_review(review)
     synthesis_text = (
         f"{synthesis.narrative}\n\n"
         f"Key tensions: {', '.join(synthesis.key_tensions)}\n"
         f"Overall lean: {synthesis.overall_lean}"
     )
 
-    # Stage 5: Verdict
+    # Stage 4: Verdict reconciles the synthesis draft with reviewer challenges.
     verdict_run = await verdict_agent.run(
         f"Policy question: {question}\n\n"
-        f"Synthesis:\n{synthesis_text}"
+        f"Preliminary synthesis:\n{synthesis_text}\n\n"
+        f"Reviewer challenges:\n{challenge_text}"
     )
     verdict: VerdictResult = verdict_run.data
     verdict_text = f"{verdict.verdict} — {verdict.rationale}"
 
-    # Build display-friendly specialist results
     specialist_display = {
         domain: _format_specialist(sr)
         for domain, sr in specialist_objects.items()
@@ -246,7 +251,6 @@ async def _run_pipeline_async(question: str) -> dict:
         "reviewer": challenge_text,
         "synthesis": synthesis_text,
         "verdict": verdict_text,
-        # Typed objects for programmatic use
         "_typed": {
             "intake": intake,
             "specialists": specialist_objects,

@@ -1,8 +1,12 @@
 """
 Claude Agent SDK policy checker.
 
-Runs a five-stage policy review with Claude Agent SDK calls:
-intake -> parallel specialists -> reviewer -> synthesis -> verdict.
+Runs a four-stage policy review with Claude Agent SDK calls:
+intake -> parallel specialists -> parallel(reviewer, synthesis_draft) -> verdict.
+
+The reviewer and preliminary synthesis run in parallel — both depend only on
+specialist outputs — removing one sequential subprocess round-trip vs the
+original five-stage version.
 """
 
 import asyncio
@@ -36,6 +40,18 @@ access, correct, delete or erase in some cases, object, withdraw consent,
 receive portable data, and use state-specific appeal pathways.
 """
 
+# Cached at module level — options are identical for every call in the pipeline.
+_OPTIONS = ClaudeAgentOptions(
+    allowed_tools=[],
+    permission_mode="dontAsk",
+    max_turns=1,
+    model=MODEL,
+    system_prompt=(
+        "You are the principal orchestration agent for a policy compliance "
+        "analysis. Keep answers concise, grounded, and citation-led."
+    ),
+)
+
 
 def _message_text(message: object) -> str:
     if isinstance(message, AssistantMessage):
@@ -48,22 +64,9 @@ def _message_text(message: object) -> str:
     return ""
 
 
-def _options() -> ClaudeAgentOptions:
-    return ClaudeAgentOptions(
-        allowed_tools=[],
-        permission_mode="dontAsk",
-        max_turns=1,
-        model=MODEL,
-        system_prompt=(
-            "You are the principal orchestration agent for a policy compliance "
-            "analysis. Keep answers concise, grounded, and citation-led."
-        ),
-    )
-
-
 async def _ask(prompt: str) -> str:
     parts: list[str] = []
-    async for message in query(prompt=prompt, options=_options()):
+    async for message in query(prompt=prompt, options=_OPTIONS):
         text = _message_text(message)
         if text:
             parts.append(text)
@@ -72,11 +75,14 @@ async def _ask(prompt: str) -> str:
 
 async def _run_pipeline_async(question: str) -> dict:
     outputs: dict[str, str] = {}
+
+    # Stage 1: intake
     outputs["intake"] = await _ask(
         f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
         "Identify relevant clauses and assign specialist review tasks.",
     )
 
+    # Stage 2: four specialists in parallel
     specialist_roles = {
         "compliance": "Review regulatory and policy obligations.",
         "security": "Review data-protection controls and access safeguards.",
@@ -96,18 +102,25 @@ async def _run_pipeline_async(question: str) -> dict:
     outputs["specialists"] = "\n\n".join(
         f"{role}: {text}" for role, text in zip(specialist_roles, specialist_outputs)
     )
-    outputs["reviewer"] = await _ask(
-        f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
-        "Reviewer: challenge unsupported claims and missing caveats.",
+
+    # Stage 3: reviewer and preliminary synthesis run in parallel.
+    # Both depend only on specialist outputs, so neither needs to wait for the other.
+    outputs["reviewer"], outputs["synthesis"] = await asyncio.gather(
+        _ask(
+            f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+            "Reviewer: challenge unsupported claims and missing caveats.",
+        ),
+        _ask(
+            f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+            "Draft the grounded answer citing policy clauses.",
+        ),
     )
-    outputs["synthesis"] = await _ask(
-        f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
-        f"Reviewer notes:\n{outputs['reviewer']}\n\n"
-        "Draft the grounded answer.",
-    )
+
+    # Stage 4: verdict combines the draft and reviewer challenges.
     outputs["verdict"] = await _ask(
         f"Question: {question}\n\nDraft:\n{outputs['synthesis']}\n\n"
-        "Return the final answer with cited clause ids and confidence.",
+        f"Reviewer challenges:\n{outputs['reviewer']}\n\n"
+        "Return the final answer addressing reviewer concerns, with cited clause ids and confidence.",
     )
     return {"question": question, **outputs}
 
