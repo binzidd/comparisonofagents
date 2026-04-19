@@ -903,6 +903,10 @@ function formatMs(ms) {
   return `${ms} ms`;
 }
 
+function formatTokens(tokens) {
+  return Number(tokens).toLocaleString("en-US");
+}
+
 let currentStage = 0;
 let compareIds = ["langgraph", "openai-agents"];
 let selectedQuestionId = "retention";
@@ -991,7 +995,11 @@ function getTraceStage(frameworkId, stageId) {
 }
 
 function getTraceTotals(frameworkId) {
-  const frameworkStages = traceStore?.questions?.[selectedQuestionId]?.frameworks?.[frameworkId]?.stages;
+  return getTraceTotalsForQuestion(frameworkId, selectedQuestionId);
+}
+
+function getTraceTotalsForQuestion(frameworkId, questionId) {
+  const frameworkStages = traceStore?.questions?.[questionId]?.frameworks?.[frameworkId]?.stages;
   if (!frameworkStages) {
     return null;
   }
@@ -1100,8 +1108,59 @@ function renderSummary() {
 
   scenarioHeadline.textContent = "Public policy checker across frameworks";
   scenarioSupport.textContent = `Click through one stage at a time to compare orchestration, eval, and risk handling for the same question: ${question.label}`;
-  frameworkSummary.innerHTML = "";
-  appStatus.textContent = "";
+  const questionLeaders = demoFrameworks
+    .map((framework) => ({
+      framework,
+      totals: getTraceTotalsForQuestion(framework.id, selectedQuestionId)
+    }))
+    .filter((item) => item.totals);
+
+  if (questionLeaders.length > 0) {
+    const fastest = [...questionLeaders].sort((a, b) => a.totals.timeMs - b.totals.timeMs)[0];
+    const leanest = [...questionLeaders].sort((a, b) => a.totals.tokens - b.totals.tokens)[0];
+    const cheapest = [...questionLeaders].sort((a, b) => a.totals.cost - b.totals.cost)[0];
+
+    frameworkSummary.innerHTML = [
+      {
+        label: "Fastest Total Run",
+        headline: `${fastest.framework.name} · ${formatMs(fastest.totals.timeMs)}`,
+        detail: `${formatTokens(fastest.totals.tokens)} tok · $${fastest.totals.cost.toFixed(5)}`
+      },
+      {
+        label: "Leanest Token Run",
+        headline: `${leanest.framework.name} · ${formatTokens(leanest.totals.tokens)} tok`,
+        detail: `${formatMs(leanest.totals.timeMs)} · $${leanest.totals.cost.toFixed(5)}`
+      },
+      {
+        label: "Lowest Cost Run",
+        headline: `${cheapest.framework.name} · $${cheapest.totals.cost.toFixed(5)}`,
+        detail: `${formatMs(cheapest.totals.timeMs)} · ${formatTokens(cheapest.totals.tokens)} tok`
+      }
+    ]
+      .map(
+        (item) => `
+          <article class="summary-pill">
+            <span>${item.label}</span>
+            <strong>${item.headline}</strong>
+            <small>${item.detail}</small>
+          </article>
+        `
+      )
+      .join("");
+
+    const frameworkCount = traceStore?.real_frameworks?.length || questionLeaders.length;
+    const stageCaptureCount = questionLeaders.length * stages.length;
+    appStatus.textContent = `${frameworkCount} frameworks rerun for this lab. ${stageCaptureCount} real stage captures back the current question view, and every displayed row is from a real SDK trace.`;
+  } else {
+    frameworkSummary.innerHTML = `
+      <article class="summary-pill">
+        <span>Trace Status</span>
+        <strong>Trace data unavailable</strong>
+        <small>Run the harnesses to repopulate timings, tokens, and cost.</small>
+      </article>
+    `;
+    appStatus.textContent = "Framework Lab is waiting for a fresh trace store.";
+  }
   skeletonCaption.textContent = "Compare the selected frameworks by state carrier, reviewer stop signal, and emitted verdict artifact.";
 }
 

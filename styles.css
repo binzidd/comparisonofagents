@@ -2118,28 +2118,55 @@ select {
 }
 
 .lab-status-row {
-  display: none;
+  display: grid;
+  gap: 12px;
 }
 
 .summary-strip {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
 .summary-pill {
-  display: flex;
-  align-items: center;
+  display: grid;
+  gap: 4px;
   min-height: 52px;
   color: var(--text);
   font-size: 0.88rem;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-card);
 }
 
-.summary-pill + .summary-pill {
-  border-left: 1px solid var(--line);
-  padding-left: 20px;
+.summary-pill span {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.summary-pill strong {
+  font-size: 0.96rem;
+  line-height: 1.35;
+}
+
+.summary-pill small {
+  font-size: 0.8rem;
+  color: var(--muted);
 }
 
 .app-status {
-  display: none;
+  display: block;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg-card);
 }
 
 .skeleton-card,
