@@ -11,19 +11,26 @@ original five-stage version.
 
 import asyncio
 import os
+import shutil
+from pathlib import Path
 
 from claude_agent_sdk import (
     AssistantMessage,
     ClaudeAgentOptions,
     ResultMessage,
     TextBlock,
+    ToolAnnotations,
+    create_sdk_mcp_server,
     query,
+    tool,
 )
 from dotenv import load_dotenv
 
 load_dotenv()
 
 MODEL = os.getenv("CLAUDE_AGENT_MODEL", "sonnet")
+HERE = Path(__file__).resolve().parent
+USE_READ_ONLY_HINT = os.getenv("CLAUDE_AGENT_READ_ONLY_HINT", "").lower() in {"1", "true", "yes", "on"}
 
 POLICY_CORPUS = """\
 RETENTION CLAUSE: GitHub retains personal information as long as necessary for
@@ -40,17 +47,104 @@ access, correct, delete or erase in some cases, object, withdraw consent,
 receive portable data, and use state-specific appeal pathways.
 """
 
-# Cached at module level — options are identical for every call in the pipeline.
-_OPTIONS = ClaudeAgentOptions(
+
+@tool(
+    "get_policy_corpus",
+    "Read the shared policy corpus for this experiment.",
+    {},
+    annotations=ToolAnnotations(readOnlyHint=True),
+)
+async def get_policy_corpus(_args: dict) -> dict:
+    return {
+        "content": [
+            {
+                "type": "text",
+                "text": POLICY_CORPUS,
+            }
+        ]
+    }
+
+
+_POLICY_SERVER = create_sdk_mcp_server(
+    name="policy-docs",
+    tools=[get_policy_corpus],
+)
+
+
+def _default_cli_path() -> str | None:
+    cli_path = shutil.which("claude")
+    if cli_path:
+        return cli_path
+
+    candidates = [
+        HERE / "node_modules" / ".bin" / "claude",
+        HERE.parent / "node_modules" / ".bin" / "claude",
+        HERE.parent.parent / "node_modules" / ".bin" / "claude",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return str(candidate)
+    return None
+
+
+def _default_env() -> dict[str, str]:
+    env = dict(os.environ)
+    path_parts: list[str] = []
+
+    node_path = shutil.which("node")
+    if node_path:
+        path_parts.append(str(Path(node_path).resolve().parent))
+    else:
+        fallback_node_dir = Path("/opt/homebrew/bin")
+        if fallback_node_dir.exists():
+            path_parts.append(str(fallback_node_dir))
+
+    cli_path = _default_cli_path()
+    if cli_path:
+        path_parts.append(str(Path(cli_path).resolve().parent))
+
+    current_path = env.get("PATH", "")
+    merged_parts = [part for part in path_parts if part]
+    if current_path:
+        merged_parts.append(current_path)
+    env["PATH"] = ":".join(dict.fromkeys(merged_parts))
+    return env
+
+_BASE_OPTIONS = ClaudeAgentOptions(
     allowed_tools=[],
     permission_mode="dontAsk",
     max_turns=1,
     model=MODEL,
+    cli_path=_default_cli_path(),
+    env=_default_env(),
     system_prompt=(
         "You are the principal orchestration agent for a policy compliance "
         "analysis. Keep answers concise, grounded, and citation-led."
     ),
 )
+
+_READ_ONLY_TOOL_OPTIONS = ClaudeAgentOptions(
+    allowed_tools=["get_policy_corpus"],
+    mcp_servers={"policy-docs": _POLICY_SERVER},
+    permission_mode="dontAsk",
+    max_turns=2,
+    model=MODEL,
+    cli_path=_default_cli_path(),
+    env=_default_env(),
+    system_prompt=(
+        "You are the principal orchestration agent for a policy compliance "
+        "analysis. Keep answers concise, grounded, and citation-led. "
+        "Use the read-only get_policy_corpus tool when you need the source text."
+    ),
+)
+
+_OPTIONS = _READ_ONLY_TOOL_OPTIONS if USE_READ_ONLY_HINT else _BASE_OPTIONS
+
+
+def _policy_context_prompt() -> str:
+    if USE_READ_ONLY_HINT:
+        return "Use get_policy_corpus to inspect the source policy."
+    return f"Policy:\n{POLICY_CORPUS}"
 
 
 def _message_text(message: object) -> str:
@@ -78,8 +172,9 @@ async def _run_pipeline_async(question: str) -> dict:
 
     # Stage 1: intake
     outputs["intake"] = await _ask(
-        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
-        "Identify relevant clauses and assign specialist review tasks.",
+        f"Question: {question}\n\n{_policy_context_prompt()}\n\n"
+        "Identify "
+        "relevant clauses and assign specialist review tasks.",
     )
 
     # Stage 2: four specialists in parallel
@@ -92,7 +187,7 @@ async def _run_pipeline_async(question: str) -> dict:
     specialist_outputs = await asyncio.gather(
         *[
             _ask(
-                f"{instructions}\n\nQuestion: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+                f"{instructions}\n\nQuestion: {question}\n\n{_policy_context_prompt()}\n\n"
                 f"Intake:\n{outputs['intake']}\n\n"
                 "Return one compact finding with clause ids and a confidence note."
             )
@@ -108,10 +203,12 @@ async def _run_pipeline_async(question: str) -> dict:
     outputs["reviewer"], outputs["synthesis"] = await asyncio.gather(
         _ask(
             f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+            f"{_policy_context_prompt()}\n\n"
             "Reviewer: challenge unsupported claims and missing caveats.",
         ),
         _ask(
             f"Question: {question}\n\nFindings:\n{outputs['specialists']}\n\n"
+            f"{_policy_context_prompt()}\n\n"
             "Draft the grounded answer citing policy clauses.",
         ),
     )

@@ -2,7 +2,7 @@
 
 A multi-stage policy review pipeline built with **Claude Agent SDK**.
 
-Five stages run through live Claude Agent SDK calls: **Intake -> Specialists -> Reviewer -> Synthesis -> Verdict**. The specialist reviews run concurrently with `asyncio.gather`; reviewer, synthesis, and verdict stay sequential because they depend on the specialist outputs.
+Five stages run through live Claude Agent SDK calls: **Intake -> Specialists -> Reviewer -> Synthesis -> Verdict**. The specialist reviews run concurrently with `asyncio.gather`; reviewer and preliminary synthesis also run in parallel before the final verdict step.
 
 ## Setup
 
@@ -22,4 +22,12 @@ Optional environment settings:
 CLAUDE_AGENT_MODEL=sonnet
 ```
 
-The starter uses `allowed_tools=[]` and `permission_mode="dontAsk"` so the default policy checker stays read-only inside the SDK session.
+By default the starter keeps the simpler read-only session shape: the policy corpus is embedded in the prompt, `allowed_tools=[]`, and `permission_mode="dontAsk"`.
+
+An optional experiment enables one in-process MCP tool, `get_policy_corpus`, annotated with `readOnlyHint=True`. When enabled, Claude can fetch the shared policy text through that read-only tool instead of carrying the full corpus in every prompt.
+
+```bash
+CLAUDE_AGENT_READ_ONLY_HINT=true
+```
+
+The tool-enabled path raises `max_turns` to `2` so Claude can call the tool and still answer.
