@@ -759,6 +759,196 @@ async def run_pydanticai(question: str) -> dict:
     return _m
 
 
+# ── CREWAI ────────────────────────────────────────────────────────────────────
+async def run_crewai(question: str) -> dict:
+    from crewai import Agent as CAgent, Task as CTask, Crew, LLM
+
+    _llm = LLM(
+        model="gpt-4o-mini",
+        api_key=os.getenv("OPENAI_API_KEY", ""),
+        temperature=0.2,
+    )
+    _m: dict = {}
+
+    async def crew_stage(name: str, role: str, goal: str, backstory: str,
+                         description: str) -> str:
+        agent = CAgent(role=role, goal=goal, backstory=backstory,
+                       llm=_llm, verbose=False, allow_delegation=False)
+        task = CTask(description=description,
+                     expected_output="Concise structured response.", agent=agent)
+        crew = Crew(agents=[agent], tasks=[task], verbose=False)
+        t = time.perf_counter()
+        result = await crew.kickoff_async()
+        elapsed = int((time.perf_counter() - t) * 1000)
+        usage = crew.usage_metrics or {}
+        ti = usage.get("prompt_tokens") or 0
+        to = usage.get("completion_tokens") or 0
+        _m[name] = {"time_ms": elapsed, "tokens_in": ti, "tokens_out": to}
+        return result.raw or ""
+
+    intake_out = await crew_stage(
+        "intake",
+        role="Intake Specialist", goal="Parse policy questions and flag risk domains",
+        backstory="Intake agent for a corporate policy review system.",
+        description=(
+            f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+            "Identify relevant clauses and outline what each specialist should analyse."
+        ),
+    )
+
+    # Specialists in parallel — four separate single-task crews
+    async def specialist_crew(role: str, sys_p: str) -> tuple[str, str, int, int]:
+        agent = CAgent(role=role, goal="Assess the policy question from your domain.",
+                       backstory=sys_p, llm=_llm, verbose=False, allow_delegation=False)
+        task = CTask(
+            description=(
+                f"Intake context: {intake_out[:300]}\n\nQuestion: {question}\n\n"
+                "Give your specialist assessment (2-3 sentences) citing relevant clauses."
+            ),
+            expected_output="Concise specialist assessment.", agent=agent,
+        )
+        crew = Crew(agents=[agent], tasks=[task], verbose=False)
+        result = await crew.kickoff_async()
+        usage = crew.usage_metrics or {}
+        return role, result.raw or "", usage.get("prompt_tokens") or 0, usage.get("completion_tokens") or 0
+
+    t_review = time.perf_counter()
+    spec_results = await asyncio.gather(
+        *[specialist_crew(role, sys_p) for role, sys_p in SPECIALIST_ROLES.items()]
+    )
+    review_parts = {role: text for role, text, _ti, _to in spec_results}
+    _m["review"] = {
+        "time_ms": int((time.perf_counter() - t_review) * 1000),
+        "tokens_in": sum(ti for _r, _t, ti, _to in spec_results),
+        "tokens_out": sum(to for _r, _t, _ti, to in spec_results),
+    }
+
+    # Reviewer challenge and preliminary synthesis run in parallel
+    findings_text = "\n".join(f"{k}: {v}" for k, v in review_parts.items())
+
+    challenge_out, synthesis_out = await asyncio.gather(
+        crew_stage(
+            "challenge", role="Critical Reviewer",
+            goal="Challenge specialist findings", backstory=REVIEWER_SYS,
+            description=(
+                f"Question: {question}\n\nFindings:\n{findings_text}\n\n"
+                "List unsupported claims or missing qualifiers."
+            ),
+        ),
+        crew_stage(
+            "synthesis", role="Senior Policy Analyst",
+            goal="Synthesise findings into a preliminary answer", backstory=PRINCIPAL_SYS,
+            description=(
+                f"Question: {question}\n\nFindings: {findings_text[:300]}\n\n"
+                "Draft a preliminary answer citing policy clauses."
+            ),
+        ),
+    )
+
+    await crew_stage(
+        "verdict", role="Final Decision Agent",
+        goal="Issue the final policy verdict", backstory=PRINCIPAL_SYS,
+        description=(
+            f"Question: {question}\n\n"
+            f"Preliminary answer: {synthesis_out[:400]}\n"
+            f"Reviewer notes: {challenge_out[:200]}\n\n"
+            "Produce the final answer addressing reviewer concerns. Cite policy clauses."
+        ),
+    )
+    return _m
+
+
+# ── SEMANTIC KERNEL ───────────────────────────────────────────────────────────
+async def _ask_sk(agent, prompt: str) -> str:
+    response = await agent.get_response(messages=prompt)
+    return str(response.message)
+
+
+async def run_semantic_kernel(question: str) -> dict:
+    import sys as _sys
+    import types as _types
+    if "pybars" not in _sys.modules:
+        _pb = _types.ModuleType("pybars")
+        _pb.Compiler = type("Compiler", (), {})
+        _pb.PybarsError = Exception
+        _sys.modules["pybars"] = _pb
+
+    from semantic_kernel.agents import ChatCompletionAgent
+    from semantic_kernel.connectors.ai.open_ai import OpenAIChatCompletion
+
+    api_key = os.getenv("OPENAI_API_KEY", "")
+    _m: dict = {}
+
+    def _make_sk_agent(name: str, instructions: str) -> ChatCompletionAgent:
+        return ChatCompletionAgent(
+            service=OpenAIChatCompletion(ai_model_id=MODEL, api_key=api_key),
+            name=name, instructions=instructions,
+        )
+
+    async def sk_stage(name: str, agent, prompt: str) -> str:
+        t = time.perf_counter()
+        text = await _ask_sk(agent, prompt)
+        # SK ChatCompletionAgent.get_response() doesn't surface token counts directly;
+        # the underlying OpenAI usage is tracked by the service but not easily retrieved
+        # per-call without a custom filter — record 0 and let the dashboard use estimates.
+        _m[name] = {"time_ms": int((time.perf_counter() - t) * 1000),
+                    "tokens_in": 0, "tokens_out": 0}
+        return text
+
+    intake_agent = _make_sk_agent("IntakeAgent", PRINCIPAL_SYS)
+    intake_out = await sk_stage(
+        "intake", intake_agent,
+        f"Question: {question}\n\nPolicy:\n{POLICY_CORPUS}\n\n"
+        "Identify the relevant clauses and outline specialist tasks.",
+    )
+
+    # Specialists in parallel
+    async def sk_specialist(role: str, sys_p: str) -> tuple[str, str]:
+        agent = _make_sk_agent(role, sys_p)
+        text = await _ask_sk(
+            agent,
+            f"Intake context: {intake_out[:300]}\n\nQuestion: {question}\n\n"
+            "Give your specialist assessment (2-3 sentences) with relevant clause ids.",
+        )
+        return role, text
+
+    t_review = time.perf_counter()
+    spec_pairs = await asyncio.gather(
+        *[sk_specialist(role, sys_p) for role, sys_p in SPECIALIST_ROLES.items()]
+    )
+    review_parts = {role: text for role, text in spec_pairs}
+    _m["review"] = {"time_ms": int((time.perf_counter() - t_review) * 1000),
+                    "tokens_in": 0, "tokens_out": 0}
+
+    # Reviewer challenge and preliminary synthesis run in parallel
+    findings_text = "\n".join(f"{k}: {v}" for k, v in review_parts.items())
+    reviewer_agent = _make_sk_agent("ReviewerAgent", REVIEWER_SYS)
+    synthesis_agent = _make_sk_agent("SynthesisAgent", PRINCIPAL_SYS)
+
+    t_cs = time.perf_counter()
+    challenge_out, synthesis_out = await asyncio.gather(
+        _ask_sk(reviewer_agent,
+                f"Question: {question}\n\nFindings:\n{findings_text}\n\n"
+                "Challenge unsupported claims or missing qualifiers."),
+        _ask_sk(synthesis_agent,
+                f"Question: {question}\n\nFindings: {findings_text[:300]}\n\n"
+                "Draft a preliminary answer citing policy clauses."),
+    )
+    elapsed_cs = int((time.perf_counter() - t_cs) * 1000)
+    _m["challenge"] = {"time_ms": elapsed_cs, "tokens_in": 0, "tokens_out": 0}
+    _m["synthesis"] = {"time_ms": elapsed_cs, "tokens_in": 0, "tokens_out": 0}
+
+    verdict_agent = _make_sk_agent("VerdictAgent", PRINCIPAL_SYS)
+    await sk_stage(
+        "verdict", verdict_agent,
+        f"Question: {question}\n\n"
+        f"Preliminary answer: {synthesis_out[:400]}\n"
+        f"Reviewer notes: {challenge_out[:200]}\n\n"
+        "Produce the final answer addressing reviewer concerns. Cite policy clauses.",
+    )
+    return _m
+
+
 # ── ORCHESTRATION ─────────────────────────────────────────────────────────────
 HARNESSES: dict[str, object] = {
     "langgraph": run_langgraph,
@@ -767,6 +957,8 @@ HARNESSES: dict[str, object] = {
     "ag2": run_ag2,
     "llamaindex": run_llamaindex,
     "pydanticai": run_pydanticai,
+    "crewai": run_crewai,
+    "semantic-kernel": run_semantic_kernel,
 }
 
 STAGES = ["intake", "review", "challenge", "synthesis", "verdict"]

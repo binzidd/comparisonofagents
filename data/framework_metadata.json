@@ -166,7 +166,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["moderate", "product"],
-      "performance_technique": "Manager-task pattern is inherently sequential; async kickoff available but not applied in this benchmark",
+      "performance_technique": "Parallel specialist fan-out + parallel reviewer-synthesis via asyncio.gather on Crew.kickoff_async()",
       "criteria_scores": {
         "Developer Experience": 4,
         "Agent Capabilities": 3,
@@ -204,7 +204,7 @@
       "runtime": "python",
       "builder": "code-first",
       "best_for": ["enterprise", "advanced", "reliability"],
-      "performance_technique": "Plugin-based process steps support async; parallel step dispatch available via ProcessBuilder but not applied in this benchmark",
+      "performance_technique": "Module-level ChatCompletionAgent instances + parallel specialist fan-out + parallel reviewer-synthesis via asyncio.gather on async get_response()",
       "criteria_scores": {
         "Developer Experience": 3,
         "Agent Capabilities": 4,
