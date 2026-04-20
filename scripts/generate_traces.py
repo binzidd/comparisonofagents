@@ -194,9 +194,9 @@ FRAMEWORKS = {
             "verdict": ["principal-decision"],
         },
         "metrics": {
-            "time_ms": {"intake": 11000, "review": 12000, "challenge": 9000, "synthesis": 3600, "verdict": 4600},
-            "tokens_in": {"intake": 400, "review": 1170, "challenge": 610, "synthesis": 540, "verdict": 285},
-            "tokens_out": {"intake": 55, "review": 210, "challenge": 132, "synthesis": 182, "verdict": 150},
+            "time_ms": {"intake": 5800, "review": 6400, "challenge": 7800, "synthesis": 4200, "verdict": 5100},
+            "tokens_in": {"intake": 430, "review": 1420, "challenge": 680, "synthesis": 490, "verdict": 315},
+            "tokens_out": {"intake": 195, "review": 420, "challenge": 295, "synthesis": 210, "verdict": 180},
         },
         "confidence": 0.79,
         "cost_multiplier": 0.0000030,
