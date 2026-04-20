@@ -3,7 +3,7 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const htmlPath = path.join(root, "index.html");
-const skillsHtmlPath = path.join(root, "skills.html");
+const labHtmlPath = path.join(root, "lab.html");
 const decisionHtmlPath = path.join(root, "decision.html");
 const cssPath = path.join(root, "styles.css");
 const jsPath = path.join(root, "app.js");
@@ -12,7 +12,7 @@ const decisionJsPath = path.join(root, "decision.js");
 const tracePath = path.join(root, "traces", "framework_traces.json");
 const metadataPath = path.join(root, "data", "framework_metadata.json");
 
-const requiredFiles = [htmlPath, skillsHtmlPath, decisionHtmlPath, cssPath, jsPath, skillsJsPath, decisionJsPath, tracePath, metadataPath];
+const requiredFiles = [htmlPath, labHtmlPath, decisionHtmlPath, cssPath, jsPath, skillsJsPath, decisionJsPath, tracePath, metadataPath];
 requiredFiles.forEach((filePath) => {
   if (!fs.existsSync(filePath)) {
     throw new Error(`Missing required file: ${path.basename(filePath)}`);
@@ -20,11 +20,12 @@ requiredFiles.forEach((filePath) => {
 });
 
 const html = fs.readFileSync(htmlPath, "utf8");
-const skillsHtml = fs.readFileSync(skillsHtmlPath, "utf8");
+const labHtml = fs.readFileSync(labHtmlPath, "utf8");
 const decisionHtml = fs.readFileSync(decisionHtmlPath, "utf8");
 const traceStore = JSON.parse(fs.readFileSync(tracePath, "utf8"));
 
-const requiredIds = [
+// lab.html hosts the benchmark explorer and drives app.js
+const requiredLabIds = [
   "framework-catalog-cards",
   "stage-chip-row",
   "prev-stage-btn",
@@ -39,39 +40,40 @@ const requiredIds = [
   "score-rationale"
 ];
 
-const missingIds = requiredIds.filter((id) => !html.includes(`id="${id}"`));
-if (missingIds.length > 0) {
-  throw new Error(`Missing required HTML ids: ${missingIds.join(", ")}`);
+const missingLabIds = requiredLabIds.filter((id) => !labHtml.includes(`id="${id}"`));
+if (missingLabIds.length > 0) {
+  throw new Error(`Missing required lab HTML ids: ${missingLabIds.join(", ")}`);
 }
 
-if (!html.includes('<script src="./app.js" defer></script>')) {
-  throw new Error("Expected deferred app.js script tag was not found.");
+if (!labHtml.includes('<script src="./app.js" defer></script>')) {
+  throw new Error("Expected deferred app.js script tag was not found in lab.html.");
 }
 
-if (!html.includes('<link rel="stylesheet" href="./styles.css" />')) {
-  throw new Error("Expected styles.css link tag was not found.");
+if (!labHtml.includes('<link rel="stylesheet" href="./styles.css" />')) {
+  throw new Error("Expected styles.css link tag was not found in lab.html.");
 }
 
-const requiredSkillsIds = [
-  "skills-headline",
-  "skills-support",
-  "skills-framework-row",
-  "skills-summary-grid",
-  "skills-comparison-grid",
-  "skills-stage-board",
-  "starter-pack-support",
-  "starter-pack-grid",
-  "agentcore-support",
-  "agentcore-board"
+// index.html is the decision surface and drives decision.js
+const requiredDecisionSurfaceIds = [
+  "decision-support",
+  "runtime-row",
+  "complexity-row",
+  "priority-row",
+  "decision-results",
+  "matrix-support",
+  "criteria-matrix",
+  "framework-metadata-row",
+  "decision-rationale-board",
+  "decision-tooltip"
 ];
 
-const missingSkillsIds = requiredSkillsIds.filter((id) => !skillsHtml.includes(`id="${id}"`));
-if (missingSkillsIds.length > 0) {
-  throw new Error(`Missing required skills HTML ids: ${missingSkillsIds.join(", ")}`);
+const missingDecisionSurfaceIds = requiredDecisionSurfaceIds.filter((id) => !html.includes(`id="${id}"`));
+if (missingDecisionSurfaceIds.length > 0) {
+  throw new Error(`Missing required decision surface HTML ids in index.html: ${missingDecisionSurfaceIds.join(", ")}`);
 }
 
-if (!skillsHtml.includes('<script src="./skills.js" defer></script>')) {
-  throw new Error("Expected deferred skills.js script tag was not found.");
+if (!html.includes('<script src="./decision.js" defer></script>')) {
+  throw new Error("Expected deferred decision.js script tag was not found in index.html.");
 }
 
 const requiredDecisionIds = [

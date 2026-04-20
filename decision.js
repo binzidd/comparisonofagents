@@ -247,7 +247,7 @@ function renderRecommendations() {
             data-tooltip-rank="Currently ranked ${index + 1} of ${frameworks().length} for this specific decision setup."
             data-tooltip-strengths="${topCriteria(framework).map((item) => item.criterion).join(', ')}"
             data-tooltip-weaknesses="${lowCriteria(framework).map((item) => item.criterion).join(', ')}">Why this fit?</button>
-          <a class="secondary-btn compact decision-link-btn" href="./index.html?framework=${framework.id}">Open in Framework Lab</a>
+          <a class="secondary-btn compact decision-link-btn" href="./lab.html?framework=${framework.id}">Open in Benchmark Lab</a>
         </div>
       </article>
     `)

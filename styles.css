@@ -3734,3 +3734,111 @@ button.step-item:hover {
     text-wrap: unset;
   }
 }
+
+/* ── Decision Surface (index.html redesign) ───────────────────────── */
+
+.hero-copy--compact h1 {
+  font-size: clamp(1.8rem, 3.2vw, 2.6rem);
+  max-width: 30ch;
+}
+
+.constraint-bar-section {
+  padding-top: 22px;
+}
+
+.constraint-bar {
+  background: var(--toolbar-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px 26px 14px;
+  position: sticky;
+  top: 12px;
+  z-index: 10;
+}
+
+.constraint-bar-inner {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.constraint-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.constraint-bar-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--secondary);
+  font-weight: 700;
+}
+
+.constraint-scenario-note {
+  font-size: 0.78rem;
+  color: var(--muted);
+  opacity: 0.7;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  line-height: 1.5;
+}
+
+.decision-surface-grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 28px;
+  align-items: start;
+}
+
+.decision-surface-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.decision-surface-left .decision-results {
+  grid-template-columns: 1fr;
+}
+
+.decision-surface-right {
+  min-width: 0;
+}
+
+.surface-panel-head {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.surface-panel-head h2 {
+  font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+  max-width: none;
+  margin-top: 4px;
+  line-height: 1.2;
+}
+
+.surface-panel-sub {
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+@media (max-width: 1080px) {
+  .decision-surface-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .constraint-bar {
+    position: static;
+  }
+
+  .constraint-bar-inner {
+    gap: 20px;
+  }
+}
