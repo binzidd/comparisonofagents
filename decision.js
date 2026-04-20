@@ -126,10 +126,12 @@ async function loadTraces() {
   }
 }
 
-function getCumulativeMetrics(frameworkId) {
+function getPerQuestionMetrics(frameworkId) {
   if (!traceStore) return null;
   const questionIds = Object.keys(traceStore.questions || {});
-  return questionIds.reduce(
+  if (questionIds.length === 0) return null;
+
+  const totals = questionIds.reduce(
     (total, qId) => {
       const fwStages = traceStore.questions[qId]?.frameworks?.[frameworkId]?.stages || {};
       for (const stage of Object.values(fwStages)) {
@@ -141,8 +143,16 @@ function getCumulativeMetrics(frameworkId) {
       }
       return total;
     },
-    { timeMs: 0, tokens: 0, cost: 0 }
+    { timeMs: 0, tokens: 0, cost: 0, questions: questionIds.length }
   );
+
+  return {
+    timeMs: Math.round(totals.timeMs / totals.questions),
+    tokens: Math.round(totals.tokens / totals.questions),
+    cost: totals.cost / totals.questions,
+    totalCost: totals.cost,
+    questionCount: totals.questions
+  };
 }
 
 function frameworks() {
@@ -362,10 +372,9 @@ function renderTraceMetrics() {
   }
 
   const questionIds = Object.keys(traceStore.questions || {});
-  const numCalls = questionIds.length * 5;
   const fwList = frameworks();
   const rows = fwList
-    .map((fw) => ({ fw, metrics: getCumulativeMetrics(fw.id) }))
+    .map((fw) => ({ fw, metrics: getPerQuestionMetrics(fw.id) }))
     .filter((item) => item.metrics && item.metrics.cost > 0)
     .sort((a, b) => a.metrics.cost - b.metrics.cost);
 
@@ -374,9 +383,9 @@ function renderTraceMetrics() {
       <thead>
         <tr>
           <th>Framework</th>
-          <th title="Total wall-clock time across all ${numCalls} calls">Time</th>
-          <th title="Total tokens (in + out) across all ${numCalls} calls">Tokens</th>
-          <th title="Estimated USD cost across all ${numCalls} calls">Cost</th>
+          <th title="Wall-clock time for one question (5 stages)">Time / Q</th>
+          <th title="Total tokens (in + out) for one question (5 stages)">Tokens / Q</th>
+          <th title="Estimated USD cost for one question (5 stages)">Cost / Q</th>
         </tr>
       </thead>
       <tbody>
@@ -390,7 +399,7 @@ function renderTraceMetrics() {
         `).join("")}
       </tbody>
     </table>
-    <p class="trace-metrics-note">Cumulative across ${questionIds.length} questions × 5 stages = ${numCalls} SDK calls. Claude Agent SDK uses claude-sonnet pricing ($3/$15 per 1M tokens); all other frameworks use gpt-4o-mini ($0.15/$0.60).</p>
+    <p class="trace-metrics-note">Average per question across ${questionIds.length} runs × 5 stages. Claude Agent SDK uses Sonnet pricing ($3/$15 per 1M tokens); all others use gpt-4o-mini ($0.15/$0.60). Matches the numbers in the Benchmark Lab.</p>
   `;
 }
 
