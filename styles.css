@@ -3996,3 +3996,151 @@ button.step-item:hover {
   flex-shrink: 0;
   opacity: 0.5;
 }
+
+/* ── Framework Landscape ───────────────────────────────────────────── */
+
+.framework-landscape {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+
+.landscape-row {
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.landscape-row:last-child {
+  border-bottom: 0;
+}
+
+.landscape-row:hover {
+  background: var(--bg-card-str);
+}
+
+.landscape-row-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 20px;
+}
+
+.landscape-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--framework-color, var(--primary));
+  flex-shrink: 0;
+}
+
+.landscape-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+  width: 150px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landscape-runtime {
+  font-size: 0.68rem;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: var(--muted);
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.landscape-tagline {
+  font-size: 0.82rem;
+  color: var(--secondary);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.landscape-chevron {
+  color: var(--muted);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  transition: transform 0.18s;
+}
+
+.landscape-row.open .landscape-chevron {
+  transform: rotate(180deg);
+}
+
+.landscape-detail {
+  padding: 0 20px 14px 42px;
+  display: grid;
+  gap: 10px;
+}
+
+.landscape-detail[hidden] {
+  display: none;
+}
+
+.landscape-summary {
+  font-size: 0.82rem;
+  color: var(--secondary);
+  margin: 0;
+  line-height: 1.55;
+}
+
+.landscape-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.landscape-chip {
+  font-size: 0.73rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 9px;
+  color: var(--muted);
+  background: var(--bg-card-str);
+}
+
+.landscape-chip--up {
+  border-color: rgba(74, 158, 99, 0.3);
+  color: #4a9e63;
+  background: rgba(74, 158, 99, 0.06);
+}
+
+.landscape-chip--down {
+  border-color: rgba(198, 100, 75, 0.28);
+  color: #c6644b;
+  background: rgba(198, 100, 75, 0.06);
+}
+
+.landscape-link {
+  font-size: 0.78rem;
+  color: var(--primary);
+  text-decoration: none;
+  align-self: start;
+  display: inline;
+}
+
+.landscape-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 680px) {
+  .landscape-tagline {
+    display: none;
+  }
+
+  .landscape-name {
+    width: auto;
+    flex: 1;
+  }
+}

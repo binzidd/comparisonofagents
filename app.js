@@ -3,6 +3,7 @@ const catalogItems = [
     id: "langgraph",
     name: "LangGraph",
     kind: "framework",
+    runtime: "Python",
     color: "#1f5f5b",
     tagline: "Stateful branching and review loops",
     summary: "Explicit graph control with strong state visibility and reviewer edges.",
@@ -23,6 +24,7 @@ const catalogItems = [
     id: "openai-agents",
     name: "OpenAI Agents SDK",
     kind: "framework",
+    runtime: "Python",
     color: "#6b4bc2",
     tagline: "Parallel specialists, tools, and traces",
     summary: "Independent specialist agents can run concurrently, then converge through reviewer and verdict agents.",
@@ -43,6 +45,7 @@ const catalogItems = [
     id: "claude-agent-sdk",
     name: "Claude Agent SDK",
     kind: "framework",
+    runtime: "Python",
     color: "#5f735a",
     tagline: "Claude Code agent loop as an SDK",
     summary: "Programmable Claude Code sessions with tools, hooks, permissions, and streaming progress.",
@@ -63,6 +66,7 @@ const catalogItems = [
     id: "ag2",
     name: "AG2",
     kind: "framework",
+    runtime: "Python",
     color: "#cf8f2e",
     tagline: "Debate-heavy specialist teams",
     summary: "Conversation-first multi-agent coordination with direct specialist challenge.",
@@ -83,6 +87,7 @@ const catalogItems = [
     id: "crewai",
     name: "CrewAI",
     kind: "framework",
+    runtime: "Python",
     color: "#445fbb",
     tagline: "Manager and crew process",
     summary: "Role-based orchestration that reads like a managed business workflow.",
@@ -101,8 +106,9 @@ const catalogItems = [
   },
   {
     id: "semantic-kernel",
-    name: "Semantic Kernel Agent Framework",
+    name: "Semantic Kernel",
     kind: "framework",
+    runtime: "Python",
     color: "#9b4c3d",
     tagline: "Enterprise governed flow",
     summary: "Enterprise-oriented specialist workflow with platform-level controls.",
@@ -123,6 +129,7 @@ const catalogItems = [
     id: "llamaindex",
     name: "LlamaIndex Workflows",
     kind: "framework",
+    runtime: "Python",
     color: "#3f6b2a",
     tagline: "Event-driven evidence pipeline",
     summary: "Workflow and event model for structured evidence gathering and synthesis.",
@@ -143,6 +150,7 @@ const catalogItems = [
     id: "mastra",
     name: "Mastra",
     kind: "framework",
+    runtime: "TypeScript",
     color: "#0f6d90",
     tagline: "App-friendly workflows and agents",
     summary: "TypeScript-first combination of workflows, agents, and traces.",
@@ -163,6 +171,7 @@ const catalogItems = [
     id: "pydanticai",
     name: "PydanticAI",
     kind: "framework",
+    runtime: "Python",
     color: "#b34747",
     tagline: "Typed agent workflows",
     summary: "Strong when structured outputs, validation, and typed tool-driven agents matter.",
@@ -1068,38 +1077,46 @@ function renderDeeperDive(framework, stageId) {
   `;
 }
 
-function cardMarkup(item) {
-  const bestFit = item.pros?.[0] || item.summary;
-  const watchPoint = item.cons?.[0] || item.tagline;
-  const patternLabel = PATTERN_LABELS[item.pattern] || item.tagline;
+function landscapeRowMarkup(item) {
+  const patternLabel = PATTERN_LABELS[item.pattern] || "";
   return `
-    <article class="catalog-card ${item.kind}">
-      <div class="catalog-card-top">
-        <div>
-          <span class="catalog-card-kicker">Framework</span>
-          <h4>${item.name}</h4>
+    <article class="landscape-row" data-landscape-id="${item.id}" style="--framework-color:${item.color}">
+      <div class="landscape-row-main">
+        <span class="landscape-dot" aria-hidden="true"></span>
+        <span class="landscape-name">${item.name}</span>
+        <span class="landscape-runtime">${item.runtime}</span>
+        <span class="landscape-tagline">${item.tagline}</span>
+        <span class="landscape-chevron" aria-hidden="true">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </div>
+      <div class="landscape-detail" hidden>
+        <p class="landscape-summary">${item.summary}</p>
+        <div class="landscape-chips">
+          <span class="landscape-chip landscape-chip--up">↑ ${item.pros?.[0] || ""}</span>
+          <span class="landscape-chip landscape-chip--down">↓ ${item.cons?.[0] || ""}</span>
+          ${patternLabel ? `<span class="landscape-chip">${patternLabel}</span>` : ""}
         </div>
-        <span class="catalog-card-pattern">${patternLabel}</span>
+        <a class="landscape-link" href="${item.source}" target="_blank" rel="noreferrer">Official docs ↗</a>
       </div>
-      <p class="catalog-tagline">${item.tagline}</p>
-      <p>${item.summary}</p>
-      <div class="catalog-card-meta">
-        <article>
-          <span>Best fit</span>
-          <strong>${bestFit}</strong>
-        </article>
-        <article>
-          <span>Watch for</span>
-          <strong>${watchPoint}</strong>
-        </article>
-      </div>
-      <a href="${item.source}" target="_blank" rel="noreferrer">Official docs</a>
     </article>
   `;
 }
 
 function renderCatalog() {
-  frameworkCatalogCards.innerHTML = catalogItems.filter((item) => item.kind === "framework").map(cardMarkup).join("");
+  frameworkCatalogCards.innerHTML = catalogItems
+    .filter((item) => item.kind === "framework")
+    .map(landscapeRowMarkup)
+    .join("");
+
+  frameworkCatalogCards.querySelectorAll(".landscape-row").forEach((row) => {
+    row.addEventListener("click", () => {
+      const detail = row.querySelector(".landscape-detail");
+      const isOpen = !detail.hidden;
+      detail.hidden = isOpen;
+      row.classList.toggle("open", !isOpen);
+    });
+  });
 }
 
 function clauseSummary(clauseIds) {
