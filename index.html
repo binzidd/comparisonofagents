@@ -58,23 +58,24 @@
                 <div class="chip-row" id="priority-row"></div>
               </div>
             </div>
-            <p id="decision-support" class="constraint-scenario-note"></p>
           </div>
         </section>
 
-        <!-- ── Recommendations + Criteria Matrix ──────────────────── -->
-        <section class="section decision-surface-section">
-          <div class="decision-surface-grid">
+        <!-- ── Recommendations (full-width horizontal) ─────────────── -->
+        <section class="section">
+          <div class="section-heading">
+            <p class="eyebrow">Recommendation</p>
+            <h2>Top matches for your setup</h2>
+            <p id="decision-support" class="surface-panel-sub"></p>
+          </div>
+          <div class="decision-results" id="decision-results"></div>
+        </section>
 
-            <div class="decision-surface-left">
-              <div class="surface-panel-head">
-                <p class="eyebrow">Recommendation</p>
-                <h2>Top matches for your setup</h2>
-              </div>
-              <div class="decision-results" id="decision-results"></div>
-            </div>
+        <!-- ── Criteria Matrix + Trace Metrics ────────────────────── -->
+        <section class="section decision-compare-section">
+          <div class="decision-compare-grid">
 
-            <div class="decision-surface-right">
+            <div class="decision-compare-left">
               <div class="surface-panel-head">
                 <p class="eyebrow">Criteria Matrix</p>
                 <h2>All frameworks, five dimensions</h2>
@@ -83,6 +84,14 @@
               <div class="criteria-matrix-wrap">
                 <table class="criteria-matrix" id="criteria-matrix"></table>
               </div>
+            </div>
+
+            <div class="decision-compare-right">
+              <div class="surface-panel-head">
+                <p class="eyebrow">Benchmark Results</p>
+                <h2>Real trace metrics</h2>
+              </div>
+              <div class="criteria-matrix-wrap" id="trace-metrics-panel"></div>
             </div>
 
           </div>

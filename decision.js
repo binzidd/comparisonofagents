@@ -47,11 +47,20 @@ const criterionDefinitions = {
 
 const sharedScenario = "Shared scenario: answer one GitHub privacy-policy question through Intake, Review, Challenge, Synthesis, and Verdict.";
 
+const criterionAbbrev = {
+  "Developer Experience": "Dev XP",
+  "Agent Capabilities": "Capabilities",
+  "Context & Memory": "Memory",
+  "Deployment & Hosting": "Deployment",
+  "Security & Compliance": "Security"
+};
+
 let selectedRuntime = "python";
 let selectedComplexity = "moderate";
 let selectedPriority = "reliability";
 let selectedFrameworkId = "langgraph";
 let metadata = null;
+let traceStore = null;
 
 let decisionSupport;
 let runtimeRow;
@@ -60,6 +69,7 @@ let priorityRow;
 let decisionResults;
 let matrixSupport;
 let criteriaMatrix;
+let traceMetricsPanel;
 let frameworkMetadataRow;
 let decisionRationaleBoard;
 let decisionTooltip;
@@ -85,12 +95,54 @@ function initTheme() {
   }
 }
 
+function formatMs(ms) {
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
+}
+
+function formatNum(n) {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
+}
+
+function formatCost(usd) {
+  return usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(3)}`;
+}
+
 async function loadMetadata() {
   const res = await fetch("./data/framework_metadata.json", { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`Metadata load failed: ${res.status}`);
   }
   metadata = await res.json();
+}
+
+async function loadTraces() {
+  try {
+    const res = await fetch("./traces/framework_traces.json", { cache: "no-store" });
+    if (res.ok) {
+      traceStore = await res.json();
+    }
+  } catch (_err) {
+    traceStore = null;
+  }
+}
+
+function getCumulativeMetrics(frameworkId) {
+  if (!traceStore) return null;
+  const questionIds = Object.keys(traceStore.questions || {});
+  return questionIds.reduce(
+    (total, qId) => {
+      const fwStages = traceStore.questions[qId]?.frameworks?.[frameworkId]?.stages || {};
+      for (const stage of Object.values(fwStages)) {
+        const m = stage.metrics;
+        if (!m) continue;
+        total.timeMs += m.time_ms;
+        total.tokens += m.token_total_estimate;
+        total.cost += m.usd_cost_estimate;
+      }
+      return total;
+    },
+    { timeMs: 0, tokens: 0, cost: 0 }
+  );
 }
 
 function frameworks() {
@@ -195,7 +247,6 @@ function renderChipRow(root, options, selectedId, onSelect) {
 }
 
 function renderControls() {
-  decisionSupport.textContent = `${sharedScenario} This page explains which framework is the best fit before you open the full execution trace.`;
   renderChipRow(runtimeRow, runtimeOptions, selectedRuntime, (id) => {
     selectedRuntime = id;
     render();
@@ -217,6 +268,8 @@ function renderRecommendations() {
     selectedFrameworkId = top[0].id;
   }
 
+  decisionSupport.textContent = `Ranked by runtime, orchestration, and priority fit. Click any card for full rationale.`;
+
   decisionResults.innerHTML = top
     .map((framework, index) => `
       <article class="decision-result-card ${index === 0 ? "top-pick" : ""}" style="--framework-color:${framework.color}">
@@ -227,27 +280,24 @@ function renderRecommendations() {
           </div>
           <span class="capability-pattern">${framework.runtime}</span>
         </div>
-        <p>${sharedScenario} ${framework.name} is a strong fit when ${selectedPriority} matters most.</p>
+        <p>${framework.name} is a strong fit when ${selectedPriority} matters most.</p>
         <div class="decision-result-pills">
-          <span class="summary-pill">Match score: ${scoreFramework(framework)}</span>
-          <span class="summary-pill">Best for: ${framework.best_for.join(", ")}</span>
+          <span class="summary-pill">Score: ${scoreFramework(framework)}/7</span>
+          ${framework.best_for.slice(0, 2).map((tag) => `<span class="summary-pill">${tag}</span>`).join("")}
         </div>
         <div class="decision-result-pills">
-          ${topCriteria(framework).map((item) => `<span class="summary-pill">Strength: ${item.criterion}</span>`).join("")}
-          ${lowCriteria(framework).map((item) => `<span class="summary-pill">Watch: ${item.criterion}</span>`).join("")}
+          ${topCriteria(framework).slice(0, 1).map((item) => `<span class="summary-pill">↑ ${criterionAbbrev[item.criterion] || item.criterion}</span>`).join("")}
+          ${lowCriteria(framework).slice(0, 1).map((item) => `<span class="summary-pill">↓ ${criterionAbbrev[item.criterion] || item.criterion}</span>`).join("")}
         </div>
         <div class="decision-result-actions">
           <button
             class="secondary-btn compact"
             type="button"
             data-framework-pick="${framework.id}"
-            data-tooltip-title="${framework.name} · Recommendation"
-            data-tooltip-def="This card combines runtime match, orchestration fit, priority fit, and one bonus criterion tied to your selected priority."
-            data-tooltip-reason="Why it scored ${scoreFramework(framework)}: ${scoreBreakdown(framework).map((item) => `${item.label} ${item.value}`).join(', ')}."
-            data-tooltip-rank="Currently ranked ${index + 1} of ${frameworks().length} for this specific decision setup."
-            data-tooltip-strengths="${topCriteria(framework).map((item) => item.criterion).join(', ')}"
-            data-tooltip-weaknesses="${lowCriteria(framework).map((item) => item.criterion).join(', ')}">Why this fit?</button>
-          <a class="secondary-btn compact decision-link-btn" href="./lab.html?framework=${framework.id}">Open in Benchmark Lab</a>
+            data-tooltip-title="${framework.name} · Score ${scoreFramework(framework)}/7"
+            data-tooltip-def="Runtime match (+2), orchestration fit (+2), priority fit (+2), bonus criterion (+1)."
+            data-tooltip-reason="${scoreBreakdown(framework).map((item) => `${item.label}: ${item.value}`).join(' · ')}">Why this fit?</button>
+          <a class="secondary-btn compact decision-link-btn" href="./lab.html?framework=${framework.id}">Open in Lab</a>
         </div>
       </article>
     `)
@@ -264,13 +314,13 @@ function renderRecommendations() {
 }
 
 function renderCriteriaMatrix() {
-  matrixSupport.textContent = `${sharedScenario} Hover any score to see why it landed there and how it compares with the rest of the framework pool.`;
+  matrixSupport.textContent = `Hover any score cell for details. Click a framework name to see its full decision rationale.`;
   const criteria = metadata.criteria;
   criteriaMatrix.innerHTML = `
     <thead>
       <tr>
         <th>Framework</th>
-        ${criteria.map((criterion) => `<th>${criterion}</th>`).join("")}
+        ${criteria.map((criterion) => `<th title="${criterionDefinitions[criterion]}">${criterionAbbrev[criterion] || criterion}</th>`).join("")}
       </tr>
     </thead>
     <tbody>
@@ -281,12 +331,9 @@ function renderCriteriaMatrix() {
             <td>
               <div
                 class="matrix-score-cell"
-                data-tooltip-title="${framework.name} · ${criterion}"
+                data-tooltip-title="${framework.name} · ${criterionAbbrev[criterion] || criterion}"
                 data-tooltip-def="${criterionDefinitions[criterion]}"
-                data-tooltip-reason="${framework.criteria_notes[criterion]}"
-                data-tooltip-rank="Ranked ${criterionRank(criterion, framework.id)} of ${frameworks().length} in the current framework pool."
-                data-tooltip-strengths="${topCriteria(framework).map((item) => item.criterion).join(', ')}"
-                data-tooltip-weaknesses="${lowCriteria(framework).map((item) => item.criterion).join(', ')}"
+                data-tooltip-reason="${framework.criteria_notes[criterion]} (Rank ${criterionRank(criterion, framework.id)}/${frameworks().length})"
                 tabindex="0">
                 <div class="noise-dot-row">${metricDots(framework.criteria_scores[criterion])}</div>
               </div>
@@ -305,6 +352,46 @@ function renderCriteriaMatrix() {
       decisionRationaleBoard.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   });
+}
+
+function renderTraceMetrics() {
+  if (!traceMetricsPanel) return;
+  if (!traceStore) {
+    traceMetricsPanel.innerHTML = `<p class="trace-metrics-note">Trace data unavailable.</p>`;
+    return;
+  }
+
+  const questionIds = Object.keys(traceStore.questions || {});
+  const numCalls = questionIds.length * 5;
+  const fwList = frameworks();
+  const rows = fwList
+    .map((fw) => ({ fw, metrics: getCumulativeMetrics(fw.id) }))
+    .filter((item) => item.metrics && item.metrics.cost > 0)
+    .sort((a, b) => a.metrics.cost - b.metrics.cost);
+
+  traceMetricsPanel.innerHTML = `
+    <table class="trace-metrics-table">
+      <thead>
+        <tr>
+          <th>Framework</th>
+          <th title="Total wall-clock time across all ${numCalls} calls">Time</th>
+          <th title="Total tokens (in + out) across all ${numCalls} calls">Tokens</th>
+          <th title="Estimated USD cost across all ${numCalls} calls">Cost</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(({ fw, metrics }) => `
+          <tr>
+            <td>${fw.name}</td>
+            <td>${formatMs(metrics.timeMs)}</td>
+            <td>${formatNum(metrics.tokens)}</td>
+            <td>${formatCost(metrics.cost)}</td>
+          </tr>
+        `).join("")}
+      </tbody>
+    </table>
+    <p class="trace-metrics-note">Cumulative across ${questionIds.length} questions × 5 stages = ${numCalls} SDK calls. Claude Agent SDK uses claude-sonnet pricing ($3/$15 per 1M tokens); all other frameworks use gpt-4o-mini ($0.15/$0.60).</p>
+  `;
 }
 
 function renderMetadataControls() {
@@ -449,10 +536,7 @@ function handleDecisionTooltipHover(e) {
   decisionTooltip.innerHTML = `
     <div class="metric-tooltip-label">${target.dataset.tooltipTitle}</div>
     <div class="metric-tooltip-def">${target.dataset.tooltipDef}</div>
-    <div class="metric-tooltip-reason">${target.dataset.tooltipReason}</div>
-    <div class="metric-tooltip-reason">${target.dataset.tooltipRank}</div>
-    <div class="metric-tooltip-reason">Strengths in pool: ${target.dataset.tooltipStrengths}</div>
-    <div class="metric-tooltip-reason">Weaknesses in pool: ${target.dataset.tooltipWeaknesses}</div>
+    ${target.dataset.tooltipReason ? `<div class="metric-tooltip-reason">${target.dataset.tooltipReason}</div>` : ""}
   `;
   decisionTooltip.removeAttribute("hidden");
 }
@@ -475,6 +559,7 @@ function render() {
   renderControls();
   renderRecommendations();
   renderCriteriaMatrix();
+  renderTraceMetrics();
   renderMetadataControls();
   renderDecisionRationale();
 }
@@ -489,6 +574,7 @@ async function initApp() {
   criteriaMatrix = document.getElementById("criteria-matrix");
   frameworkMetadataRow = document.getElementById("framework-metadata-row");
   decisionRationaleBoard = document.getElementById("decision-rationale-board");
+  traceMetricsPanel = document.getElementById("trace-metrics-panel");
   decisionTooltip = document.getElementById("decision-tooltip");
   footerLikeBtn = document.getElementById("footer-like-btn");
   footerLikeCount = document.getElementById("footer-like-count");
@@ -512,7 +598,7 @@ async function initApp() {
     throw new Error("Missing DOM nodes for decision page.");
   }
 
-  await loadMetadata();
+  await Promise.all([loadMetadata(), loadTraces()]);
   footerLikeBtn.addEventListener("click", toggleFooterLike);
   decisionResults.addEventListener("mouseover", handleDecisionTooltipHover);
   decisionResults.addEventListener("mouseout", handleDecisionTooltipOut);

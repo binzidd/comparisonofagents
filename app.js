@@ -1165,15 +1165,13 @@ function renderPolicyCase() {
 
 function renderStageChips() {
   stageChipRow.innerHTML = stages
-    .map(
-      (stage, index) => `
-        <button class="chip ${index === currentStage ? "active" : ""}" data-stage="${index}">
-          <span class="chip-persona">${stage.persona}</span>
-          <span class="chip-stage-label">${stage.label}</span>
-          <span class="chip-stage-note">${stage.caption}</span>
-        </button>
-      `
-    )
+    .map((stage, index) => [
+      index > 0 ? `<span class="stage-step-arrow" aria-hidden="true">→</span>` : "",
+      `<button class="stage-step ${index === currentStage ? "active" : ""}" data-stage="${index}" type="button" title="${stage.caption}">
+        <span class="stage-step-num">Step ${index + 1}</span>
+        <span class="stage-step-label">${stage.label}</span>
+      </button>`
+    ].join(""))
     .join("");
 
   stageChipRow.querySelectorAll("[data-stage]").forEach((button) => {

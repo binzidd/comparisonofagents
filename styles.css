@@ -3866,3 +3866,133 @@ button.step-item:hover {
     gap: 20px;
   }
 }
+
+/* ── Decision Compare Grid ─────────────────────────────────────────── */
+
+.decision-compare-grid {
+  display: grid;
+  grid-template-columns: 6fr 4fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.decision-compare-left,
+.decision-compare-right {
+  min-width: 0;
+}
+
+.decision-compare-left .criteria-matrix {
+  min-width: 480px;
+}
+
+@media (max-width: 1100px) {
+  .decision-compare-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Trace Metrics Table ───────────────────────────────────────────── */
+
+.trace-metrics-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.trace-metrics-table th,
+.trace-metrics-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+}
+
+.trace-metrics-table th:first-child,
+.trace-metrics-table td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+
+.trace-metrics-table th {
+  font-size: 0.71rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  background: var(--bg-card-str);
+  cursor: default;
+}
+
+.trace-metrics-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.trace-metrics-note {
+  font-size: 0.74rem;
+  color: var(--muted);
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  line-height: 1.5;
+}
+
+/* ── Stage Step Indicator ──────────────────────────────────────────── */
+
+.stage-step-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+
+.stage-step-row::-webkit-scrollbar {
+  display: none;
+}
+
+.stage-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg-card);
+  cursor: pointer;
+  font: inherit;
+  color: var(--muted);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.stage-step.active {
+  border-color: rgba(198, 155, 75, 0.5);
+  background: rgba(198, 155, 75, 0.08);
+  color: var(--text);
+}
+
+.stage-step-num {
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+
+.stage-step.active .stage-step-num {
+  opacity: 1;
+  color: var(--primary);
+}
+
+.stage-step-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.stage-step-arrow {
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 0 6px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
